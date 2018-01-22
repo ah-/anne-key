@@ -52,11 +52,11 @@ app! {
         },
         USART2: {
             path: bluetooth::receive,
-            resources: [DMA1, USART2, STDOUT, BLUETOOTH, KEYBOARD],
+            resources: [DMA1, USART2, STDOUT, BLUETOOTH, KEYBOARD, GPIOA],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx_complete,
-            resources: [DMA1],
+            resources: [DMA1, STDOUT, GPIOA],
         }
     }
 }
@@ -74,15 +74,19 @@ fn init(p: init::Peripherals, r: init::Resources) -> init::LateResourceValues {
     p.SYST.enable_interrupt();
     p.SYST.enable_counter();
 
-    /*
     p.GPIOA.moder.modify(|_, w| unsafe {
-        w.moder0().bits(1)
+        w.moder1().bits(1)
     });
 
     p.GPIOA.pupdr.modify(|_, w| unsafe {
-        w.pupdr0().bits(0b10)
+        w.pupdr1().bits(0b01)
     });
-    */
+
+    p.GPIOA.odr.modify(|_, w| unsafe {
+        w.odr1().clear_bit()
+    });
+
+    p.GPIOA.odr.modify(|_, w| unsafe { w.odr1().clear_bit() });
 
     init::LateResourceValues {
         STDOUT: hio::hstdout().unwrap(),
@@ -95,12 +99,12 @@ fn idle() -> ! {
     }
 }
 
-fn tick(_t: &mut Threshold, r: SYS_TICK::Resources) {
+fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     r.KEYBOARD.sample(r.GPIOA, r.GPIOB, r.SYST);
     let pressed = r.KEYBOARD.state.into_iter().filter(|s| **s).count();
     if pressed != **r.X {
         **r.X = pressed;
-        r.BLUETOOTH.send_report(&r.KEYBOARD, &r.DMA1);
+        r.BLUETOOTH.send_report(&r.KEYBOARD, &r.DMA1, &mut r.STDOUT, &r.GPIOA);
         //write!(r.STDOUT, "{}", pressed).unwrap();
     }
 }
