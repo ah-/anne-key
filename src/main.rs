@@ -35,7 +35,7 @@ app! {
         static GPIOB: stm32l151::GPIOB;
         static DMA1: stm32l151::DMA1;
         static SYST: stm32l151::SYST;
-        //static USB_LOG : usb::log::Log = usb::log::Log::new();
+        static USB_LOG : usb::log::Log = usb::log::Log::new();
         static X: usize = 0;
         static STDOUT: hio::HStdout;
     },
@@ -49,12 +49,10 @@ app! {
             path: led::receive,
             resources: [STDOUT, LED],
         },
-        /*
         USB_LP: {
             path: usb::usb_lp,
             resources: [STDOUT, USB, USB_LOG],
         },
-        */
         USART2: {
             path: bluetooth::receive,
             resources: [STDOUT, BLUETOOTH, KEYBOARD, GPIOA, DMA1],
@@ -66,7 +64,7 @@ app! {
     }
 }
 
-fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
+fn init(mut p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     clock::init_clock(&p.device);
 
     // TODO: merge new with init()?

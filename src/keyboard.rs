@@ -1,6 +1,5 @@
 #![feature(const_fn)]
 
-use stm32l151;
 use stm32l151::{GPIOA, GPIOB, SYST};
 
 const ROWS: usize = 5;

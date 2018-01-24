@@ -123,11 +123,9 @@ impl Bluetooth {
 
                 if unsafe { RECEIVE_COUNTER == RECEIVE_COUNT } {
                     unsafe {
-                        unsafe {
-                            gpioa.odr.modify(|_, w| unsafe { w.odr1().clear_bit() });
-                            dma.cndtr7.modify(|_, w| unsafe { w.ndt().bits(0xb) });
-                            dma.ccr7.modify(|_, w| w.en().set_bit());
-                        }
+                        gpioa.odr.modify(|_, w| w.odr1().clear_bit());
+                        dma.cndtr7.modify(|_, w| w.ndt().bits(0xb));
+                        dma.ccr7.modify(|_, w| w.en().set_bit());
                         /*
                             for i in 0..RECEIVE_COUNT {
                                 write!(r.STDOUT, "{} ", RECEIVE_BUFFER[i]).unwrap();

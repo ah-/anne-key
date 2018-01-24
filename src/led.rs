@@ -1,4 +1,3 @@
-use core::fmt::Write;
 use rtfm::Threshold;
 use stm32l151;
 

@@ -87,16 +87,15 @@ impl Usb {
     }
 }
 
-/*
 pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
-    if r.USB.istr.read().ctr().bit_is_set() {
-        while r.USB.istr.read().ctr().bit_is_set() {
-            let endpoint = r.USB.istr.read().ep_id().bits();
+    if r.USB.usb.istr.read().ctr().bit_is_set() {
+        while r.USB.usb.istr.read().ctr().bit_is_set() {
+            let endpoint = r.USB.usb.istr.read().ep_id().bits();
             match endpoint {
                 0 => {
-                    r.USB_LOG.save(r.USB, 4);
+                    r.USB_LOG.save(&mut r.USB.usb, 4);
                     usb_ctr(&mut r);
-                    r.USB_LOG.save(r.USB, 5);
+                    r.USB_LOG.save(&mut r.USB.usb, 5);
                 }
                 1 => {
                     hid::usb_hid_ctr(&mut r);
@@ -106,7 +105,7 @@ pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
         }
     }
 
-    if r.USB.istr.read().reset().bit_is_set() {
+    if r.USB.usb.istr.read().reset().bit_is_set() {
         usb_reset(&mut r);
     }
 
@@ -125,13 +124,11 @@ pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
     //.susp().clear_bit()
     //);
 }
-*/
 
 static mut NRESET: usize = 0;
 
-/*
 fn usb_reset(r: &mut super::USB_LP::Resources) {
-    r.USB.istr.modify(|_, w| w.reset().clear_bit());
+    r.USB.usb.istr.modify(|_, w| w.reset().clear_bit());
 
     let pma = PMA.get();
     unsafe {
@@ -150,13 +147,13 @@ fn usb_reset(r: &mut super::USB_LP::Resources) {
         (*pma).pma_area.set_u16(10, 5);
     }
 
-    r.USB.usb_ep0r.modify(|_, w| unsafe {
+    r.USB.usb.usb_ep0r.modify(|_, w| unsafe {
         w.ep_type().bits(0b01).stat_tx().bits(0b10).stat_rx().bits(
             0b11,
         )
     });
 
-    r.USB.usb_ep1r.modify(|_, w| unsafe {
+    r.USB.usb.usb_ep1r.modify(|_, w| unsafe {
         w.ep_type()
             .bits(0b11)
             .stat_tx()
@@ -167,7 +164,7 @@ fn usb_reset(r: &mut super::USB_LP::Resources) {
             .bits(0b1)
     });
 
-    r.USB.daddr.modify(|_, w| w.ef().set_bit());
+    r.USB.usb.daddr.modify(|_, w| w.ef().set_bit());
 
     unsafe {
         r.USB_LOG.reset();
@@ -179,21 +176,21 @@ fn usb_reset(r: &mut super::USB_LP::Resources) {
 }
 
 fn usb_clear_tx_ep_ctr(r: &mut super::USB_LP::Resources) {
-    r.USB.usb_ep0r.write(|w| unsafe {
-        w.bits((r.USB.usb_ep0r.read().bits() & 0xFF7F) & USB_EPREG_MASK)
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
+        w.bits((r.USB.usb.usb_ep0r.read().bits() & 0xFF7F) & USB_EPREG_MASK)
     });
 }
 
 fn usb_clear_rx_ep_ctr(r: &mut super::USB_LP::Resources) {
-    r.USB.usb_ep0r.write(|w| unsafe {
-        w.bits((r.USB.usb_ep0r.read().bits() & 0x7FFF) & USB_EPREG_MASK)
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
+        w.bits((r.USB.usb.usb_ep0r.read().bits() & 0x7FFF) & USB_EPREG_MASK)
     });
 }
 
 static mut DADDR: u8 = 0;
 
 fn set_ep_tx_status_valid(r: &mut super::USB_LP::Resources) {
-    let mut bb = r.USB.usb_ep0r.read().bits();
+    let mut bb = r.USB.usb.usb_ep0r.read().bits();
     bb &= USB_EPTX_DTOGMASK;
     if (bb & 0x10) == 0 {
         bb |= 0x10
@@ -205,13 +202,13 @@ fn set_ep_tx_status_valid(r: &mut super::USB_LP::Resources) {
     } else {
         bb &= !0x20
     }
-    r.USB.usb_ep0r.write(|w| unsafe {
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
         w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX)
     });
 }
 
 fn set_ep_tx_status_valid_dtog(r: &mut super::USB_LP::Resources) {
-    let mut bb = r.USB.usb_ep0r.read().bits();
+    let mut bb = r.USB.usb.usb_ep0r.read().bits();
     bb &= USB_EPTX_DTOGMASK;
     if (bb & 0x10) == 0 {
         bb |= 0x10
@@ -224,13 +221,13 @@ fn set_ep_tx_status_valid_dtog(r: &mut super::USB_LP::Resources) {
         bb &= !0x20
     }
     bb |= 0x1000;
-    r.USB.usb_ep0r.write(|w| unsafe {
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
         w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX)
     });
 }
 
 fn set_ep_rx_status_valid(r: &mut super::USB_LP::Resources) {
-    let mut bb = r.USB.usb_ep0r.read().bits();
+    let mut bb = r.USB.usb.usb_ep0r.read().bits();
     bb &= USB_EPRX_DTOGMASK;
     if (bb & 0x1000) == 0 {
         bb |= 0x1000
@@ -244,13 +241,13 @@ fn set_ep_rx_status_valid(r: &mut super::USB_LP::Resources) {
     }
     bb &= !0x1000;
     //bb |= 0x4000;
-    r.USB.usb_ep0r.write(|w| unsafe {
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
         w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX)
     });
 }
 
 fn set_ep_rx_status_valid_dtog(r: &mut super::USB_LP::Resources) {
-    let mut bb = r.USB.usb_ep0r.read().bits();
+    let mut bb = r.USB.usb.usb_ep0r.read().bits();
     bb &= USB_EPRX_DTOGMASK;
     if (bb & 0x1000) == 0 {
         bb |= 0x1000
@@ -263,7 +260,7 @@ fn set_ep_rx_status_valid_dtog(r: &mut super::USB_LP::Resources) {
         bb &= !0x2000
     }
     bb |= 0x1000;
-    r.USB.usb_ep0r.write(|w| unsafe {
+    r.USB.usb.usb_ep0r.write(|w| unsafe {
         w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX)
     });
 }
@@ -289,11 +286,11 @@ fn ep_rx_toggle_dtog(r: &mut super::USB_LP::Resources) {
 */
 
 fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
-    if !r.USB.istr.read().dir().bit_is_set() {
+    if !r.USB.usb.istr.read().dir().bit_is_set() {
         usb_clear_tx_ep_ctr(&mut r);
         unsafe {
             if DADDR != 0 {
-                r.USB.daddr.modify(|_, w| w.add().bits(DADDR));
+                r.USB.usb.daddr.modify(|_, w| w.add().bits(DADDR));
                 DADDR = 0;
                 set_ep_rx_status_valid(&mut r);
             } else {
@@ -420,4 +417,3 @@ fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
         }
     }
 }
-*/
