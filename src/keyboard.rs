@@ -18,21 +18,45 @@ impl Keyboard {
     }
 
     pub fn init(&self, gpioa: &mut GPIOA, gpiob: &mut GPIOB) {
-        // TODO: set up other input pins?
+        gpioa.moder.modify(|_, w| unsafe {
+            w.moder5().bits(1)
+             .moder6().bits(1)
+             .moder7().bits(1)
+             .moder8().bits(1)
+             .moder9().bits(1)
+             .moder15().bits(1)
+        });
+
         gpiob.moder.modify(|_, w| unsafe {
-            w.moder3().bits(1)
+            w.moder0().bits(1)
+             .moder1().bits(1)
+             .moder3().bits(1)
              .moder4().bits(1)
              .moder5().bits(1)
+             .moder12().bits(1)
+             .moder13().bits(1)
+             .moder15().bits(1)
         });
 
         gpioa.pupdr.modify(|_, w| unsafe {
-            w.pupdr0().bits(0b10)
+            w.pupdr5().bits(1)
+             .pupdr6().bits(1)
+             .pupdr7().bits(1)
+             .pupdr8().bits(1)
+             .pupdr9().bits(1)
+             .pupdr15().bits(1)
+             .pupdr0().bits(0b10)
         });
 
         gpiob.pupdr.modify(|_, w| unsafe {
-            w.pupdr3().bits(1)
+            w.pupdr0().bits(1)
+             .pupdr1().bits(1)
+             .pupdr3().bits(1)
              .pupdr4().bits(1)
              .pupdr5().bits(1)
+             .pupdr12().bits(1)
+             .pupdr13().bits(1)
+             .pupdr15().bits(1)
              .pupdr6().bits(0b10)
              .pupdr7().bits(0b10)
              .pupdr8().bits(0b10)

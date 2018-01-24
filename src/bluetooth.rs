@@ -32,14 +32,10 @@ impl Bluetooth {
         self.usart.cr3.modify(|_, w| w.dmat().set_bit());
         self.usart.cr3.modify(|_, w| w.dmar().set_bit());
         self.usart.cr1.modify(|_, w| {
-            w.rxneie()
-                .set_bit()
-                .re()
-                .set_bit()
-                .te()
-                .set_bit()
-                .ue()
-                .set_bit()
+            w.rxneie().set_bit()
+             .re().set_bit()
+             .te().set_bit()
+             .ue().set_bit()
         });
 
         dma.cpar6.write(|w| unsafe { w.pa().bits(0x4000_4404) });
@@ -50,14 +46,10 @@ impl Bluetooth {
             unsafe {
                 w.pl().bits(2);
             }
-            w.minc()
-                .set_bit()
-                .dir()
-                .set_bit()
-                .tcie()
-                .set_bit()
-                .en()
-                .clear_bit()
+            w.minc().set_bit()
+             .dir().set_bit()
+             .tcie().set_bit()
+             .en().clear_bit()
         });
     }
 
@@ -93,7 +85,14 @@ impl Bluetooth {
             } else if keyboard.state[4] {
                 self.send_buffer[5] = 0x8;
             }
-
+            /*
+            } else {
+                let pressed = keyboard.state.into_iter().filter(|s| **s).count();
+                if pressed > 0 {
+                    self.send_buffer[5] = 0x9;
+                }
+            }
+            */
             gpioa.odr.modify(|_, w| w.odr1().clear_bit());
             gpioa.odr.modify(|_, w| w.odr1().set_bit());
         } else {
@@ -101,21 +100,24 @@ impl Bluetooth {
         }
     }
 
-    pub fn receive(&mut self, dma: &mut stm32l151::DMA1, gpioa: &mut stm32l151::GPIOA) {
+    pub fn receive(&mut self, dma: &mut stm32l151::DMA1, gpioa: &mut stm32l151::GPIOA, stdout: &mut hio::HStdout) {
         // TODO: always just receive two via DMA?
         // and then from there on via length field
         if self.usart.sr.read().rxne().bit_is_set() {
             let bits = self.usart.dr.read().bits() as u8;
 
             if unsafe { STATE == 0 } && bits == 6 {
+                //write!(stdout, "rx1").unwrap();
                 unsafe { STATE = 1 }
             } else if unsafe { STATE == 1 } {
+                //write!(stdout, "rx2").unwrap();
                 unsafe {
                     RECEIVE_COUNT = bits as usize;
                     RECEIVE_COUNTER = 0;
                     STATE = 2;
                 }
             } else if unsafe { STATE == 2 } {
+                //write!(stdout, "rx3").unwrap();
                 unsafe {
                     RECEIVE_BUFFER[RECEIVE_COUNTER] = bits;
                     RECEIVE_COUNTER += 1;
@@ -126,10 +128,13 @@ impl Bluetooth {
                         gpioa.odr.modify(|_, w| w.odr1().clear_bit());
                         dma.cndtr7.modify(|_, w| w.ndt().bits(0xb));
                         dma.ccr7.modify(|_, w| w.en().set_bit());
+                        write!(stdout, "{}", self.send_buffer[5]).unwrap();
+
                         /*
-                            for i in 0..RECEIVE_COUNT {
-                                write!(r.STDOUT, "{} ", RECEIVE_BUFFER[i]).unwrap();
-                            }
+                        write!(stdout, "rx").unwrap();
+                        for i in 0..RECEIVE_COUNT {
+                            write!(stdout, "{} ", RECEIVE_BUFFER[i]).unwrap();
+                        }
                         */
                         STATE = 0;
                     }
@@ -145,10 +150,10 @@ static mut RECEIVE_COUNTER: usize = 0;
 static mut RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
 
 pub fn receive(_t: &mut Threshold, mut r: super::USART2::Resources) {
-    r.BLUETOOTH.receive(&mut r.DMA1, &mut r.GPIOA)
+    r.BLUETOOTH.receive(&mut r.DMA1, &mut r.GPIOA, &mut r.STDOUT)
 }
 
-pub fn tx_complete(_t: &mut Threshold, r: super::DMA1_CHANNEL7::Resources) {
+pub fn tx_complete(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {
     r.DMA1.ifcr.write(|w| w.cgif7().set_bit());
     r.DMA1.ccr7.modify(|_, w| w.en().clear_bit());
     //write!(r.STDOUT, "txc").unwrap();

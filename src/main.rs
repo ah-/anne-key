@@ -43,7 +43,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [STDOUT, X, LED, KEYBOARD, GPIOA, GPIOB, DMA1, BLUETOOTH, USB, SYST],
+            resources: [STDOUT, X, KEYBOARD, BLUETOOTH, SYST, GPIOA, GPIOB, DMA1],
         },
         USART3: {
             path: led::receive,
@@ -59,7 +59,7 @@ app! {
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx_complete,
-            resources: [DMA1],
+            resources: [STDOUT, DMA1],
         }
     }
 }
@@ -68,24 +68,26 @@ fn init(mut p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     clock::init_clock(&p.device);
 
     // TODO: merge new with init()?
-    let mut led = Led::new(p.device.USART3);
-    led.init(&p.device.DMA1, &mut p.device.GPIOB, &mut p.device.RCC);
     let keyboard = Keyboard::new();
     keyboard.init(&mut p.device.GPIOA, &mut p.device.GPIOB);
+    let mut led = Led::new(p.device.USART3);
+    //led.init(&p.device.DMA1, &mut p.device.GPIOB, &mut p.device.RCC);
     let mut bluetooth = Bluetooth::new(p.device.USART2);
     bluetooth.init(&p.device.DMA1, &mut p.device.GPIOA, &mut p.device.RCC);
     let mut usb = Usb::new(p.device.USB);
-    usb.init(&mut p.device.RCC, &mut p.device.SYSCFG);
+    //usb.init(&mut p.device.RCC, &mut p.device.SYSCFG);
 
     let mut syst = p.core.SYST;
+    //syst.set_clock_source(SystClkSource::Core);
     syst.set_reload(100_000);
     syst.enable_interrupt();
     syst.enable_counter();
 
+    // todo move into bt
     let gpioa = p.device.GPIOA;
     gpioa.moder.modify(|_, w| unsafe { w.moder1().bits(1) });
     gpioa.pupdr.modify(|_, w| unsafe { w.pupdr1().bits(0b01) });
-    gpioa.odr.modify(|_, w| w.odr1().clear_bit()); 
+    gpioa.odr.modify(|_, w| w.odr1().clear_bit());
 
     init::LateResources {
         BLUETOOTH: bluetooth,
@@ -107,7 +109,6 @@ fn idle() -> ! {
 }
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
-    write!(r.STDOUT, "tick {}", *r.X).unwrap();
     r.KEYBOARD.sample(&mut r.GPIOA, &mut r.GPIOB, &r.SYST);
     let pressed = r.KEYBOARD.state.into_iter().filter(|s| **s).count();
     if pressed != *r.X {
