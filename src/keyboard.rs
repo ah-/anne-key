@@ -1,5 +1,6 @@
 #![feature(const_fn)]
 
+use stm32l151;
 use stm32l151::{GPIOA, GPIOB, SYST};
 
 const ROWS: usize = 5;
@@ -17,18 +18,19 @@ impl Keyboard {
         }
     }
 
-    pub fn init(&self, p: &super::init::Peripherals) {
-        p.GPIOB.moder.modify(|_, w| unsafe {
+    pub fn init(&self, gpioa: &mut GPIOA, gpiob: &mut GPIOB) {
+        // TODO: set up other input pins?
+        gpiob.moder.modify(|_, w| unsafe {
             w.moder3().bits(1)
              .moder4().bits(1)
              .moder5().bits(1)
         });
 
-        p.GPIOA.pupdr.modify(|_, w| unsafe {
+        gpioa.pupdr.modify(|_, w| unsafe {
             w.pupdr0().bits(0b10)
         });
 
-        p.GPIOB.pupdr.modify(|_, w| unsafe {
+        gpiob.pupdr.modify(|_, w| unsafe {
             w.pupdr3().bits(1)
              .pupdr4().bits(1)
              .pupdr5().bits(1)

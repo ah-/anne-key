@@ -6,13 +6,13 @@ keywords = ["no-std", "arm", "cortex-m", "anne", "pro", "keyboard"]
 license = "Apache-2.0"
 name = "anne-key"
 repository = ""
-version = "0.0.1"
+version = "0.0.2"
 
 [dependencies]
 bare-metal = "0.1.1"
 cortex-m = "0.3.1"
 cortex-m-semihosting = "0.2.0"
-cortex-m-rtfm = "0.2.2"
+cortex-m-rtfm = "0.3.1"
 vcell = "0.1.0"
 
 [features]
@@ -20,7 +20,7 @@ default = []
 
 [dependencies.cortex-m-rt]
 features = ["abort-on-panic"]
-version = "0.3.9"
+version = "0.3.12"
 
 [dependencies.stm32l151]
 features = ["rt"]
@@ -33,11 +33,3 @@ lto = true
 [profile.dev]
 debug = true
 lto = true
-
-#[profile.rls]
-#debug = true
-#lto = true
-
-#[profile.languageclient]
-#debug = true
-#lto = true

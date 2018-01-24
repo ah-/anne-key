@@ -1,41 +1,37 @@
 #![feature(const_fn)]
 
-use cortex_m_semihosting::hio;
 use core::fmt::Write;
+use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::DMA1;
+use stm32l151::{DMA1, GPIOA, RCC};
+use stm32l151;
 use super::Keyboard;
-use stm32l151::GPIOA;
 
 pub struct Bluetooth {
+    usart: stm32l151::USART2,
     send_buffer: [u8; 0x10],
 }
 
 impl Bluetooth {
-    pub const fn new() -> Bluetooth {
+    pub const fn new(usart: stm32l151::USART2) -> Bluetooth {
         Bluetooth {
+            usart: usart,
             send_buffer: [0; 0x10],
         }
     }
 
-    pub fn init(&mut self, p: &super::init::Peripherals) {
-        p.GPIOA
-            .moder
-            .modify(|_, w| unsafe { w.moder2().bits(0b10).moder3().bits(0b10) });
-        p.GPIOA
-            .pupdr
-            .modify(|_, w| unsafe { w.pupdr2().bits(0b01).pupdr3().bits(0b01) });
-        p.GPIOA
-            .afrl
-            .modify(|_, w| unsafe { w.afrl2().bits(7).afrl3().bits(7) });
+    pub fn init(&mut self, dma: &DMA1, gpioa: &mut GPIOA, rcc: &mut RCC) {
+        gpioa.moder.modify(|_, w| unsafe { w.moder2().bits(0b10).moder3().bits(0b10) });
+        gpioa.pupdr.modify(|_, w| unsafe { w.pupdr2().bits(0b01).pupdr3().bits(0b01) });
+        gpioa.afrl.modify(|_, w| unsafe { w.afrl2().bits(7).afrl3().bits(7) });
 
-        p.RCC.apb1enr.modify(|_, w| w.usart2en().set_bit());
-        p.RCC.ahbenr.modify(|_, w| w.dma1en().set_bit());
+        rcc.apb1enr.modify(|_, w| w.usart2en().set_bit());
+        rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
 
-        p.USART2.brr.modify(|_, w| unsafe { w.bits(417) });
-        p.USART2.cr3.modify(|_, w| w.dmat().set_bit());
-        p.USART2.cr3.modify(|_, w| w.dmar().set_bit());
-        p.USART2.cr1.modify(|_, w| {
+        self.usart.brr.modify(|_, w| unsafe { w.bits(417) });
+        self.usart.cr3.modify(|_, w| w.dmat().set_bit());
+        self.usart.cr3.modify(|_, w| w.dmar().set_bit());
+        self.usart.cr1.modify(|_, w| {
             w.rxneie()
                 .set_bit()
                 .re()
@@ -46,13 +42,11 @@ impl Bluetooth {
                 .set_bit()
         });
 
-        p.DMA1.cpar6.write(|w| unsafe { w.pa().bits(0x4000_4404) });
-        p.DMA1.cpar7.write(|w| unsafe { w.pa().bits(0x4000_4404) });
-        p.DMA1
-            .cmar7
-            .write(|w| unsafe { w.ma().bits(self.send_buffer.as_mut_ptr() as u32) });
-        p.DMA1.cndtr7.modify(|_, w| unsafe { w.ndt().bits(0x0) });
-        p.DMA1.ccr7.modify(|_, w| {
+        dma.cpar6.write(|w| unsafe { w.pa().bits(0x4000_4404) });
+        dma.cpar7.write(|w| unsafe { w.pa().bits(0x4000_4404) });
+        dma.cmar7.write(|w| unsafe { w.ma().bits(self.send_buffer.as_mut_ptr() as u32) });
+        dma.cndtr7.modify(|_, w| unsafe { w.ndt().bits(0x0) });
+        dma.ccr7.modify(|_, w| {
             unsafe {
                 w.pl().bits(2);
             }
@@ -100,10 +94,49 @@ impl Bluetooth {
                 self.send_buffer[5] = 0x8;
             }
 
-            gpioa.odr.modify(|_, w| unsafe { w.odr1().clear_bit() });
-            gpioa.odr.modify(|_, w| unsafe { w.odr1().set_bit() });
+            gpioa.odr.modify(|_, w| w.odr1().clear_bit());
+            gpioa.odr.modify(|_, w| w.odr1().set_bit());
         } else {
             write!(stdout, "incomplete tx {}", bits).unwrap();
+        }
+    }
+
+    pub fn receive(&mut self, dma: &mut stm32l151::DMA1, gpioa: &mut stm32l151::GPIOA) {
+        // TODO: always just receive two via DMA?
+        // and then from there on via length field
+        if self.usart.sr.read().rxne().bit_is_set() {
+            let bits = self.usart.dr.read().bits() as u8;
+
+            if unsafe { STATE == 0 } && bits == 6 {
+                unsafe { STATE = 1 }
+            } else if unsafe { STATE == 1 } {
+                unsafe {
+                    RECEIVE_COUNT = bits as usize;
+                    RECEIVE_COUNTER = 0;
+                    STATE = 2;
+                }
+            } else if unsafe { STATE == 2 } {
+                unsafe {
+                    RECEIVE_BUFFER[RECEIVE_COUNTER] = bits;
+                    RECEIVE_COUNTER += 1;
+                }
+
+                if unsafe { RECEIVE_COUNTER == RECEIVE_COUNT } {
+                    unsafe {
+                        unsafe {
+                            gpioa.odr.modify(|_, w| unsafe { w.odr1().clear_bit() });
+                            dma.cndtr7.modify(|_, w| unsafe { w.ndt().bits(0xb) });
+                            dma.ccr7.modify(|_, w| w.en().set_bit());
+                        }
+                        /*
+                            for i in 0..RECEIVE_COUNT {
+                                write!(r.STDOUT, "{} ", RECEIVE_BUFFER[i]).unwrap();
+                            }
+                        */
+                        STATE = 0;
+                    }
+                }
+            }
         }
     }
 }
@@ -113,53 +146,8 @@ static mut RECEIVE_COUNT: usize = 0;
 static mut RECEIVE_COUNTER: usize = 0;
 static mut RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
 
-pub fn receive(_t: &mut Threshold, r: super::USART2::Resources) {
-    // TODO: always just receive two via DMA?
-    // and then from there on via length field
-    if r.USART2.sr.read().rxne().bit_is_set() {
-        let bits = r.USART2.dr.read().bits() as u8;
-
-        if unsafe { STATE == 0 } && bits == 6 {
-            unsafe { STATE = 1 }
-        } else if unsafe { STATE == 1 } {
-            unsafe {
-                RECEIVE_COUNT = bits as usize;
-                RECEIVE_COUNTER = 0;
-                STATE = 2;
-            }
-        } else if unsafe { STATE == 2 } {
-            unsafe {
-                RECEIVE_BUFFER[RECEIVE_COUNTER] = bits;
-                RECEIVE_COUNTER += 1;
-            }
-
-            if unsafe { RECEIVE_COUNTER == RECEIVE_COUNT } {
-                unsafe {
-                    //write!(r.STDOUT, "recv").unwrap();
-
-                    unsafe { //
-                        r.GPIOA.odr.modify(|_, w| unsafe { w.odr1().clear_bit() });
-                        //write!(r.STDOUT, "s").unwrap();
-
-                        r.DMA1.cndtr7.modify(|_, w| unsafe { w.ndt().bits(0xb) });
-                        r.DMA1.ccr7.modify(|_, w| w.en().set_bit());
-
-                        //if done_togglings == 0 {
-                            //done_togglings == 1;
-                            //r.GPIOA.odr.modify(|_, w| unsafe { w.odr1().set_bit() });
-                            //}
-                        //}
-                    }
-                /*
-                    for i in 0..RECEIVE_COUNT {
-                        write!(r.STDOUT, "{} ", RECEIVE_BUFFER[i]).unwrap();
-                    }
-                */
-                    STATE = 0;
-                }
-            }
-        }
-    }
+pub fn receive(_t: &mut Threshold, mut r: super::USART2::Resources) {
+    r.BLUETOOTH.receive(&mut r.DMA1, &mut r.GPIOA)
 }
 
 pub fn tx_complete(_t: &mut Threshold, r: super::DMA1_CHANNEL7::Resources) {

@@ -1,5 +1,6 @@
 pub static mut HID_REPORT: [u8; 5] = [0x01, 0x00, 0x04, 0x00, 0x00];
 
+/*
 pub fn usb_hid_ctr(mut r: &mut super::super::USB_LP::Resources) {
     if !r.USB.istr.read().dir().bit_is_set() {
         usb_clear_tx_ep1_ctr(&mut r);
@@ -71,3 +72,4 @@ fn set_ep1_tx_status_valid_dtog(r: &mut super::super::USB_LP::Resources) {
         w.bits(bb | super::USB_EP_CTR_RX | super::USB_EP_CTR_TX)
     });
 }
+*/

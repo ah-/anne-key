@@ -7,6 +7,8 @@ use core::cmp::min;
 use core::fmt::Write;
 use rtfm::Threshold;
 
+use stm32l151;
+
 use self::pma::PMA;
 
 const MAX_PACKET_SIZE: u32 = 64;
@@ -47,23 +49,26 @@ const USB_DESC_TYPE_DEVICE_QUALIFIER: u8 = 6;
 const USB_DESC_TYPE_HID_REPORT: u8 = 0x22;
 
 
-pub struct Usb {}
+pub struct Usb {
+    usb: stm32l151::USB
+}
 
 impl Usb {
-    pub const fn new() -> Usb {
-        Usb {}
+    pub const fn new(usb: stm32l151::USB) -> Usb {
+        Usb {
+            usb: usb
+        }
     }
 
-    pub fn init(&self, p: &super::init::Peripherals) {
+    pub fn init(&mut self, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG) {
         unsafe { (*(PMA.get())).zero() };
 
-        p.RCC.apb1enr.modify(|_, w| w.usben().set_bit());
-        p.RCC.apb1rstr.modify(|_, w| w.usbrst().set_bit());
-        p.RCC.apb1rstr.modify(|_, w| w.usbrst().clear_bit());
+        rcc.apb1enr.modify(|_, w| w.usben().set_bit());
+        rcc.apb1rstr.modify(|_, w| w.usbrst().set_bit());
+        rcc.apb1rstr.modify(|_, w| w.usbrst().clear_bit());
 
-        p.USB.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
-
-        p.USB.usb_cntr.modify(|_, w| {
+        self.usb.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
+        self.usb.usb_cntr.modify(|_, w| {
             w.ctrm().set_bit()
              .errm().set_bit()
              .pmaovrm().set_bit()
@@ -73,19 +78,16 @@ impl Usb {
              //.sofm().set_bit()
              .resetm().set_bit()
         });
+        self.usb.btable.reset();
+        self.usb.usb_cntr.modify(|_, w| w.fres().clear_bit());
+        self.usb.istr.reset();
+        self.usb.daddr.modify(|_, w| w.ef().set_bit());
 
-        p.USB.btable.reset();
-
-        p.USB.usb_cntr.modify(|_, w| w.fres().clear_bit());
-
-        p.USB.istr.reset();
-
-        p.USB.daddr.modify(|_, w| w.ef().set_bit());
-
-        p.SYSCFG.pmc.modify(|_, w| w.usb_pu().set_bit());
+        syscfg.pmc.modify(|_, w| w.usb_pu().set_bit());
     }
 }
 
+/*
 pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
     if r.USB.istr.read().ctr().bit_is_set() {
         while r.USB.istr.read().ctr().bit_is_set() {
@@ -123,9 +125,11 @@ pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
     //.susp().clear_bit()
     //);
 }
+*/
 
 static mut NRESET: usize = 0;
 
+/*
 fn usb_reset(r: &mut super::USB_LP::Resources) {
     r.USB.istr.modify(|_, w| w.reset().clear_bit());
 
@@ -416,3 +420,4 @@ fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
         }
     }
 }
+*/
