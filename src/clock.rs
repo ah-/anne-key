@@ -40,8 +40,8 @@ pub fn init_clock(p: &stm32l151::Peripherals) {
          .gpiopben().set_bit());
 }
 
-pub fn enable_tick(syst: &stm32l151::SYST, reload: usize) {
-    syst.set_reload(100_000);
+pub fn enable_tick(syst: &mut stm32l151::SYST, reload: u32) {
+    syst.set_reload(reload);
     syst.enable_interrupt();
     syst.enable_counter();
 }

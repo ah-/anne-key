@@ -63,16 +63,15 @@ app! {
     }
 }
 
-fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
+fn init(mut p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     let mut d = p.device;
     clock::init_clock(&d);
+    clock::enable_tick(&mut p.core.SYST, 100_000);
 
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
     let led = Led::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
     let bluetooth = Bluetooth::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
-
-    clock::enable_tick(p.core.SYST, 100_000);
 
     init::LateResources {
         BLUETOOTH: bluetooth,
