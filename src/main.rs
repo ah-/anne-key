@@ -13,6 +13,7 @@ mod clock;
 mod keyboard;
 mod keymap;
 mod led;
+mod protocol;
 mod usb;
 
 use cortex_m_semihosting::hio;
@@ -44,23 +45,23 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [STDOUT, NUM_PRESSED_KEYS, KEYBOARD, BLUETOOTH, SYST, GPIOA, GPIOB, DMA1],
+            resources: [BLUETOOTH, DMA1, GPIOA, GPIOB, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
         },
         USART3: {
             path: led::receive,
-            resources: [STDOUT, LED],
+            resources: [LED, STDOUT],
         },
         USB_LP: {
             path: usb::usb_lp,
             resources: [STDOUT, USB, USB_LOG],
         },
-        USART2: {
-            path: bluetooth::receive,
-            resources: [STDOUT, BLUETOOTH, KEYBOARD, GPIOA, DMA1],
+        DMA1_CHANNEL6: {
+            path: bluetooth::rx,
+            resources: [BLUETOOTH, DMA1, GPIOA, KEYBOARD, STDOUT],
         },
         DMA1_CHANNEL7: {
-            path: bluetooth::tx_complete,
-            resources: [STDOUT, DMA1],
+            path: bluetooth::tx,
+            resources: [DMA1, STDOUT],
         }
     }
 }
