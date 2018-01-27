@@ -54,10 +54,12 @@ pub struct Usb {
 }
 
 impl Usb {
-    pub const fn new(usb: stm32l151::USB) -> Usb {
-        Usb {
+    pub fn new(usb: stm32l151::USB, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG) -> Usb {
+        let mut usb = Usb {
             usb: usb
-        }
+        };
+        usb.init(rcc, syscfg);
+        usb
     }
 
     pub fn init(&mut self, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG) {

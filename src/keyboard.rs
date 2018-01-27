@@ -11,13 +11,15 @@ pub struct Keyboard {
 }
 
 impl Keyboard {
-    pub const fn new() -> Keyboard {
-        Keyboard {
+    pub fn new(gpioa: &mut GPIOA, gpiob: &mut GPIOB) -> Keyboard {
+        let kb = Keyboard {
             state: [false; ROWS * COLUMNS],
-        }
+        };
+        kb.init(gpioa, gpiob);
+        kb
     }
 
-    pub fn init(&self, gpioa: &mut GPIOA, gpiob: &mut GPIOB) {
+    fn init(&self, gpioa: &mut GPIOA, gpiob: &mut GPIOB) {
         gpioa.moder.modify(|_, w| unsafe {
             w.moder5().bits(1)
              .moder6().bits(1)

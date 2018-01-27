@@ -1,18 +1,20 @@
 use rtfm::Threshold;
-use stm32l151;
+use stm32l151::{DMA1, GPIOB, RCC, USART3};
 
 pub struct Led {
-    usart: stm32l151::USART3,
+    usart: USART3,
 }
 
 impl Led {
-    pub const fn new(usart: stm32l151::USART3) -> Led {
-        Led {
+    pub fn new(usart: USART3, dma: &DMA1, gpiob: &mut GPIOB, rcc: &mut RCC) -> Led {
+        let mut led = Led {
             usart: usart
-        }
+        };
+        led.init(dma, gpiob, rcc);
+        led
     }
 
-    pub fn init(&mut self, dma: &stm32l151::DMA1, gpiob: &mut stm32l151::GPIOB, rcc: &mut stm32l151::RCC) {
+    fn init(&mut self, dma: &DMA1, gpiob: &mut GPIOB, rcc: &mut RCC) {
         gpiob.moder.modify(|_, w| unsafe { w.moder11().bits(0b10) });
         gpiob.pupdr.modify(|_, w| unsafe { w.pupdr11().bits(0b01) });
         gpiob.afrh.modify(|_, w| unsafe { w.afrh11().bits(7) });
