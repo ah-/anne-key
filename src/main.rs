@@ -11,6 +11,7 @@ extern crate stm32l151;
 mod bluetooth;
 mod clock;
 mod keyboard;
+mod keymap;
 mod led;
 mod usb;
 
@@ -19,6 +20,7 @@ use rtfm::{app, Threshold};
 
 use bluetooth::Bluetooth;
 use keyboard::Keyboard;
+use keymap::HidReport;
 use led::Led;
 use usb::Usb;
 
@@ -97,6 +99,7 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     let pressed = r.KEYBOARD.state.into_iter().filter(|s| **s).count();
     if pressed != *r.NUM_PRESSED_KEYS {
         *r.NUM_PRESSED_KEYS = pressed;
-        r.BLUETOOTH.send_report(&r.KEYBOARD, &r.DMA1, &mut r.STDOUT, &r.GPIOA);
+        let report = HidReport::from_key_state(&r.KEYBOARD.state);
+        r.BLUETOOTH.send_report(&report, &r.DMA1, &mut r.STDOUT, &r.GPIOA);
     }
 }

@@ -3,18 +3,17 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOA, RCC};
-use stm32l151;
-use super::Keyboard;
+use stm32l151::{DMA1, GPIOA, RCC, USART2};
+use super::keymap::HidReport;
 
 pub struct Bluetooth {
-    usart: stm32l151::USART2,
+    usart: USART2,
 }
 
 static mut SEND_BUFFER: [u8; 0x10] = [0; 0x10];
 
 impl Bluetooth {
-    pub fn new(usart: stm32l151::USART2, dma: &DMA1, gpioa: &mut GPIOA, rcc: &mut RCC) -> Bluetooth {
+    pub fn new(usart: USART2, dma: &DMA1, gpioa: &mut GPIOA, rcc: &mut RCC) -> Bluetooth {
         let mut bt = Bluetooth {
             usart: usart,
         };
@@ -23,13 +22,18 @@ impl Bluetooth {
     }
 
     fn init(&mut self, dma: &DMA1, gpioa: &mut GPIOA, rcc: &mut RCC) {
-        gpioa.moder.modify(|_, w| unsafe { w.moder1().bits(1) });
-        gpioa.pupdr.modify(|_, w| unsafe { w.pupdr1().bits(0b01) });
-        gpioa.odr.modify(|_, w| w.odr1().clear_bit());
-
-        gpioa.moder.modify(|_, w| unsafe { w.moder2().bits(0b10).moder3().bits(0b10) });
-        gpioa.pupdr.modify(|_, w| unsafe { w.pupdr2().bits(0b01).pupdr3().bits(0b01) });
+        gpioa.moder.modify(|_, w| unsafe {
+            w.moder1().bits(1)
+             .moder2().bits(0b10)
+             .moder3().bits(0b10)
+        });
+        gpioa.pupdr.modify(|_, w| unsafe {
+            w.pupdr1().bits(0b01)
+             .pupdr2().bits(0b01)
+             .pupdr3().bits(0b01)
+        });
         gpioa.afrl.modify(|_, w| unsafe { w.afrl2().bits(7).afrl3().bits(7) });
+        gpioa.odr.modify(|_, w| w.odr1().clear_bit());
 
         rcc.apb1enr.modify(|_, w| w.usart2en().set_bit());
         rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
@@ -61,50 +65,26 @@ impl Bluetooth {
 
     pub fn send_report(
         &mut self,
-        keyboard: &Keyboard,
+        report: &HidReport,
         dma1: &DMA1,
         stdout: &mut hio::HStdout,
         gpioa: &GPIOA,
     ) {
-        let bits = dma1.cndtr7.read().ndt().bits();
-        if bits == 0 {
+        if dma1.cndtr7.read().ndt().bits() == 0 {
             unsafe {
                 SEND_BUFFER[0] = 0x7;
                 SEND_BUFFER[1] = 0x9;
                 SEND_BUFFER[2] = 0x1;
-                SEND_BUFFER[3] = 0x0;
-                SEND_BUFFER[4] = 0x0;
-                SEND_BUFFER[5] = 0x0;
-                SEND_BUFFER[6] = 0x0;
-                SEND_BUFFER[7] = 0x0;
-                SEND_BUFFER[8] = 0x0;
-
-                if keyboard.state[0] {
-                    //unsafe { usb::hid::HID_REPORT[2] = 0x5 };
-                    SEND_BUFFER[5] = 0x4;
-                } else if keyboard.state[1] {
-                    SEND_BUFFER[5] = 0x5;
-                } else if keyboard.state[2] {
-                    SEND_BUFFER[5] = 0x6;
-                } else if keyboard.state[3] {
-                    SEND_BUFFER[5] = 0x7;
-                } else if keyboard.state[4] {
-                    SEND_BUFFER[5] = 0x8;
-                } else {
-                    let pressed = keyboard.state.into_iter().filter(|s| **s).count();
-                    if pressed > 0 {
-                        SEND_BUFFER[5] = 0x9;
-                    }
-                }
+                SEND_BUFFER[3..8].clone_from_slice(&report.bytes);
             }
             gpioa.odr.modify(|_, w| w.odr1().clear_bit());
             gpioa.odr.modify(|_, w| w.odr1().set_bit());
         } else {
-            write!(stdout, "incomplete tx {}", bits).unwrap();
+            write!(stdout, "incomplete tx").unwrap();
         }
     }
 
-    pub fn receive(&mut self, dma: &mut stm32l151::DMA1, gpioa: &mut stm32l151::GPIOA) {
+    pub fn receive(&mut self, dma: &mut DMA1, gpioa: &mut GPIOA) {
         // TODO: always just receive two via DMA?
         // and then from there on via length field
         if self.usart.sr.read().rxne().bit_is_set() {

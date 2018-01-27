@@ -5,9 +5,11 @@ use stm32l151::{GPIOA, GPIOB, SYST};
 const ROWS: usize = 5;
 const COLUMNS: usize = 14;
 
+pub type KeyState = [bool; ROWS * COLUMNS];
+
 pub struct Keyboard {
     /// Stores the currently pressed down keys from last sample.
-    pub state: [bool; ROWS * COLUMNS],
+    pub state: KeyState,
 }
 
 impl Keyboard {
