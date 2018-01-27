@@ -72,6 +72,11 @@ impl Bluetooth {
                         data: unsafe { &RECEIVE_BUFFER[3..3 + RECEIVE_BUFFER[1] as usize - 1] },
                     };
                     self.handle_message(&message, dma, stdout);
+
+                    dma.ccr6.modify(|_, w| { w.en().clear_bit() });
+                    dma.cmar6.write(|w| unsafe { w.ma().bits(RECEIVE_BUFFER.as_mut_ptr() as u32) });
+                    dma.cndtr6.modify(|_, w| unsafe { w.ndt().bits(2) });
+                    dma.ccr6.modify(|_, w| { w.en().set_bit() });
                 }
             }
         }
@@ -168,8 +173,13 @@ impl Bluetooth {
                 unsafe { dma.cndtr7.modify(|_, w| w.ndt().bits(0xb)) };
                 dma.ccr7.modify(|_, w| w.en().set_bit());
             }
+            //(2, 1) => {
+                // SYSTEM Get ID
+                //let data = &[4, 1, 0, 1, 2, 3, 4][..];
+                //self.send(MsgType::System, 129, &data, dma, stdout, gpioa);
+            //}
             _ => {
-                write!(stdout, "msg: {} {}", message.msg_type, message.operation).unwrap();
+                write!(stdout, "msg: {} {} {:?}", message.msg_type, message.operation, message.data).unwrap();
             }
         }
     }
