@@ -69,7 +69,7 @@ impl Bluetooth {
                     let message = Message {
                         msg_type: unsafe { RECEIVE_BUFFER[0] },
                         operation: unsafe { RECEIVE_BUFFER[2] },
-                        data: unsafe { &RECEIVE_BUFFER[3..3 + RECEIVE_BUFFER[1] as usize] },
+                        data: unsafe { &RECEIVE_BUFFER[3..3 + RECEIVE_BUFFER[1] as usize - 1] },
                     };
                     self.handle_message(&message, dma, stdout);
                 }
@@ -130,7 +130,7 @@ impl Bluetooth {
 
     fn send(
         &mut self,
-        messageType: MsgType,
+        message_type: MsgType,
         operation: u8, // TODO: make this typed
         data: &[u8],
         dma1: &DMA1,
@@ -138,7 +138,7 @@ impl Bluetooth {
         gpioa: &GPIOA) {
         if dma1.cndtr7.read().ndt().bits() == 0 {
             unsafe {
-                SEND_BUFFER[0] = messageType as u8;
+                SEND_BUFFER[0] = message_type as u8;
                 SEND_BUFFER[1] = data.len() as u8;
                 SEND_BUFFER[2] = operation;
                 SEND_BUFFER[3..3 + data.len()].clone_from_slice(data);
@@ -156,7 +156,7 @@ impl Bluetooth {
         } else {
             // TODO: return an error instead
             // saying we're busy
-            // using that async thing
+            // using https://docs.rs/nb/0.1.1/nb/
             write!(stdout, "tx busy").unwrap();
         }
     }

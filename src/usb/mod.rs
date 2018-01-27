@@ -58,7 +58,7 @@ impl Usb {
         let mut usb = Usb {
             usb: usb
         };
-        usb.init(rcc, syscfg);
+        //usb.init(rcc, syscfg);
         usb
     }
 
