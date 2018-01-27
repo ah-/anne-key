@@ -72,10 +72,7 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
     let bluetooth = Bluetooth::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
-    let mut syst = p.core.SYST;
-    syst.set_reload(100_000);
-    syst.enable_interrupt();
-    syst.enable_counter();
+    clock::enable_tick(p.core.SYST, 100_000);
 
     init::LateResources {
         BLUETOOTH: bluetooth,
@@ -85,7 +82,7 @@ fn init(p: init::Peripherals, _r: init::Resources) -> init::LateResources {
         GPIOA: d.GPIOA,
         GPIOB: d.GPIOB,
         DMA1: d.DMA1,
-        SYST: syst,
+        SYST: p.core.SYST,
         STDOUT: hio::hstdout().unwrap(),
     }
 }

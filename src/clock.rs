@@ -39,3 +39,9 @@ pub fn init_clock(p: &stm32l151::Peripherals) {
         w.gpiopaen().set_bit()
          .gpiopben().set_bit());
 }
+
+pub fn enable_tick(syst: &stm32l151::SYST, reload: usize) {
+    syst.set_reload(100_000);
+    syst.enable_interrupt();
+    syst.enable_counter();
+}
