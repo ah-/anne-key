@@ -8,11 +8,6 @@ use super::keymap::HidReport;
 use super::protocol::{MsgType, KeyboardOperation};
 
 
-pub enum ReceiveStage {
-    Header,
-    Body,
-}
-
 pub struct Bluetooth {
     usart: USART2,
     receive_stage: ReceiveStage,
@@ -22,6 +17,11 @@ pub struct Message<'a> {
     msg_type: u8,
     operation: u8,
     data: &'a[u8],
+}
+
+pub enum ReceiveStage {
+    Header,
+    Body,
 }
 
 static mut SEND_BUFFER: [u8; 0x10] = [0; 0x10];
@@ -44,7 +44,7 @@ impl Bluetooth {
         stdout: &mut hio::HStdout,
         gpioa: &GPIOA) {
         self.send(MsgType::Keyboard, KeyboardOperation::KeyReport as u8,
-                  &report.bytes, &dma1, stdout, &gpioa);
+                  &report.as_bytes(), &dma1, stdout, &gpioa);
     }
 
     pub fn receive(&mut self, dma: &mut DMA1, gpioa: &mut GPIOA, stdout: &mut hio::HStdout) {

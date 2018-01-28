@@ -1,28 +1,49 @@
-use super::keyboard::KeyState;
+use core::slice;
+use keyboard::KeyState;
+use layout::DEFAULT;
+use keycodes::KeyCode;
 
-pub struct HidReport{pub bytes: [u8; 8]}
+#[repr(packed)]
+pub struct HidReport {
+    pub modifiers: u8,
+    pub _unused: u8,
+    pub keys: [u8; 6]
+}
 
 impl HidReport {
     pub fn from_key_state(state: &KeyState) -> HidReport {
-        let mut bytes = [0; 8];
+        let layout = &DEFAULT;
 
-        if state[0] {
-            bytes[2] = 0x4;
-        } else if state[1] {
-            bytes[2] = 0x5;
-        } else if state[2] {
-            bytes[2] = 0x6;
-        } else if state[3] {
-            bytes[2] = 0x7;
-        } else if state[4] {
-            bytes[2] = 0x8;
-        } else {
-            let pressed = state.into_iter().filter(|s| **s).count();
-            if pressed > 0 {
-                bytes[2] = 0x9;
+        let mut modifiers: u8 = 0;
+        let mut keys : [u8; 6] = [0; 6];
+        let mut i : usize = 0;
+
+        for (key, pressed) in state.iter().enumerate() {
+            let code = &layout[key];
+
+            if *pressed {
+                if code.is_modifier() {
+                    modifiers |= 1 << (*code as u8 - KeyCode::LCtrl as u8);
+                } else if code.is_normal_key() {
+                    if i < keys.len() {
+                        keys[i] = *code as u8;
+                        i += 1;
+                    }
+                }
             }
         }
 
-        HidReport{bytes}
+        HidReport {
+            modifiers: modifiers,
+            _unused: 0,
+            keys: keys,
+        }
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        unsafe { 
+            let p : *const HidReport = self;
+            slice::from_raw_parts(p as *const u8, 8)
+        }
     }
 }

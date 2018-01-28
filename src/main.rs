@@ -11,8 +11,10 @@ extern crate stm32l151;
 mod bluetooth;
 mod clock;
 mod keyboard;
+mod keycodes;
 mod keymap;
 mod led;
+mod layout;
 mod protocol;
 mod usb;
 
