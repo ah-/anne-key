@@ -19,9 +19,9 @@ impl HidReport {
         let mut i : usize = 0;
 
         for (key, pressed) in state.iter().enumerate() {
-            let code = &layout[key];
-
             if *pressed {
+                let code = &layout[key];
+
                 if code.is_modifier() {
                     modifiers |= 1 << (*code as u8 - KeyCode::LCtrl as u8);
                 } else if code.is_normal_key() {

@@ -8,13 +8,15 @@ extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
 extern crate stm32l151;
 
+#[macro_use]
+mod macros;
 mod bluetooth;
 mod clock;
 mod keyboard;
 mod keycodes;
 mod keymap;
-mod led;
 mod layout;
+mod led;
 mod protocol;
 mod usb;
 
@@ -41,7 +43,7 @@ app! {
         static SYST: stm32l151::SYST;
         static USB_LOG : usb::log::Log = usb::log::Log::new();
         static NUM_PRESSED_KEYS: usize = 0;
-        static STDOUT: hio::HStdout;
+        static STDOUT: Option<hio::HStdout>;
     },
 
     tasks: {
@@ -87,7 +89,7 @@ fn init(mut p: init::Peripherals, _r: init::Resources) -> init::LateResources {
         GPIOB: d.GPIOB,
         DMA1: d.DMA1,
         SYST: p.core.SYST,
-        STDOUT: hio::hstdout().unwrap(),
+        STDOUT: hio::hstdout().ok(),
     }
 }
 

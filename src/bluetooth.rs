@@ -41,13 +41,13 @@ impl Bluetooth {
         &mut self,
         report: &HidReport,
         dma1: &DMA1,
-        stdout: &mut hio::HStdout,
+        stdout: &mut Option<hio::HStdout>,
         gpioa: &GPIOA) {
         self.send(MsgType::Keyboard, KeyboardOperation::KeyReport as u8,
                   &report.as_bytes(), &dma1, stdout, &gpioa);
     }
 
-    pub fn receive(&mut self, dma: &mut DMA1, gpioa: &mut GPIOA, stdout: &mut hio::HStdout) {
+    pub fn receive(&mut self, dma: &mut DMA1, gpioa: &mut GPIOA, stdout: &mut Option<hio::HStdout>) {
         if dma.isr.read().tcif6().bit_is_set() {
             dma.ifcr.write(|w| w.cgif6().set_bit());
 
@@ -139,7 +139,7 @@ impl Bluetooth {
         operation: u8, // TODO: make this typed
         data: &[u8],
         dma1: &DMA1,
-        stdout: &mut hio::HStdout,
+        stdout: &mut Option<hio::HStdout>,
         gpioa: &GPIOA) {
         if dma1.cndtr7.read().ndt().bits() == 0 {
             unsafe {
@@ -162,11 +162,11 @@ impl Bluetooth {
             // TODO: return an error instead
             // saying we're busy
             // using https://docs.rs/nb/0.1.1/nb/
-            write!(stdout, "tx busy").unwrap();
+            debug!(stdout, "tx busy").ok();
         }
     }
 
-    fn handle_message(&mut self, message: &Message, dma: &mut DMA1, stdout: &mut hio::HStdout) {
+    fn handle_message(&mut self, message: &Message, dma: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
         match (message.msg_type, message.operation) {
             (6, 170) => {
                 // Wakeup acknowledged, send data
@@ -179,7 +179,7 @@ impl Bluetooth {
                 //self.send(MsgType::System, 129, &data, dma, stdout, gpioa);
             //}
             _ => {
-                write!(stdout, "msg: {} {} {:?}", message.msg_type, message.operation, message.data).unwrap();
+                debug!(stdout, "msg: {} {} {:?}", message.msg_type, message.operation, message.data).ok();
             }
         }
     }

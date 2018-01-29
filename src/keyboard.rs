@@ -75,7 +75,7 @@ impl Keyboard {
             // Busy wait a short while before sampling the keys
             // to let the pins settle
             let current_tick = syst.cvr.read();
-            let wait_until_tick = current_tick - 100;
+            let wait_until_tick = current_tick - 10;
             while syst.cvr.read() > wait_until_tick {}
 
             self.state[column + 0 * COLUMNS] = gpiob.idr.read().idr9().bit_is_set() as bool;
