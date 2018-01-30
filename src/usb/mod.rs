@@ -171,7 +171,7 @@ fn usb_reset(r: &mut super::USB_LP::Resources) {
     unsafe {
         r.USB_LOG.reset();
         if NRESET > 1 {
-            write!(r.STDOUT, "r").unwrap();
+            //debug!(r.STDOUT, "r").unwrap();
         }
         NRESET += 1;
     }
