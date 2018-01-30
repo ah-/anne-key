@@ -18,6 +18,7 @@ mod keymap;
 mod layout;
 mod led;
 mod protocol;
+mod serial;
 mod usb;
 
 use cortex_m_semihosting::hio;
@@ -28,12 +29,15 @@ use keyboard::Keyboard;
 use keymap::HidReport;
 use led::Led;
 use usb::Usb;
+use serial::Serial;
 
 app! {
     device: stm32l151,
 
     resources: {
-        static BLUETOOTH: Bluetooth;
+        static BLUETOOTH_SEND_BUFFER: [u8; 0x10] = [0; 0x10];
+        static BLUETOOTH_RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
+        static BLUETOOTH: Bluetooth<'static>;
         static KEYBOARD: Keyboard;
         static LED: Led;
         static USB: Usb;
@@ -44,6 +48,10 @@ app! {
         static USB_LOG : usb::log::Log = usb::log::Log::new();
         static NUM_PRESSED_KEYS: usize = 0;
         static STDOUT: Option<hio::HStdout>;
+    },
+
+    init: {
+        resources: [BLUETOOTH_SEND_BUFFER, BLUETOOTH_RECEIVE_BUFFER],
     },
 
     tasks: {
@@ -65,19 +73,21 @@ app! {
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
-            resources: [DMA1, STDOUT],
+            resources: [BLUETOOTH, DMA1, STDOUT],
         }
     }
 }
 
-fn init(mut p: init::Peripherals, _r: init::Resources) -> init::LateResources {
+fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let mut d = p.device;
     clock::init_clock(&d);
     clock::enable_tick(&mut p.core.SYST, 100_000);
 
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
     let led = Led::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
-    let bluetooth = Bluetooth::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
+    let bluetooth_serial = Serial::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC,
+                                       r.BLUETOOTH_SEND_BUFFER, r.BLUETOOTH_RECEIVE_BUFFER);
+    let bluetooth = Bluetooth::new(bluetooth_serial);
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
     init::LateResources {

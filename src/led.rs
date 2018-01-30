@@ -51,21 +51,8 @@ impl Led {
 
     pub fn receive(&mut self) {
         if self.usart.sr.read().rxne().bit_is_set() {
-            //let bits = r.USART3.dr.read().bits() as u16;
-
-            /*
-            if bits != 9 && bits != 0 {
-                **r.RECV_LEN = bits;
-                r.DMA1.cndtr3.modify(|_, w| {
-                    unsafe { w.ndt().bits(bits) }
-                });
-                r.DMA1.ccr3.modify(|_, w| {
-                    w.en().set_bit()
-                });
-            }
-            */
+            //write!(r.STDOUT, "x").unwrap()
         }
-        //write!(r.STDOUT, "x").unwrap()
     }
 }
 
