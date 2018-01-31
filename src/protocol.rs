@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+pub struct Message<'a> {
+    pub msg_type: u8,
+    pub operation: u8,
+    pub data: &'a[u8],
+}
+
 pub enum MsgType {
     Reserved = 0,
     Error = 1,

@@ -1,62 +1,37 @@
+use core::fmt::Write;
+use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOB, RCC, USART3};
+use stm32l151::USART3;
+use super::protocol::{Message, MsgType, KeyboardOperation};
+use super::serial::Serial;
 
-pub struct Led {
-    usart: USART3,
+
+pub struct Led<'a> {
+    pub serial: Serial<'a, USART3>,
 }
 
-impl Led {
-    pub fn new(usart: USART3, dma: &DMA1, gpiob: &mut GPIOB, rcc: &mut RCC) -> Led {
-        let mut led = Led {
-            usart: usart
-        };
-        led.init(dma, gpiob, rcc);
-        led
+impl<'a> Led<'a> {
+    pub fn new(serial: Serial<'a, USART3>) -> Led {
+        Led {
+            serial: serial,
+        }
     }
 
-    fn init(&mut self, dma: &DMA1, gpiob: &mut GPIOB, rcc: &mut RCC) {
-        gpiob.moder.modify(|_, w| unsafe { w.moder11().bits(0b10) });
-        gpiob.pupdr.modify(|_, w| unsafe { w.pupdr11().bits(0b01) });
-        gpiob.afrh.modify(|_, w| unsafe { w.afrh11().bits(7) });
-
-        rcc.apb1enr.modify(|_, w| w.usart3en().set_bit());
-        rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
-
-        self.usart.brr.modify(|_, w| unsafe { w.bits(417) });
-        self.usart.cr3.modify(|_, w| w.dmar().set_bit());
-        self.usart.cr1.modify(|_, w| {
-            w.rxneie().set_bit()
-             //.tcie().set_bit()
-             .idleie().set_bit()
-             .re().set_bit()
-             .te().set_bit()
-             .ue().set_bit()
-        });
-
-        dma.cpar3.write(|w| unsafe { w.pa().bits(0x4000_4804) });
-
-        //p.DMA1.cmar3.write(|w| {
-            //unsafe {
-                //w.ma().bits(r.RECV_BUFFER.as_mut_ptr() as u32) 
-            //}
-        //});
-
-        dma.ccr3.modify(|_, w| {
-            unsafe {
-                w.pl().bits(2);
+    pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
+        match (message.msg_type, message.operation) {
+            _ => {
+                debug!(stdout, "lmsg: {} {} {:?}", message.msg_type, message.operation, message.data).ok();
             }
-            w.minc().set_bit().tcie().set_bit().en().clear_bit()
-        });
-    }
-
-    pub fn receive(&mut self) {
-        if self.usart.sr.read().rxne().bit_is_set() {
-            //write!(r.STDOUT, "x").unwrap()
         }
     }
 }
 
+pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
+    let stdout = &mut r.STDOUT;
+    let callback = |msg: &Message| Led::receive(msg, stdout);
+    r.LED.serial.receive(&mut r.DMA1, &mut r.GPIOA, callback);
+}
 
-pub fn receive(_t: &mut Threshold, mut r: super::USART3::Resources) {
-    r.LED.receive();
+pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
+    r.LED.serial.tx_interrupt(&mut r.DMA1);
 }

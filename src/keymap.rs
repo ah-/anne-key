@@ -15,8 +15,8 @@ impl HidReport {
         let layout = &DEFAULT;
 
         let mut modifiers: u8 = 0;
-        let mut keys : [u8; 6] = [0; 6];
-        let mut i : usize = 0;
+        let mut keys: [u8; 6] = [0; 6];
+        let mut i: usize = 0;
 
         for (key, pressed) in state.iter().enumerate() {
             if *pressed {

@@ -39,7 +39,9 @@ app! {
         static BLUETOOTH_RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
         static BLUETOOTH: Bluetooth<'static>;
         static KEYBOARD: Keyboard;
-        static LED: Led;
+        static LED_SEND_BUFFER: [u8; 0x10] = [0; 0x10];
+        static LED_RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
+        static LED: Led<'static>;
         static USB: Usb;
         static GPIOA: stm32l151::GPIOA;
         static GPIOB: stm32l151::GPIOB;
@@ -51,7 +53,8 @@ app! {
     },
 
     init: {
-        resources: [BLUETOOTH_SEND_BUFFER, BLUETOOTH_RECEIVE_BUFFER],
+        resources: [BLUETOOTH_SEND_BUFFER, BLUETOOTH_RECEIVE_BUFFER,
+                    LED_SEND_BUFFER, LED_RECEIVE_BUFFER],
     },
 
     tasks: {
@@ -59,13 +62,17 @@ app! {
             path: tick,
             resources: [BLUETOOTH, DMA1, GPIOA, GPIOB, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
         },
-        USART3: {
-            path: led::receive,
-            resources: [LED, STDOUT],
-        },
         USB_LP: {
             path: usb::usb_lp,
             resources: [STDOUT, USB, USB_LOG],
+        },
+        DMA1_CHANNEL2: {
+            path: led::tx,
+            resources: [LED, DMA1, STDOUT],
+        },
+        DMA1_CHANNEL3: {
+            path: led::rx,
+            resources: [LED, DMA1, GPIOA, STDOUT],
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
@@ -74,7 +81,7 @@ app! {
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
             resources: [BLUETOOTH, DMA1, STDOUT],
-        }
+        },
     }
 }
 
@@ -84,10 +91,15 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     clock::enable_tick(&mut p.core.SYST, 100_000);
 
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
-    let led = Led::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
-    let bluetooth_serial = Serial::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC,
+
+    let led_serial = Serial::new(d.USART3, &mut d.DMA1, &mut d.GPIOA, &mut d.RCC,
+                                 r.LED_SEND_BUFFER, r.LED_RECEIVE_BUFFER);
+    let led = Led::new(led_serial);
+
+    let bluetooth_serial = Serial::new(d.USART2, &mut d.DMA1, &mut d.GPIOA, &mut d.RCC,
                                        r.BLUETOOTH_SEND_BUFFER, r.BLUETOOTH_RECEIVE_BUFFER);
     let bluetooth = Bluetooth::new(bluetooth_serial);
+
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
     init::LateResources {
@@ -115,6 +127,6 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     if pressed != *r.NUM_PRESSED_KEYS {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
-        r.BLUETOOTH.send_report(&report, &r.DMA1, &mut r.STDOUT, &r.GPIOA);
+        r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
     }
 }
