@@ -35,12 +35,10 @@ app! {
     device: stm32l151,
 
     resources: {
-        static BLUETOOTH_SEND_BUFFER: [u8; 0x10] = [0; 0x10];
-        static BLUETOOTH_RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
-        static BLUETOOTH: Bluetooth<'static>;
         static KEYBOARD: Keyboard;
-        static LED_SEND_BUFFER: [u8; 0x10] = [0; 0x10];
-        static LED_RECEIVE_BUFFER: [u8; 0x10] = [0; 0x10];
+        static BLUETOOTH_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
+        static BLUETOOTH: Bluetooth<'static>;
+        static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
         static USB: Usb;
         static GPIOA: stm32l151::GPIOA;
@@ -53,8 +51,7 @@ app! {
     },
 
     init: {
-        resources: [BLUETOOTH_SEND_BUFFER, BLUETOOTH_RECEIVE_BUFFER,
-                    LED_SEND_BUFFER, LED_RECEIVE_BUFFER],
+        resources: [BLUETOOTH_BUFFERS, LED_BUFFERS],
     },
 
     tasks: {
@@ -93,11 +90,11 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
 
     let led_serial = Serial::new(d.USART3, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
-                                 r.LED_SEND_BUFFER, r.LED_RECEIVE_BUFFER);
+                                 r.LED_BUFFERS);
     let led = Led::new(led_serial);
 
     let bluetooth_serial = Serial::new(d.USART2, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
-                                       r.BLUETOOTH_SEND_BUFFER, r.BLUETOOTH_RECEIVE_BUFFER);
+                                       r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);

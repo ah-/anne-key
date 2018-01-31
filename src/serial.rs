@@ -22,16 +22,17 @@ impl<'a, USART> Serial<'a, USART>
     where USART: DmaUsart
 {
     pub fn new(mut usart: USART, dma: &mut DMA1, gpioa: &mut GPIOA, gpiob: &mut GPIOB, rcc: &mut RCC,
-               send_buffer: &'a mut[u8; 0x10], receive_buffer: &'a mut[u8; 0x10]) -> Serial<'a, USART> {
-        let send_ptr = send_buffer.as_mut_ptr() as u32;
-        let receive_ptr = receive_buffer.as_mut_ptr() as u32;
+               buffers: &'a mut[[u8; 0x10]; 2]) -> Serial<'a, USART> {
+        let (send_buffer, receive_buffer) = buffers.split_at_mut(1);
+        let send_ptr = send_buffer[0].as_mut_ptr() as u32;
+        let receive_ptr = receive_buffer[0].as_mut_ptr() as u32;
         usart.init(dma, gpioa, gpiob, rcc, send_ptr, receive_ptr);
         usart.receive(dma, gpioa, 2, receive_ptr);
         Serial {
             usart: usart,
             receive_stage: ReceiveStage::Header,
-            send_buffer: send_buffer,
-            receive_buffer: receive_buffer,
+            send_buffer: &mut send_buffer[0],
+            receive_buffer: &mut receive_buffer[0],
         }
     }
 
