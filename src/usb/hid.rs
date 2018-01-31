@@ -12,7 +12,7 @@ pub fn usb_hid_ctr(mut r: &mut super::super::USB_LP::Resources) {
     //loop {}
     } else {
         usb_clear_rx_ep1_ctr(&mut r);
-        loop {}
+        panic!()
     }
 }
 

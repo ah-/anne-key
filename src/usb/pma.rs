@@ -71,9 +71,9 @@ impl PMA_Area {
         for (ofs, v) in buf.iter().enumerate() {
             off = ofs;
             if ofs & 1 == 0 {
-                last = *v as u16;
+                last = u16::from(*v);
             } else {
-                self.set_u16(base + ofs & !1, last | ((*v as u16) << 8));
+                self.set_u16((base + ofs) & !1, last | (u16::from(*v) << 8));
             }
         }
 

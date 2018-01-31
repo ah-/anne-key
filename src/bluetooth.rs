@@ -23,7 +23,7 @@ impl<'a> Bluetooth<'a> {
 
     pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
         self.serial.send(MsgType::Keyboard, KeyboardOperation::KeyReport as u8,
-                  &report.as_bytes(), dma1, stdout, gpioa);
+                         report.as_bytes(), dma1, stdout, gpioa);
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
@@ -32,7 +32,7 @@ impl<'a> Bluetooth<'a> {
                 // SYSTEM Get ID
                 //let data = &[4, 1, 0, 1, 2, 3, 4][..];
                 //self.send(MsgType::System, 129, &data, dma, stdout, gpioa);
-            //}
+                //}
             (6, 134) => {
                 //debug!(stdout, "bt host list: {:?}", message.data).ok();
             },

@@ -24,11 +24,9 @@ impl HidReport {
 
                 if code.is_modifier() {
                     modifiers |= 1 << (*code as u8 - KeyCode::LCtrl as u8);
-                } else if code.is_normal_key() {
-                    if i < keys.len() {
-                        keys[i] = *code as u8;
-                        i += 1;
-                    }
+                } else if code.is_normal_key() && i < keys.len() {
+                    keys[i] = *code as u8;
+                    i += 1;
                 }
             }
         }

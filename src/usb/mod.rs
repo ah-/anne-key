@@ -24,7 +24,7 @@ const USB_EPRX_STAT: u32 = 0x3000;
 const USB_EPRX_DTOGMASK: u32 = (USB_EPRX_STAT | USB_EPREG_MASK);
 
 const USB_EP_CTR_RX: u32 = 0x8000;
-const USB_EP_CTR_TX: u32 = 0x80000000;
+const USB_EP_CTR_TX: u32 = 0x8000_0000;
 
 // TODO: more from header
 const USB_REQ_GET_STATUS: u8 = 0x00;
@@ -103,7 +103,7 @@ pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
                 1 => {
                     hid::usb_hid_ctr(&mut r);
                 }
-                _ => loop {},
+                _ => panic!(),
             }
         }
     }
@@ -116,7 +116,7 @@ pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
     } else {
         write!(r.STDOUT, "other").unwrap();
         write!(r.STDOUT, "\n{:x}\n", istr.bits()).unwrap();
-        loop {}
+        panic!()
     }
     */
 
@@ -375,7 +375,7 @@ fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
                             );
                             set_ep_tx_status_valid_dtog(&mut r);
                         }
-                        _ => loop {},
+                        _ => panic!(),
                     }
                 }
                 (0x81, USB_REQ_GET_DESCRIPTOR) => {
@@ -393,7 +393,7 @@ fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
                             );
                             set_ep_tx_status_valid_dtog(&mut r);
                         }
-                        _ => loop {},
+                        _ => panic!(),
                     }
                 }
                 (0, USB_REQ_GET_STATUS) => {
@@ -416,7 +416,7 @@ fn usb_ctr(mut r: &mut super::USB_LP::Resources) {
                     (*pma).pma_area.set_u16(2, 0);
                     set_ep_tx_status_valid_dtog(&mut r);
                 }
-                _ => loop {},
+                _ => panic!(),
             }
         }
     }

@@ -42,7 +42,7 @@ impl<'a, USART> Serial<'a, USART>
             match self.receive_stage {
                 ReceiveStage::Header => {
                     self.receive_stage = ReceiveStage::Body;
-                    self.usart.receive(dma, gpioa, self.receive_buffer[1] as u16, self.receive_buffer.as_mut_ptr() as u32 + 2);
+                    self.usart.receive(dma, gpioa, u16::from(self.receive_buffer[1]), self.receive_buffer.as_mut_ptr() as u32 + 2);
                 }
                 ReceiveStage::Body => {
                     self.receive_stage = ReceiveStage::Header;

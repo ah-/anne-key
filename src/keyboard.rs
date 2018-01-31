@@ -78,8 +78,8 @@ impl Keyboard {
             let wait_until_tick = current_tick - 10;
             while syst.cvr.read() > wait_until_tick {}
 
-            self.state[column + 0 * COLUMNS] = gpiob.idr.read().idr9().bit_is_set() as bool;
-            self.state[column + 1 * COLUMNS] = gpiob.idr.read().idr8().bit_is_set() as bool;
+            self.state[column              ] = gpiob.idr.read().idr9().bit_is_set() as bool;
+            self.state[column +     COLUMNS] = gpiob.idr.read().idr8().bit_is_set() as bool;
             self.state[column + 2 * COLUMNS] = gpiob.idr.read().idr7().bit_is_set() as bool;
             self.state[column + 3 * COLUMNS] = gpiob.idr.read().idr6().bit_is_set() as bool;
             self.state[column + 4 * COLUMNS] = gpioa.idr.read().idr0().bit_is_set() as bool;
