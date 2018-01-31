@@ -2,7 +2,7 @@ use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
 use stm32l151::USART3;
-use super::protocol::{Message, MsgType, KeyboardOperation};
+use super::protocol::Message;
 use super::serial::Serial;
 
 

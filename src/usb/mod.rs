@@ -5,6 +5,7 @@ pub mod hid;
 
 use core::cmp::min;
 use core::fmt::Write;
+use cortex_m_semihosting::hio;
 use rtfm::Threshold;
 
 use stm32l151;
@@ -58,7 +59,7 @@ impl Usb {
         let mut usb = Usb {
             usb: usb
         };
-        //usb.init(rcc, syscfg);
+        usb.init(rcc, syscfg);
         usb
     }
 
@@ -171,7 +172,8 @@ fn usb_reset(r: &mut super::USB_LP::Resources) {
     unsafe {
         r.USB_LOG.reset();
         if NRESET > 1 {
-            //debug!(r.STDOUT, "r").unwrap();
+            let stdout: &mut Option<hio::HStdout> = &mut r.STDOUT;
+            debug!(stdout, "r").unwrap();
         }
         NRESET += 1;
     }

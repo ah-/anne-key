@@ -191,7 +191,7 @@ impl DmaUsart for USART2 {
 }
 
 impl DmaUsart for USART3 {
-    fn init(&mut self, dma: &DMA1, gpioa: &mut GPIOA, gpiob: &mut GPIOB, rcc: &mut RCC, send_ptr: u32, receive_ptr: u32) {
+    fn init(&mut self, dma: &DMA1, _gpioa: &mut GPIOA, gpiob: &mut GPIOB, rcc: &mut RCC, send_ptr: u32, receive_ptr: u32) {
         gpiob.moder.modify(|_, w| unsafe {
             w.moder10().bits(0b10)
              .moder11().bits(0b10)
@@ -243,7 +243,7 @@ impl DmaUsart for USART3 {
         dma.isr.read().tcif3().bit_is_set()
     }
 
-    fn receive(&self, dma: &mut DMA1, gpioa: &mut GPIOA, length: u16, buffer: u32) {
+    fn receive(&self, dma: &mut DMA1, _gpioa: &mut GPIOA, length: u16, buffer: u32) {
         dma.ifcr.write(|w| w.cgif3().set_bit());
         dma.ccr3.modify(|_, w| { w.en().clear_bit() });
         dma.cmar3.write(|w| unsafe { w.ma().bits(buffer) });
@@ -255,7 +255,7 @@ impl DmaUsart for USART3 {
         dma.cndtr2.read().ndt().bits() == 0
     }
 
-    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA) {
+    fn send(&self, dma: &mut DMA1, _gpioa: &mut GPIOA) {
         unsafe { dma.cndtr2.modify(|_, w| w.ndt().bits(0xb)) };
         dma.ccr2.modify(|_, w| w.en().set_bit());
     }
