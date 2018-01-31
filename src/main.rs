@@ -92,11 +92,11 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
 
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
 
-    let led_serial = Serial::new(d.USART3, &mut d.DMA1, &mut d.GPIOA, &mut d.RCC,
+    let led_serial = Serial::new(d.USART3, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
                                  r.LED_SEND_BUFFER, r.LED_RECEIVE_BUFFER);
     let led = Led::new(led_serial);
 
-    let bluetooth_serial = Serial::new(d.USART2, &mut d.DMA1, &mut d.GPIOA, &mut d.RCC,
+    let bluetooth_serial = Serial::new(d.USART2, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
                                        r.BLUETOOTH_SEND_BUFFER, r.BLUETOOTH_RECEIVE_BUFFER);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
