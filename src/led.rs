@@ -1,17 +1,17 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::USART3;
 use super::protocol::Message;
 use super::serial::Serial;
+use super::serial::led_usart::LedUsart;
 
 
 pub struct Led<'a> {
-    pub serial: Serial<'a, USART3>,
+    pub serial: Serial<'a, LedUsart>,
 }
 
 impl<'a> Led<'a> {
-    pub fn new(serial: Serial<'a, USART3>) -> Led {
+    pub fn new(serial: Serial<'a, LedUsart>) -> Led {
         Led {
             serial: serial,
         }

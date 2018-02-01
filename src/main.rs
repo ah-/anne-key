@@ -30,6 +30,9 @@ use keymap::HidReport;
 use led::Led;
 use usb::Usb;
 use serial::Serial;
+use serial::bluetooth_usart::BluetoothUsart;
+use serial::led_usart::LedUsart;
+
 
 app! {
     device: stm32l151,
@@ -89,12 +92,12 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
 
     let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
 
-    let led_serial = Serial::new(d.USART3, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
-                                 r.LED_BUFFERS);
+    let led_usart = LedUsart::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
+    let led_serial = Serial::new(led_usart, &mut d.DMA1, &mut d.GPIOA, r.LED_BUFFERS);
     let led = Led::new(led_serial);
 
-    let bluetooth_serial = Serial::new(d.USART2, &mut d.DMA1, &mut d.GPIOA, &mut d.GPIOB, &mut d.RCC,
-                                       r.BLUETOOTH_BUFFERS);
+    let bluetooth_usart = BluetoothUsart::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
+    let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, &mut d.GPIOA, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);

@@ -3,19 +3,20 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOA, USART2};
+use stm32l151::{DMA1, GPIOA};
 use super::keymap::HidReport;
 use super::protocol::{Message, MsgType, KeyboardOperation};
 use super::serial::Serial;
+use super::serial::bluetooth_usart::BluetoothUsart;
 
 
 pub struct Bluetooth<'a> {
-    pub serial: Serial<'a, USART2>,
+    pub serial: Serial<'a, BluetoothUsart>,
 }
 
 
 impl<'a> Bluetooth<'a> {
-    pub fn new(serial: Serial<'a, USART2>) -> Bluetooth {
+    pub fn new(serial: Serial<'a, BluetoothUsart>) -> Bluetooth {
         Bluetooth {
             serial: serial,
         }
