@@ -1,5 +1,6 @@
 #![feature(const_fn)]
 #![feature(proc_macro)]
+#![feature(non_exhaustive)]
 #![no_std]
 
 extern crate bare_metal;
@@ -60,7 +61,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, DMA1, GPIOA, GPIOB, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
+            resources: [BLUETOOTH, LED, DMA1, GPIOA, GPIOB, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
         },
         USB_LP: {
             path: usb::usb_lp,
@@ -128,5 +129,6 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
         r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
+        r.LED.send_something(&mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
     }
 }

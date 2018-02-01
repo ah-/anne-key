@@ -5,7 +5,7 @@ use cortex_m_semihosting::hio;
 use rtfm::Threshold;
 use stm32l151::{DMA1, GPIOA};
 use super::hidreport::HidReport;
-use super::protocol::{Message, MsgType, KeyboardOperation};
+use super::protocol::{Message, MsgType, BleOp, KeyboardOp};
 use super::serial::Serial;
 use super::serial::bluetooth_usart::BluetoothUsart;
 
@@ -23,22 +23,29 @@ impl<'a> Bluetooth<'a> {
     }
 
     pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Keyboard, KeyboardOperation::KeyReport as u8,
+        self.serial.send(MsgType::Keyboard, KeyboardOp::KeyReport as u8,
                          report.as_bytes(), dma1, stdout, gpioa);
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
-        match (message.msg_type, message.operation) {
+        match message.msg_type {
             //(2, 1) => {
                 // SYSTEM Get ID
                 //let data = &[4, 1, 0, 1, 2, 3, 4][..];
                 //self.send(MsgType::System, 129, &data, dma, stdout, gpioa);
                 //}
-            (6, 134) => {
-                //debug!(stdout, "bt host list: {:?}", message.data).ok();
+            MsgType::Ble => {
+                match BleOp::from(message.operation)  {
+                    BleOp::AckHostListQuery => {
+                        //debug!(stdout, "bt host list: {:?}", message.data).ok();
+                    }
+                    _ => {
+                        debug!(stdout, "msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                    }
+                }
             },
             _ => {
-                debug!(stdout, "msg: {} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                debug!(stdout, "msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
             }
         }
     }

@@ -1,11 +1,15 @@
 #![allow(dead_code)]
+use core::mem::transmute;
 
 pub struct Message<'a> {
-    pub msg_type: u8,
+    pub msg_type: MsgType,
     pub operation: u8,
     pub data: &'a[u8],
 }
 
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug,Copy,Clone)]
 pub enum MsgType {
     Reserved = 0,
     Error = 1,
@@ -23,7 +27,15 @@ pub enum MsgType {
     CustomKey = 13,
 }
 
-pub enum BleOperation {
+impl From<u8> for MsgType {
+    #[inline]
+    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+}
+
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug,Copy,Clone)]
+pub enum BleOp {
     Reserved = 0,
     On = 1,
     Off = 2,
@@ -52,7 +64,15 @@ pub enum BleOperation {
     AckCompatibilityMode = 140,
 }
 
-pub enum KeyboardOperation {
+impl From<u8> for BleOp {
+    #[inline]
+    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+}
+
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug,Copy,Clone)]
+pub enum KeyboardOp {
     Reserved = 0,
     KeyReport = 1,
     DownloadUserLayout = 2,
@@ -65,4 +85,42 @@ pub enum KeyboardOperation {
     AckSetLayoutId = 131,
     AckGetLayoutId = 132,
     AckUpUserLayout = 133,
+}
+
+impl From<u8> for KeyboardOp {
+    #[inline]
+    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+}
+
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug,Copy,Clone)]
+pub enum LedOp {
+    Reserved = 0,
+    ThemeMode = 1,
+    ThemeSwitch = 2,
+    UserStaticTheme = 3,
+    BleConfig = 4,
+    ConfigCmd = 5,
+    Music = 6,
+    Key = 7,
+    GetUsedThemeId = 8,
+    GetUserStaticTheme = 9,
+    GetUserStaticCrcId = 10,
+    AckReserved = 128,
+    AckThemeMode = 129,
+    AckThemeSwitch = 130,
+    AckUserStaticTheme = 131,
+    AckBleConfig = 132,
+    AckConfigCmd = 133,
+    AckMusic = 134,
+    AckKey = 135,
+    AckGetUsedThemeId = 136,
+    AckGetUserStaticTheme = 137,
+    AckGetUserStaticCrcId = 138,
+}
+
+impl From<u8> for LedOp {
+    #[inline]
+    fn from(b: u8) -> Self { unsafe { transmute(b) } }
 }

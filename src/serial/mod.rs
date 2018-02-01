@@ -65,12 +65,12 @@ impl<'a, USART> Serial<'a, USART>
                     
                     {
                         let message = Message {
-                            msg_type: self.receive_buffer[0],
+                            msg_type: MsgType::from(self.receive_buffer[0]),
                             operation: self.receive_buffer[2],
                             data: &self.receive_buffer[3..3 + self.receive_buffer[1] as usize - 1],
                         };
                         match (message.msg_type, message.operation) {
-                            (6, 170) => {
+                            (MsgType::Ble, 170) => {
                                 // Wakeup acknowledged, send data
                                 unsafe { dma.cndtr7.modify(|_, w| w.ndt().bits(0xb)) };
                                 dma.ccr7.modify(|_, w| w.en().set_bit());
