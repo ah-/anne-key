@@ -10,11 +10,12 @@ extern crate stm32l151;
 
 #[macro_use]
 mod macros;
+
 mod bluetooth;
 mod clock;
+mod hidreport;
 mod keyboard;
 mod keycodes;
-mod keymap;
 mod layout;
 mod led;
 mod protocol;
@@ -26,7 +27,7 @@ use rtfm::{app, Threshold};
 
 use bluetooth::Bluetooth;
 use keyboard::Keyboard;
-use keymap::HidReport;
+use hidreport::HidReport;
 use led::Led;
 use usb::Usb;
 use serial::Serial;
@@ -48,7 +49,6 @@ app! {
         static GPIOB: stm32l151::GPIOB;
         static DMA1: stm32l151::DMA1;
         static SYST: stm32l151::SYST;
-        static USB_LOG : usb::log::Log = usb::log::Log::new();
         static NUM_PRESSED_KEYS: usize = 0;
         static STDOUT: Option<hio::HStdout>;
     },
@@ -64,7 +64,7 @@ app! {
         },
         USB_LP: {
             path: usb::usb_lp,
-            resources: [STDOUT, USB, USB_LOG],
+            resources: [STDOUT, USB],
         },
         DMA1_CHANNEL2: {
             path: led::tx,
