@@ -1,4 +1,5 @@
 use stm32l151;
+use cortex_m;
 
 pub fn init_clock(p: &stm32l151::Peripherals) {
     p.USB.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
@@ -37,10 +38,12 @@ pub fn init_clock(p: &stm32l151::Peripherals) {
 
     p.RCC.ahbenr.modify(|_, w|
         w.gpiopaen().set_bit()
-         .gpiopben().set_bit());
+         .gpiopben().set_bit()
+         .gpiopcen().set_bit());
 }
 
 pub fn enable_tick(syst: &mut stm32l151::SYST, reload: u32) {
+    syst.set_clock_source(cortex_m::peripheral::syst::SystClkSource::Core);
     syst.set_reload(reload);
     syst.enable_interrupt();
     syst.enable_counter();

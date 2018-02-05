@@ -22,10 +22,10 @@ impl DmaUsart for LedUsart {
         dma.cndtr2.read().ndt().bits() == 0
     }
 
-    // TODO: this needs len as well
-    fn send(&self, dma: &mut DMA1, _gpioa: &mut GPIOA, buffer: u32) {
+    fn send(&self, dma: &mut DMA1, _gpioa: &mut GPIOA, buffer: u32, length: u16) {
+        dma.ccr2.modify(|_, w| w.en().clear_bit());
         dma.cmar2.write(|w| unsafe { w.ma().bits(buffer) });
-        unsafe { dma.cndtr2.modify(|_, w| w.ndt().bits(0xb)) };
+        unsafe { dma.cndtr2.modify(|_, w| w.ndt().bits(length)) };
         dma.ccr2.modify(|_, w| w.en().set_bit());
     }
 

@@ -21,8 +21,9 @@ mod layout;
 mod led;
 mod protocol;
 mod serial;
-mod usb;
+//mod usb;
 
+use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
 
@@ -30,7 +31,7 @@ use bluetooth::Bluetooth;
 use keyboard::Keyboard;
 use hidreport::HidReport;
 use led::Led;
-use usb::Usb;
+//use usb::Usb;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
@@ -45,7 +46,9 @@ app! {
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
+    /*
         static USB: Usb;
+        */
         static GPIOA: stm32l151::GPIOA;
         static GPIOB: stm32l151::GPIOB;
         static DMA1: stm32l151::DMA1;
@@ -63,10 +66,12 @@ app! {
             path: tick,
             resources: [BLUETOOTH, LED, DMA1, GPIOA, GPIOB, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
         },
+    /*
         USB_LP: {
             path: usb::usb_lp,
             resources: [STDOUT, USB],
         },
+    */
         DMA1_CHANNEL2: {
             path: led::tx,
             resources: [LED, DMA1, STDOUT],
@@ -87,6 +92,9 @@ app! {
 }
 
 fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
+    // vector table relocation because of bootloader
+    unsafe { p.core.SCB.vtor.write(0x4000) };
+
     let mut d = p.device;
     clock::init_clock(&d);
     clock::enable_tick(&mut p.core.SYST, 100_000);
@@ -101,18 +109,30 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, &mut d.GPIOA, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
+    /*
     let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
+    */
+
+    let gpioc = d.GPIOC;
+    gpioc.moder.modify(|_, w| unsafe {
+        w.moder15().bits(1)
+    });
+    gpioc.pupdr.modify(|_, w| unsafe {
+        w.pupdr15().bits(0b01)
+    });
+    //gpioc.odr.modify(|_, w| w.odr15().clear_bit());
+    gpioc.odr.modify(|_, w| w.odr15().set_bit());
 
     init::LateResources {
         BLUETOOTH: bluetooth,
         KEYBOARD: keyboard,
         LED: led,
-        USB: usb,
+        //USB: usb,
         GPIOA: d.GPIOA,
         GPIOB: d.GPIOB,
         DMA1: d.DMA1,
         SYST: p.core.SYST,
-        STDOUT: hio::hstdout().ok(),
+        STDOUT: hio::hstdout().ok(), // None
     }
 }
 
@@ -129,6 +149,6 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
         r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
-        r.LED.send_something(&mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
+        r.LED.send_something(&mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA, &r.KEYBOARD.state);
     }
 }

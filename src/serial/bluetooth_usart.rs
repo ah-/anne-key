@@ -26,7 +26,7 @@ impl DmaUsart for BluetoothUsart {
         dma.cndtr7.read().ndt().bits() == 0
     }
 
-    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA, buffer: u32) {
+    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA, buffer: u32, _len: u16) {
         // Don't actually send anything yet, just enqueue and wait for wakeup package
         dma.ccr6.modify(|_, w| { w.en().clear_bit() });
         //dma.cmar6.write(|w| unsafe { w.ma().bits(self.receive_buffer.as_mut_ptr() as u32) });

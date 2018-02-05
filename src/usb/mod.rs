@@ -1,3 +1,4 @@
+pub mod constants;
 pub mod descriptors;
 pub mod log;
 pub mod pma;
@@ -13,33 +14,9 @@ use stm32l151;
 
 use self::usb_ext::UsbExt;
 use self::pma::PMA;
+use self::constants::{UsbRequest, UsbDescriptorType};
 
 const MAX_PACKET_SIZE: u32 = 64;
-
-// TODO: more from header, make this an enum
-const USB_REQ_GET_STATUS: u8 = 0x00;
-//const USB_REQ_CLEAR_FEATURE: u8 = 0x01;
-//const USB_REQ_SET_FEATURE: u8 = 0x03;
-const USB_REQ_SET_ADDRESS: u8 = 0x05;
-const USB_REQ_GET_DESCRIPTOR: u8 = 0x06;
-//const USB_REQ_SET_DESCRIPTOR: u8 = 0x07;
-//const USB_REQ_GET_CONFIGURATION: u8 = 0x08;
-const USB_REQ_SET_CONFIGURATION: u8 = 0x09;
-//const USB_REQ_GET_INTERFACE: u8 = 0x0A;
-//const USB_REQ_SET_INTERFACE: u8 = 0x0B;
-//const USB_REQ_SYNCH_FRAME: u8 = 0x0C;
-
-// TODO: make this an enum
-const USB_DESC_TYPE_DEVICE: u8 = 1;
-const USB_DESC_TYPE_CONFIGURATION: u8 = 2;
-const USB_DESC_TYPE_STRING: u8 = 3;
-//const USB_DESC_TYPE_INTERFACE: u8 = 4;
-//const USB_DESC_TYPE_ENDPOINT: u8 = 5;
-const USB_DESC_TYPE_DEVICE_QUALIFIER: u8 = 6;
-//const USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION: u8 = 7;
-//const USB_DESC_TYPE_BOS: u8 = 0x0F;
-const USB_DESC_TYPE_HID_REPORT: u8 = 0x22;
-
 
 pub struct Usb {
     usb: stm32l151::USB,
@@ -196,18 +173,18 @@ impl Usb {
                         u16,
                 );
 
-                let request = ((request16 & 0xff00) >> 8) as u8;
+                let request = UsbRequest::from(((request16 & 0xff00) >> 8) as u8);
                 let request_type = (request16 & 0xff) as u8;
                 match (request_type, request) {
-                    (0, USB_REQ_SET_ADDRESS) => {
+                    (0, UsbRequest::SetAddress) => {
                         self.pending_daddr = value as u8;
                         self.usb.set_ep_tx_status_valid();
                     }
-                    (0x80, USB_REQ_GET_DESCRIPTOR) => {
-                        let descriptor_type = (value >> 8) as u8;
+                    (0x80, UsbRequest::GetDescriptor) => {
+                        let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
                         let descriptor_index = (value & 0xff) as u8;
-                        match (descriptor_type, descriptor_index) {
-                            (USB_DESC_TYPE_DEVICE, _) => {
+                        match descriptor_type {
+                            UsbDescriptorType::Device => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::DEV_DESC);
                                 (*pma).pma_area.set_u16(
                                     2,
@@ -218,7 +195,7 @@ impl Usb {
                                 );
                                 self.usb.set_ep_tx_status_valid();
                             }
-                            (USB_DESC_TYPE_CONFIGURATION, _) => {
+                            UsbDescriptorType::Configuration => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::CONF_DESC);
                                 (*pma).pma_area.set_u16(
                                     2,
@@ -229,7 +206,7 @@ impl Usb {
                                 );
                                 self.usb.set_ep_tx_status_valid_dtog();
                             }
-                            (USB_DESC_TYPE_STRING, _) => {
+                            UsbDescriptorType::StringDesc => {
                                 let string = match descriptor_index {
                                     0 => &descriptors::LANG_STR[..],
                                     1 => &descriptors::MANUFACTURER_STR[..],
@@ -243,7 +220,7 @@ impl Usb {
                                 (*pma).pma_area.set_u16(2, min(length, string.len() as u16));
                                 self.usb.set_ep_tx_status_valid_dtog();
                             }
-                            (USB_DESC_TYPE_DEVICE_QUALIFIER, _) => {
+                            UsbDescriptorType::DeviceQualifier => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::DEVICE_QUALIFIER);
                                 (*pma).pma_area.set_u16(
                                     2,
@@ -257,11 +234,11 @@ impl Usb {
                             _ => panic!(),
                         }
                     }
-                    (0x81, USB_REQ_GET_DESCRIPTOR) => {
-                        let descriptor_type = (value >> 8) as u8;
+                    (0x81, UsbRequest::GetDescriptor) => {
+                        let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
                         let descriptor_index = (value & 0xff) as u8;
                         match (descriptor_type, descriptor_index) {
-                            (USB_DESC_TYPE_HID_REPORT, _) => {
+                            (UsbDescriptorType::HidReport, _) => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::HID_REPORT_DESC);
                                 (*pma).pma_area.set_u16(
                                     2,
@@ -275,22 +252,22 @@ impl Usb {
                             _ => panic!(),
                         }
                     }
-                    (0, USB_REQ_GET_STATUS) => {
+                    (0, UsbRequest::GetStatus) => {
                         (*pma).pma_area.set_u16(0x40, 0);
                         (*pma).pma_area.set_u16(2, 2);
                         self.usb.set_ep_tx_status_valid_dtog();
                     }
-                    (0, USB_REQ_SET_CONFIGURATION) => {
+                    (0, UsbRequest::SetConfiguration) => {
                         // TODO: check value?
                         (*pma).pma_area.set_u16(2, 0);
                         self.usb.set_ep_tx_status_valid_dtog();
                     }
-                    (0x21, 0xa) => {
+                    (0x21, UsbRequest::GetInterface) => {
                         // USBHID SET_IDLE
                         (*pma).pma_area.set_u16(2, 0);
                         self.usb.set_ep_tx_status_valid_dtog();
                     }
-                    (33, 11) => {
+                    (33, UsbRequest::SetInterface) => {
                         // ???
                         (*pma).pma_area.set_u16(2, 0);
                         self.usb.set_ep_tx_status_valid_dtog();

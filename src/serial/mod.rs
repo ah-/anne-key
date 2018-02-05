@@ -21,7 +21,7 @@ pub trait DmaUsart {
     fn is_receive_pending(&self, dma: &DMA1) -> bool;
     fn receive(&self, dma: &mut DMA1, gpioa: &mut GPIOA, length: u16, buffer: u32);
     fn is_send_ready(&self, dma: &DMA1) -> bool;
-    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA, buffer: u32);
+    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA, buffer: u32, len: u16);
     fn tx_interrupt(&self, dma: &mut DMA1);
 }
 
@@ -95,11 +95,11 @@ impl<'a, USART> Serial<'a, USART>
         mut gpioa: &mut GPIOA) {
         if self.usart.is_send_ready(dma) {
             self.send_buffer[0] = message_type as u8;
-            self.send_buffer[1] = data.len() as u8;
+            self.send_buffer[1] = 1 + data.len() as u8;
             self.send_buffer[2] = operation;
             self.send_buffer[3..3 + data.len()].clone_from_slice(data);
 
-            self.usart.send(dma, &mut gpioa, self.send_buffer.as_mut_ptr() as u32);
+            self.usart.send(dma, &mut gpioa, self.send_buffer.as_mut_ptr() as u32, 3 + data.len() as u16);
             self.receive_stage = ReceiveStage::Header;
         } else {
             // TODO: return an error instead
