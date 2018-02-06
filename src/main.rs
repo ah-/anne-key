@@ -121,6 +121,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         w.pupdr15().bits(0b01)
     });
     //gpioc.odr.modify(|_, w| w.odr15().clear_bit());
+    //write!(hio::hstdout().unwrap(), "sleep").ok();
     gpioc.odr.modify(|_, w| w.odr15().set_bit());
 
     init::LateResources {

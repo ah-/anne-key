@@ -46,6 +46,39 @@ impl<'a> Led<'a> {
             self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
                              &[0, 0, 0, 1], dma1, stdout, gpioa);
         }
+        if state[15] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[0], dma1, stdout, gpioa);
+        }
+        if state[16] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[1], dma1, stdout, gpioa);
+        }
+        if state[17] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[2], dma1, stdout, gpioa);
+        }
+        if state[18] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[3], dma1, stdout, gpioa);
+        }
+        if state[19] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[14], dma1, stdout, gpioa);
+        }
+        if state[20] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[18], dma1, stdout, gpioa);
+        }
+        if state[21] {
+            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
+                             &[17], dma1, stdout, gpioa);
+        }
+        if state[22] {
+            // sends O
+            self.serial.send(MsgType::Led, LedOp::Key as u8,
+                             &[0,0,0,1,0,0,0,0,0], dma1, stdout, gpioa);
+        }
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
