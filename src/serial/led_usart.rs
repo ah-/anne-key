@@ -60,6 +60,7 @@ impl LedUsart {
              .ue().set_bit()
              .idleie().clear_bit()
              .txeie().clear_bit()
+             .tcie().clear_bit()
         });
 
         dma.cpar3.write(|w| unsafe { w.pa().bits(0x4000_4804) });

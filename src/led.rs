@@ -33,15 +33,16 @@ impl<'a> Led<'a> {
         gpioc.odr.modify(|_, w| w.odr15().clear_bit());
     }
 
+    // next_* cycles through themes/brightness/speed
     pub fn next_theme(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
         self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0], dma1, stdout, gpioa);
     }
 
-    pub fn next_animation_speed(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+    pub fn next_brightness(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
         self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0], dma1, stdout, gpioa);
     }
 
-    pub fn next_brightness(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+    pub fn next_animation_speed(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
         self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1], dma1, stdout, gpioa);
     }
 
@@ -58,9 +59,8 @@ impl<'a> Led<'a> {
     }
 
     pub fn get_theme_id(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        // responds with AckConfigCmd with [ThemeId]
-        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8,
-                         &[], dma1, stdout, gpioa);
+        // responds with with [ThemeId]
+        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[], dma1, stdout, gpioa);
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
@@ -95,9 +95,4 @@ pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
     r.LED.serial.tx_interrupt(&mut r.DMA1);
-}
-
-pub fn usart3(_t: &mut Threshold, mut r: super::USART3::Resources) {
-    // not quite sure when and why this interrupt happens
-    debug!(r.STDOUT, "usart3").ok();
 }

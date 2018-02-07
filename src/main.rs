@@ -8,6 +8,7 @@ extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
 extern crate stm32l151;
+extern crate stm32l151_hal as hal;
 
 #[macro_use]
 mod macros;
@@ -26,6 +27,7 @@ mod serial;
 use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
 use stm32l151::{DMA1, GPIOA, GPIOC};
+use hal::rcc::RccExt;
 
 use bluetooth::Bluetooth;
 use keyboard::Keyboard;
@@ -93,10 +95,6 @@ app! {
             path: exti9_5,
             resources: [EXTI],
         },
-        USART3: {
-            path: led::usart3,
-            resources: [STDOUT],
-        },
     }
 }
 
@@ -118,6 +116,8 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let bluetooth_usart = BluetoothUsart::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, &mut d.GPIOA, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
+
+    let mut rcc = d.RCC.constrain();
 
     //let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
