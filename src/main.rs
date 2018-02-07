@@ -23,7 +23,6 @@ mod protocol;
 mod serial;
 //mod usb;
 
-use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
 use stm32l151::{DMA1, GPIOA, GPIOC};
@@ -37,7 +36,6 @@ use led::Led;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
-use protocol::{MsgType, LedOp};
 
 
 app! {
@@ -97,6 +95,7 @@ app! {
         },
         USART3: {
             path: led::usart3,
+            resources: [STDOUT],
         },
     }
 }
@@ -114,15 +113,13 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let led_usart = LedUsart::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
     let led_serial = Serial::new(led_usart, &mut d.DMA1, &mut d.GPIOA, r.LED_BUFFERS);
     let led = Led::new(led_serial, &mut d.GPIOC);
-    // led.on();
+    led.on(&mut d.GPIOC);
 
     let bluetooth_usart = BluetoothUsart::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, &mut d.GPIOA, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
-    /*
-    let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
-    */
+    //let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
     init::LateResources {
         BLUETOOTH: bluetooth,
@@ -135,7 +132,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         DMA1: d.DMA1,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
-        STDOUT: None, //hio::hstdout().ok(), // None
+        STDOUT: None, //hio::hstdout().ok()
     }
 }
 
@@ -164,20 +161,13 @@ fn test_led(led: &mut Led, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, g
         led.on(gpioc);
     }
     if state[2] {
-        led.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                         &[1, 0, 0, 0], dma1, stdout, gpioa);
+        led.next_theme(dma1, stdout, gpioa);
     }
     if state[3] {
-        led.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                         &[0, 1, 0, 0], dma1, stdout, gpioa);
+        led.next_brightness(dma1, stdout, gpioa);
     }
     if state[4] {
-        led.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                         &[0, 0, 1, 0], dma1, stdout, gpioa);
-    }
-    if state[5] {
-        led.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                         &[0, 0, 0, 1], dma1, stdout, gpioa);
+        led.next_animation_speed(dma1, stdout, gpioa);
     }
     if state[15] {
         led.set_theme(0, dma1, stdout, gpioa);
