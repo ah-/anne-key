@@ -54,10 +54,12 @@ impl LedUsart {
         usart.cr3.modify(|_, w| w.dmat().set_bit()
                                  .dmar().set_bit());
         usart.cr1.modify(|_, w| {
-            w.rxneie().set_bit()
+            w.rxneie().clear_bit()
              .re().set_bit()
              .te().set_bit()
              .ue().set_bit()
+             .idleie().clear_bit()
+             .txeie().clear_bit()
         });
 
         dma.cpar3.write(|w| unsafe { w.pa().bits(0x4000_4804) });

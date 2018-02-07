@@ -1,7 +1,7 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOA};
+use stm32l151::{DMA1, GPIOA, GPIOC};
 use super::protocol::{Message, MsgType, LedOp};
 use super::serial::Serial;
 use super::serial::led_usart::LedUsart;
@@ -13,73 +13,42 @@ pub struct Led<'a> {
 }
 
 impl<'a> Led<'a> {
-    pub fn new(serial: Serial<'a, LedUsart>) -> Led {
+    pub fn new(serial: Serial<'a, LedUsart>, gpioc: &mut GPIOC) -> Led<'a> {
+        gpioc.moder.modify(|_, w| unsafe {
+            w.moder15().bits(1)
+        });
+        gpioc.pupdr.modify(|_, w| unsafe {
+            w.pupdr15().bits(0b01)
+        });
+
         Led {
             serial: serial,
         }
     }
 
-    pub fn send_something(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA, state: &KeyState) {
-        if state[0] {
-            // returns AckThemeMode []
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[], dma1, stdout, gpioa);
-        }
-        if state[1] {
-            // returns AckConfigCmd with [ThemeId]
-            self.serial.send(MsgType::Led, LedOp::GetThemeId as u8,
-                             &[0], dma1, stdout, gpioa);
-        }
-        if state[2] {
-            self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                             &[1, 0, 0, 0], dma1, stdout, gpioa);
-        }
-        if state[3] {
-            self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                             &[0, 1, 0, 0], dma1, stdout, gpioa);
-        }
-        if state[4] {
-            self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                             &[0, 0, 1, 0], dma1, stdout, gpioa);
-        }
-        if state[5] {
-            self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8,
-                             &[0, 0, 0, 1], dma1, stdout, gpioa);
-        }
-        if state[15] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[0], dma1, stdout, gpioa);
-        }
-        if state[16] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[1], dma1, stdout, gpioa);
-        }
-        if state[17] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[2], dma1, stdout, gpioa);
-        }
-        if state[18] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[3], dma1, stdout, gpioa);
-        }
-        if state[19] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[14], dma1, stdout, gpioa);
-        }
-        if state[20] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[18], dma1, stdout, gpioa);
-        }
-        if state[21] {
-            self.serial.send(MsgType::Led, LedOp::ThemeMode as u8,
-                             &[17], dma1, stdout, gpioa);
-        }
-        if state[22] {
-            // sends O
-            self.serial.send(MsgType::Led, LedOp::Key as u8,
-                             &[0,0,0,1,0,0,0,0,0], dma1, stdout, gpioa);
-        }
+    pub fn on(&self, gpioc: &mut GPIOC) {
+        gpioc.odr.modify(|_, w| w.odr15().set_bit());
     }
+
+    pub fn off(&self, gpioc: &mut GPIOC) {
+        gpioc.odr.modify(|_, w| w.odr15().clear_bit());
+    }
+
+    pub fn set_theme(&mut self, theme: u8, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme], dma1, stdout, gpioa);
+    }
+
+    pub fn send_keys(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+        self.serial.send(MsgType::Led, LedOp::Key as u8, keys, dma1, stdout, gpioa);
+    }
+
+    pub fn send_music(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+        self.serial.send(MsgType::Led, LedOp::Music as u8, keys, dma1, stdout, gpioa);
+    }
+
+    // returns AckConfigCmd with [ThemeId]
+    //self.serial.send(MsgType::Led, LedOp::GetThemeId as u8,
+                     //&[0], dma1, stdout, gpioa);
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
         match message.msg_type {
@@ -113,4 +82,12 @@ pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
     let stdout: &mut Option<hio::HStdout> = &mut r.STDOUT;
     r.LED.serial.tx_interrupt(&mut r.DMA1);
+}
+
+pub fn usart3() {
+    // not quite sure when and why this interrupt happens
+    match hio::hstdout() {
+        Ok(mut stdout) => {write!(stdout, "usart3").ok();},
+        _ => {}
+    };
 }
