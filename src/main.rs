@@ -7,6 +7,7 @@ extern crate bare_metal;
 extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
+extern crate embedded_hal;
 extern crate stm32l151;
 extern crate stm32l151_hal as hal;
 
@@ -24,14 +25,14 @@ mod protocol;
 mod serial;
 //mod usb;
 
+use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
-use stm32l151::{DMA1, GPIOA, GPIOC};
-use hal::rcc::RccExt;
+use hal::gpio::{GpioExt, Input, Pin, Output};
+use stm32l151::DMA1;
 
 use bluetooth::Bluetooth;
-use keyboard::Keyboard;
-use keyboard::KeyState;
+use keyboard::{Keyboard, KeyState};
 use hidreport::HidReport;
 use led::Led;
 //use usb::Usb;
@@ -44,15 +45,12 @@ app! {
     device: stm32l151,
 
     resources: {
-        static KEYBOARD: Keyboard;
+        static KEYBOARD: Keyboard<Pin<Input>, Pin<Output>>;
         static BLUETOOTH_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
         //static USB: Usb;
-        static GPIOA: stm32l151::GPIOA;
-        static GPIOB: stm32l151::GPIOB;
-        static GPIOC: stm32l151::GPIOC;
         static DMA1: stm32l151::DMA1;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
@@ -67,7 +65,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, DMA1, GPIOA, GPIOB, GPIOC, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
+            resources: [BLUETOOTH, LED, DMA1, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
         },
     /*
         USB_LP: {
@@ -81,11 +79,11 @@ app! {
         },
         DMA1_CHANNEL3: {
             path: led::rx,
-            resources: [LED, DMA1, GPIOA, STDOUT],
+            resources: [LED, DMA1, STDOUT],
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, DMA1, GPIOA, KEYBOARD, STDOUT],
+            resources: [BLUETOOTH, DMA1, KEYBOARD, STDOUT],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
@@ -106,18 +104,42 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     clock::init_clock(&d);
     clock::enable_tick(&mut p.core.SYST, 100_000);
 
-    let keyboard = Keyboard::new(&mut d.GPIOA, &mut d.GPIOB);
+    let gpioa = d.GPIOA.split();
+    let gpiob = d.GPIOB.split();
+    let gpioc = d.GPIOC.split();
 
-    let led_usart = LedUsart::new(d.USART3, &d.DMA1, &mut d.GPIOB, &mut d.RCC);
-    let led_serial = Serial::new(led_usart, &mut d.DMA1, &mut d.GPIOA, r.LED_BUFFERS);
-    let led = Led::new(led_serial, &mut d.GPIOC);
-    led.on(&mut d.GPIOC);
+    let row_pins = [gpiob.pb9.pull_down().downgrade(),
+                    gpiob.pb8.pull_down().downgrade(),
+                    gpiob.pb7.pull_down().downgrade(),
+                    gpiob.pb6.pull_down().downgrade(),
+                    gpioa.pa0.pull_down().downgrade()];
 
-    let bluetooth_usart = BluetoothUsart::new(d.USART2, &d.DMA1, &mut d.GPIOA, &mut d.RCC);
-    let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, &mut d.GPIOA, r.BLUETOOTH_BUFFERS);
+    let column_pins = [gpioa.pa5.into_output().pull_up().downgrade(),
+                       gpioa.pa6.into_output().pull_up().downgrade(),
+                       gpioa.pa7.into_output().pull_up().downgrade(),
+                       gpiob.pb0.into_output().pull_up().downgrade(),
+                       gpiob.pb1.into_output().pull_up().downgrade(),
+                       gpiob.pb12.into_output().pull_up().downgrade(),
+                       gpiob.pb13.into_output().pull_up().downgrade(),
+                       gpiob.pb14.into_output().pull_up().downgrade(),
+                       gpioa.pa8.into_output().pull_up().downgrade(),
+                       gpioa.pa9.into_output().pull_up().downgrade(),
+                       gpioa.pa15.into_output().pull_up().downgrade(),
+                       gpiob.pb3.into_output().pull_up().downgrade(),
+                       gpiob.pb4.into_output().pull_up().downgrade(),
+                       gpiob.pb5.into_output().pull_up().downgrade()];
+
+    let keyboard = Keyboard::<Pin<Input>, Pin<Output>>::new(row_pins, column_pins);
+
+    let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, &d.DMA1, &mut d.RCC);
+    let led_serial = Serial::new(led_usart, &mut d.DMA1, r.LED_BUFFERS);
+    let mut led = Led::new(led_serial, gpioc.pc15);
+
+    let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, &mut d.DMA1, &mut d.RCC);
+    let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
-    let mut rcc = d.RCC.constrain();
+    led.on();
 
     //let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
@@ -126,9 +148,6 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         KEYBOARD: keyboard,
         LED: led,
         //USB: usb,
-        GPIOA: d.GPIOA,
-        GPIOB: d.GPIOB,
-        GPIOC: d.GPIOC,
         DMA1: d.DMA1,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
@@ -143,59 +162,59 @@ fn idle() -> ! {
 }
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
-    r.KEYBOARD.sample(&mut r.GPIOA, &mut r.GPIOB, &r.SYST);
+    r.KEYBOARD.sample(&r.SYST);
     let pressed = r.KEYBOARD.state.into_iter().filter(|s| **s).count();
     if pressed != *r.NUM_PRESSED_KEYS {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
-        r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA);
-        test_led(&mut r.LED, &mut r.DMA1, &mut r.STDOUT, &mut r.GPIOA, &mut r.GPIOC, &r.KEYBOARD.state);
+        r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT);
+        test_led(&mut r.LED, &mut r.DMA1, &mut r.STDOUT, &r.KEYBOARD.state);
     }
 }
 
-fn test_led(led: &mut Led, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA, gpioc: &mut GPIOC, state: &KeyState) {
+fn test_led(led: &mut Led, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, state: &KeyState) {
     if state[0] {
-        led.off(gpioc);
+        led.off();
     }
     if state[1] {
-        led.on(gpioc);
+        led.on();
     }
     if state[2] {
-        led.next_theme(dma1, stdout, gpioa);
+        led.next_theme(dma1, stdout);
     }
     if state[3] {
-        led.next_brightness(dma1, stdout, gpioa);
+        led.next_brightness(dma1, stdout);
     }
     if state[4] {
-        led.next_animation_speed(dma1, stdout, gpioa);
+        led.next_animation_speed(dma1, stdout);
     }
     if state[15] {
-        led.set_theme(0, dma1, stdout, gpioa);
+        led.set_theme(0, dma1, stdout);
     }
     if state[16] {
-        led.set_theme(1, dma1, stdout, gpioa);
+        led.set_theme(2, dma1, stdout);
     }
     if state[17] {
-        led.set_theme(2, dma1, stdout, gpioa);
+        led.set_theme(2, dma1, stdout);
     }
     if state[18] {
-        led.set_theme(3, dma1, stdout, gpioa);
+        led.set_theme(3, dma1, stdout);
     }
     if state[19] {
-        led.set_theme(14, dma1, stdout, gpioa);
+        led.set_theme(14, dma1, stdout);
     }
     if state[20] {
-        led.set_theme(18, dma1, stdout, gpioa);
+        led.set_theme(18, dma1, stdout);
     }
     if state[21] {
-        led.set_theme(17, dma1, stdout, gpioa);
+        led.set_theme(17, dma1, stdout);
     }
     if state[22] {
         // sends O
-        led.send_keys(&[0,0,0,1,0,0,0,0,0], dma1, stdout, gpioa);
+        led.send_keys(&[0,0,0,1,0,0,0,0,0], dma1, stdout);
     }
     if state[23] {
-        led.send_music(&[1,2,3,4,5,6,7,8,9], dma1, stdout, gpioa);
+        led.send_music(&[1,2,3,4,5,6,7,8,9], dma1, stdout);
     }
 }
 

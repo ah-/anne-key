@@ -1,7 +1,11 @@
-use stm32l151::{DMA1, GPIOA, GPIOB, RCC, USART3};
+use stm32l151::{DMA1, RCC, USART3};
+use hal::gpio::{Alternate, Input};
+use hal::gpio::gpiob::{PB10, PB11};
 use super::DmaUsart;
 
 pub struct LedUsart {
+    _pb10: PB10<Alternate>,
+    _pb11: PB11<Alternate>,
     _usart: USART3
 }
 
@@ -10,7 +14,7 @@ impl DmaUsart for LedUsart {
         dma.isr.read().tcif3().bit_is_set()
     }
 
-    fn receive(&self, dma: &mut DMA1, _gpioa: &mut GPIOA, length: u16, buffer: u32) {
+    fn receive(&mut self, dma: &mut DMA1, length: u16, buffer: u32) {
         dma.ifcr.write(|w| w.cgif3().set_bit());
         dma.ccr3.modify(|_, w| { w.en().clear_bit() });
         dma.cmar3.write(|w| unsafe { w.ma().bits(buffer) });
@@ -22,7 +26,7 @@ impl DmaUsart for LedUsart {
         dma.cndtr2.read().ndt().bits() == 0
     }
 
-    fn send(&self, dma: &mut DMA1, _gpioa: &mut GPIOA, buffer: u32, length: u16) {
+    fn send(&mut self, dma: &mut DMA1, buffer: u32, length: u16) {
         dma.ccr2.modify(|_, w| w.en().clear_bit());
         dma.cmar2.write(|w| unsafe { w.ma().bits(buffer) });
         unsafe { dma.cndtr2.modify(|_, w| w.ndt().bits(length)) };
@@ -36,16 +40,10 @@ impl DmaUsart for LedUsart {
 }
 
 impl LedUsart {
-    pub fn new(usart: USART3, dma: &DMA1, gpiob: &mut GPIOB, rcc: &mut RCC) -> LedUsart {
-        gpiob.moder.modify(|_, w| unsafe {
-            w.moder10().bits(0b10)
-             .moder11().bits(0b10)
-        });
-        gpiob.pupdr.modify(|_, w| unsafe {
-            w.pupdr10().bits(0b01)
-             .pupdr11().bits(0b01)
-        });
-        gpiob.afrh.modify(|_, w| unsafe { w.afrh10().bits(7).afrh11().bits(7) });
+    pub fn new(usart: USART3, pb10: PB10<Input>, pb11: PB11<Input>,
+               dma: &DMA1, rcc: &mut RCC) -> LedUsart {
+        let pb10 = pb10.into_alternate(7).pull_up();
+        let pb11 = pb11.into_alternate(7).pull_up();
 
         rcc.apb1enr.modify(|_, w| w.usart3en().set_bit());
         rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
@@ -86,6 +84,6 @@ impl LedUsart {
              .en().clear_bit()
         });
 
-        LedUsart { _usart: usart }
+        LedUsart { _pb10: pb10, _pb11: pb11, _usart: usart }
     }
 }

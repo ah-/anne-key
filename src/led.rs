@@ -1,7 +1,10 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
+use embedded_hal::digital::OutputPin;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOA, GPIOC};
+use stm32l151::DMA1;
+use hal::gpio::{Input, Output};
+use hal::gpio::gpioc::PC15;
 use super::protocol::{Message, MsgType, LedOp};
 use super::serial::Serial;
 use super::serial::led_usart::LedUsart;
@@ -9,58 +12,53 @@ use super::serial::led_usart::LedUsart;
 
 pub struct Led<'a> {
     pub serial: Serial<'a, LedUsart>,
+    pub pc15: PC15<Output>,
 }
 
 impl<'a> Led<'a> {
-    pub fn new(serial: Serial<'a, LedUsart>, gpioc: &mut GPIOC) -> Led<'a> {
-        gpioc.moder.modify(|_, w| unsafe {
-            w.moder15().bits(1)
-        });
-        gpioc.pupdr.modify(|_, w| unsafe {
-            w.pupdr15().bits(0b01)
-        });
-
+    pub fn new(serial: Serial<'a, LedUsart>, pc15: PC15<Input>) -> Led<'a> {
         Led {
             serial: serial,
+            pc15: pc15.into_output().pull_up(),
         }
     }
 
-    pub fn on(&self, gpioc: &mut GPIOC) {
-        gpioc.odr.modify(|_, w| w.odr15().set_bit());
+    pub fn on(&mut self) {
+        self.pc15.set_high();
     }
 
-    pub fn off(&self, gpioc: &mut GPIOC) {
-        gpioc.odr.modify(|_, w| w.odr15().clear_bit());
+    pub fn off(&mut self) {
+        self.pc15.set_low();
     }
 
     // next_* cycles through themes/brightness/speed
-    pub fn next_theme(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0], dma1, stdout, gpioa);
+    pub fn next_theme(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0], dma1, stdout);
     }
 
-    pub fn next_brightness(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0], dma1, stdout, gpioa);
+    pub fn next_brightness(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0], dma1, stdout);
     }
 
-    pub fn next_animation_speed(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1], dma1, stdout, gpioa);
+    pub fn next_animation_speed(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1], dma1, stdout);
     }
 
-    pub fn set_theme(&mut self, theme: u8, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme], dma1, stdout, gpioa);
+    pub fn set_theme(&mut self, theme: u8, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme], dma1, stdout);
     }
 
-    pub fn send_keys(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::Key as u8, keys, dma1, stdout, gpioa);
+    pub fn send_keys(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::Key as u8, keys, dma1, stdout);
     }
 
-    pub fn send_music(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
-        self.serial.send(MsgType::Led, LedOp::Music as u8, keys, dma1, stdout, gpioa);
+    pub fn send_music(&mut self, keys: &[u8], dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+        self.serial.send(MsgType::Led, LedOp::Music as u8, keys, dma1, stdout);
     }
 
-    pub fn get_theme_id(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+    pub fn get_theme_id(&mut self, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
         // responds with with [ThemeId]
-        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[], dma1, stdout, gpioa);
+        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[], dma1, stdout);
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
@@ -90,7 +88,7 @@ impl<'a> Led<'a> {
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
     let stdout: &mut Option<hio::HStdout> = &mut r.STDOUT;
     let callback = |msg: &Message| Led::receive(msg, stdout);
-    r.LED.serial.receive(&mut r.DMA1, &mut r.GPIOA, callback);
+    r.LED.serial.receive(&mut r.DMA1, callback);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {

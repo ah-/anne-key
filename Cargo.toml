@@ -22,6 +22,10 @@ default = []
 features = ["abort-on-panic"]
 version = "0.3.12"
 
+[dependencies.embedded-hal]
+features = ["unproven"]
+version = "0.1.0"
+
 [dependencies.stm32l151]
 features = ["rt"]
 path = "../../stm32l151"

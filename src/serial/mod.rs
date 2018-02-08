@@ -3,7 +3,7 @@ pub mod led_usart;
 
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
-use stm32l151::{DMA1, GPIOA};
+use stm32l151::DMA1;
 use super::protocol::{Message, MsgType};
 
 
@@ -19,9 +19,9 @@ pub struct Serial<'a, USART>
 pub trait DmaUsart {
     // TODO: naming of these isn't quite perfect
     fn is_receive_pending(&self, dma: &DMA1) -> bool;
-    fn receive(&self, dma: &mut DMA1, gpioa: &mut GPIOA, length: u16, buffer: u32);
+    fn receive(&mut self, dma: &mut DMA1, length: u16, buffer: u32);
     fn is_send_ready(&self, dma: &DMA1) -> bool;
-    fn send(&self, dma: &mut DMA1, gpioa: &mut GPIOA, buffer: u32, len: u16);
+    fn send(&mut self, dma: &mut DMA1, buffer: u32, len: u16);
     fn tx_interrupt(&self, dma: &mut DMA1);
 }
 
@@ -35,12 +35,12 @@ const HEADER_SIZE: u16 = 2;
 impl<'a, USART> Serial<'a, USART>
     where USART: DmaUsart
 {
-    pub fn new(usart: USART, dma: &mut DMA1, gpioa: &mut GPIOA,
+    pub fn new(mut usart: USART, dma: &mut DMA1,
                buffers: &'a mut[[u8; 0x10]; 2]) -> Serial<'a, USART> {
         let (send_buffer, receive_buffer) = buffers.split_at_mut(1);
         let receive_ptr = receive_buffer[0].as_mut_ptr() as u32;
 
-        usart.receive(dma, gpioa, HEADER_SIZE, receive_ptr);
+        usart.receive(dma, HEADER_SIZE, receive_ptr);
 
         Serial {
             usart: usart,
@@ -50,14 +50,14 @@ impl<'a, USART> Serial<'a, USART>
         }
     }
 
-    pub fn receive<F>(&mut self, dma: &mut DMA1, gpioa: &mut GPIOA, callback: F)
+    pub fn receive<F>(&mut self, dma: &mut DMA1, callback: F)
         where F: FnOnce(&Message)
     {
         if self.usart.is_receive_pending(dma) {
             match self.receive_stage {
                 ReceiveStage::Header => {
                     self.receive_stage = ReceiveStage::Body;
-                    self.usart.receive(dma, gpioa, u16::from(self.receive_buffer[1]),
+                    self.usart.receive(dma, u16::from(self.receive_buffer[1]),
                         self.receive_buffer.as_mut_ptr() as u32 + u32::from(HEADER_SIZE));
                 }
                 ReceiveStage::Body => {
@@ -79,7 +79,7 @@ impl<'a, USART> Serial<'a, USART>
                         }
                     }
 
-                    self.usart.receive(dma, gpioa, HEADER_SIZE, self.receive_buffer.as_mut_ptr() as u32);
+                    self.usart.receive(dma, HEADER_SIZE, self.receive_buffer.as_mut_ptr() as u32);
                 }
             }
         }
@@ -91,15 +91,14 @@ impl<'a, USART> Serial<'a, USART>
         operation: u8, // TODO: make this typed?
         data: &[u8],
         dma: &mut DMA1,
-        stdout: &mut Option<hio::HStdout>,
-        mut gpioa: &mut GPIOA) {
+        stdout: &mut Option<hio::HStdout>) {
         if self.usart.is_send_ready(dma) {
             self.send_buffer[0] = message_type as u8;
             self.send_buffer[1] = 1 + data.len() as u8;
             self.send_buffer[2] = operation;
             self.send_buffer[3..3 + data.len()].clone_from_slice(data);
 
-            self.usart.send(dma, &mut gpioa, self.send_buffer.as_mut_ptr() as u32, 3 + data.len() as u16);
+            self.usart.send(dma, self.send_buffer.as_mut_ptr() as u32, 3 + data.len() as u16);
             self.receive_stage = ReceiveStage::Header;
         } else {
             // TODO: return an error instead

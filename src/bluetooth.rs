@@ -3,7 +3,7 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::{DMA1, GPIOA};
+use stm32l151::DMA1;
 use super::hidreport::HidReport;
 use super::protocol::{Message, MsgType, BleOp, KeyboardOp};
 use super::serial::Serial;
@@ -22,9 +22,9 @@ impl<'a> Bluetooth<'a> {
         }
     }
 
-    pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, gpioa: &mut GPIOA) {
+    pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
         self.serial.send(MsgType::Keyboard, KeyboardOp::KeyReport as u8,
-                         report.as_bytes(), dma1, stdout, gpioa);
+                         report.as_bytes(), dma1, stdout);
     }
 
     pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
@@ -54,7 +54,7 @@ impl<'a> Bluetooth<'a> {
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
     let stdout = &mut r.STDOUT;
     let callback = |msg: &Message| Bluetooth::receive(msg, stdout);
-    r.BLUETOOTH.serial.receive(&mut r.DMA1, &mut r.GPIOA, callback);
+    r.BLUETOOTH.serial.receive(&mut r.DMA1, callback);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {
