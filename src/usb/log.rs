@@ -4,38 +4,40 @@ extern crate stm32l151;
 
 use super::pma::PMA;
 
+const SIZE: usize = 80;
+
 pub struct Log {
     p: usize,
-    d: [u32; 100],
-    i: [u32; 100],
-    r: [u32; 100],
-    v: [u32; 100],
-    rxc: [u16; 100],
-    rxv: [u16; 100],
-    rxv2: [u16; 100],
-    rxv3: [u16; 100],
-    rxv4: [u16; 100],
-    txc: [u16; 100],
-    txv: [u16; 100],
-    addr: [u16; 100],
+    d: [u32; SIZE],
+    i: [u32; SIZE],
+    r: [u32; SIZE],
+    v: [u32; SIZE],
+    rxc: [u16; SIZE],
+    rxv: [u16; SIZE],
+    rxv2: [u16; SIZE],
+    rxv3: [u16; SIZE],
+    rxv4: [u16; SIZE],
+    txc: [u16; SIZE],
+    txv: [u16; SIZE],
+    addr: [u16; SIZE],
 }
 
 impl Log {
     pub const fn new() -> Log {
         Log {
             p: 0,
-            d: [0; 100],
-            i: [0; 100],
-            r: [0; 100],
-            v: [0; 100],
-            rxc: [0; 100],
-            rxv: [0; 100],
-            rxv2: [0; 100],
-            rxv3: [0; 100],
-            rxv4: [0; 100],
-            txc: [0; 100],
-            txv: [0; 100],
-            addr: [0; 100],
+            d: [0; SIZE],
+            i: [0; SIZE],
+            r: [0; SIZE],
+            v: [0; SIZE],
+            rxc: [0; SIZE],
+            rxv: [0; SIZE],
+            rxv2: [0; SIZE],
+            rxv3: [0; SIZE],
+            rxv4: [0; SIZE],
+            txc: [0; SIZE],
+            txv: [0; SIZE],
+            addr: [0; SIZE],
         }
     }
 
@@ -45,7 +47,7 @@ impl Log {
 
     pub fn save(&mut self, usb: &mut stm32l151::USB, d: u32) {
         unsafe {
-            if self.p < 100 {
+            if self.p < SIZE {
                 self.d[self.p] = d;
                 self.v[self.p] = usb.usb_ep0r.read().bits();
                 self.r[self.p] = usb.usb_cntr.read().bits();

@@ -85,8 +85,7 @@ impl<'a> Led<'a> {
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
-    let callback = |msg: &Message| Led::receive(msg);
-    r.LED.serial.receive(callback);
+    r.LED.serial.receive(Led::receive);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {

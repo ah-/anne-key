@@ -22,7 +22,8 @@ impl<'a> Bluetooth<'a> {
     }
 
     pub fn send_report(&mut self, report: &HidReport) {
-        self.serial.send(MsgType::Keyboard, KeyboardOp::KeyReport as u8,
+        self.serial.send(MsgType::Keyboard,
+                         KeyboardOp::KeyReport as u8,
                          report.as_bytes());
     }
 
@@ -51,8 +52,7 @@ impl<'a> Bluetooth<'a> {
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    let callback = |msg: &Message| Bluetooth::receive(msg);
-    r.BLUETOOTH.serial.receive(callback);
+    r.BLUETOOTH.serial.receive(Bluetooth::receive);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {

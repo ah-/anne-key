@@ -4,6 +4,7 @@ use core::ops::Deref;
 use self::vcell::VolatileCell;
 use bare_metal::Peripheral;
 
+// TODO: make this take-able? or at least move into the main usb part
 pub const PMA: Peripheral<PMA> = unsafe { Peripheral::new(0x4000_6000) };
 //const BTABLE: usize = 0;
 
@@ -34,6 +35,7 @@ pub struct PMA_Area {
 }
 
 impl PMA_Area {
+    // TODO: use operator overloading and just impl [] access, without double-counting
     pub fn get_u16(&self, offset: usize) -> u16 {
         assert!((offset & 0x01) == 0);
         self.words[offset].get()
@@ -43,26 +45,6 @@ impl PMA_Area {
         assert!((offset & 0x01) == 0);
         self.words[offset].set(val);
     }
-
-    /*
-    pub fn get_rxcount(&self, ep: usize) -> u16 {
-        self.get_u16(BTABLE + (ep * 8) + 6) & 0x3ff
-    }
-
-    pub fn set_rxcount(&self, ep: usize, val: u16) {
-        assert!(val <= 1024);
-        let rval: u16 = {
-            if val > 62 {
-                assert!((val & 0x1f) == 0);
-                (((val >> 5) - 1) << 10) | 0x8000
-            } else {
-                assert!((val & 1) == 0);
-                (val >> 1) << 10
-            }
-        };
-        self.set_u16(BTABLE + (ep * 8) + 6, rval)
-    }
-    */
 
     pub fn write_buffer_u8(&self, base: usize, buf: &[u8]) {
         let mut last: u16 = 0;

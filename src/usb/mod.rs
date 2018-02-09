@@ -20,13 +20,13 @@ const MAX_PACKET_SIZE: u32 = 64;
 
 pub struct Usb {
     usb: stm32l151::USB,
-    log: self::log::Log,
+    log: &'static mut self::log::Log,
     nreset: usize,
     pending_daddr: u8,
 }
 
 impl Usb {
-    pub fn new(usb: stm32l151::USB, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG) -> Usb {
+    pub fn new(usb: stm32l151::USB, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG, log: &'static mut self::log::Log) -> Usb {
         unsafe { (*(PMA.get())).zero() };
 
         rcc.apb1enr.modify(|_, w| w.usben().set_bit());
@@ -53,13 +53,15 @@ impl Usb {
 
         Usb {
             usb: usb,
-            log: self::log::Log::new(),
+            log: log,
             nreset: 0,
             pending_daddr: 0,
         }
     }
 
     pub fn interrupt(&mut self) {
+        //debug!("\n{:x}\n", self.usb.istr.read().bits()).ok();
+
         if self.usb.istr.read().ctr().bit_is_set() {
             while self.usb.istr.read().ctr().bit_is_set() {
                 let endpoint = self.usb.istr.read().ep_id().bits();
@@ -81,14 +83,6 @@ impl Usb {
         if self.usb.istr.read().reset().bit_is_set() {
             self.reset();
         }
-
-        /*
-        } else {
-            write!(r.STDOUT, "other").unwrap();
-            write!(r.STDOUT, "\n{:x}\n", istr.bits()).unwrap();
-            panic!()
-        }
-        */
 
         // TODO: clear other interrupt bits in ifs?
         //r.USB.istr.modify(|_, w|
@@ -247,6 +241,7 @@ impl Usb {
                                         descriptors::HID_REPORT_DESC.len() as u16,
                                     ),
                                 );
+                                // TODO: ep1?
                                 self.usb.set_ep_tx_status_valid_dtog();
                             }
                             _ => panic!(),
@@ -280,5 +275,5 @@ impl Usb {
 }
 
 pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
-    //r.USB.interrupt()
+    r.USB.interrupt()
 }
