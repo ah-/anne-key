@@ -59,7 +59,7 @@ impl Usb {
         }
     }
 
-    pub fn interrupt(&mut self, stdout: &mut Option<hio::HStdout>) {
+    pub fn interrupt(&mut self) {
         if self.usb.istr.read().ctr().bit_is_set() {
             while self.usb.istr.read().ctr().bit_is_set() {
                 let endpoint = self.usb.istr.read().ep_id().bits();
@@ -79,7 +79,7 @@ impl Usb {
         }
 
         if self.usb.istr.read().reset().bit_is_set() {
-            self.reset(stdout);
+            self.reset();
         }
 
         /*
@@ -98,7 +98,7 @@ impl Usb {
         //);
     }
 
-    fn reset(&mut self, stdout: &mut Option<hio::HStdout>) {
+    fn reset(&mut self) {
         self.usb.istr.modify(|_, w| w.reset().clear_bit());
 
         let pma = PMA.get();
@@ -139,7 +139,7 @@ impl Usb {
 
         self.log.reset();
         if self.nreset > 1 {
-            debug!(stdout, "r").unwrap();
+            debug!("r").unwrap();
         }
         self.nreset += 1;
     }
@@ -280,6 +280,5 @@ impl Usb {
 }
 
 pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
-    let stdout = &mut r.STDOUT;
-    //r.USB.interrupt(stdout)
+    //r.USB.interrupt()
 }

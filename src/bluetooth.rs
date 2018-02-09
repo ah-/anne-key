@@ -22,38 +22,37 @@ impl<'a> Bluetooth<'a> {
         }
     }
 
-    pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>) {
+    pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1) {
         self.serial.send(MsgType::Keyboard, KeyboardOp::KeyReport as u8,
-                         report.as_bytes(), dma1, stdout);
+                         report.as_bytes(), dma1);
     }
 
-    pub fn receive(message: &Message, stdout: &mut Option<hio::HStdout>) {
+    pub fn receive(message: &Message) {
         match message.msg_type {
             //(2, 1) => {
                 // SYSTEM Get ID
                 //let data = &[4, 1, 0, 1, 2, 3, 4][..];
-                //self.send(MsgType::System, 129, &data, dma, stdout, gpioa);
+                //self.send(MsgType::System, 129, &data, dma, gpioa);
                 //}
             MsgType::Ble => {
                 match BleOp::from(message.operation)  {
                     BleOp::AckHostListQuery => {
-                        //debug!(stdout, "bt host list: {:?}", message.data).ok();
+                        //debug!("bt host list: {:?}", message.data).ok();
                     }
                     _ => {
-                        debug!(stdout, "msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                        debug!("msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
                     }
                 }
             },
             _ => {
-                debug!(stdout, "msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                debug!("msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
             }
         }
     }
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    let stdout = &mut r.STDOUT;
-    let callback = |msg: &Message| Bluetooth::receive(msg, stdout);
+    let callback = |msg: &Message| Bluetooth::receive(msg);
     r.BLUETOOTH.serial.receive(&mut r.DMA1, callback);
 }
 

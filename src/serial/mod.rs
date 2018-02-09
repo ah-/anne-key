@@ -90,8 +90,7 @@ impl<'a, USART> Serial<'a, USART>
         message_type: MsgType,
         operation: u8, // TODO: make this typed?
         data: &[u8],
-        dma: &mut DMA1,
-        stdout: &mut Option<hio::HStdout>) {
+        dma: &mut DMA1) {
         if self.usart.is_send_ready(dma) {
             self.send_buffer[0] = message_type as u8;
             self.send_buffer[1] = 1 + data.len() as u8;
@@ -104,7 +103,7 @@ impl<'a, USART> Serial<'a, USART>
             // TODO: return an error instead
             // saying we're busy
             // using https://docs.rs/nb/0.1.1/nb/
-            debug!(stdout, "tx busy").ok();
+            debug!("tx busy").ok();
         }
     }
 

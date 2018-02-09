@@ -54,7 +54,6 @@ app! {
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
         static NUM_PRESSED_KEYS: usize = 0;
-        static STDOUT: Option<hio::HStdout>;
     },
 
     init: {
@@ -64,29 +63,29 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, DMA1, KEYBOARD, NUM_PRESSED_KEYS, STDOUT, SYST],
+            resources: [BLUETOOTH, LED, DMA1, KEYBOARD, NUM_PRESSED_KEYS, SYST],
         },
     /*
         USB_LP: {
             path: usb::usb_lp,
-            resources: [STDOUT, USB],
+            resources: [USB],
         },
     */
         DMA1_CHANNEL2: {
             path: led::tx,
-            resources: [LED, DMA1, STDOUT],
+            resources: [LED, DMA1],
         },
         DMA1_CHANNEL3: {
             path: led::rx,
-            resources: [LED, DMA1, STDOUT],
+            resources: [LED, DMA1],
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, DMA1, KEYBOARD, STDOUT],
+            resources: [BLUETOOTH, DMA1, KEYBOARD],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
-            resources: [BLUETOOTH, DMA1, STDOUT],
+            resources: [BLUETOOTH, DMA1],
         },
         EXTI9_5: {
             path: exti9_5,
@@ -150,7 +149,6 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         DMA1: d.DMA1,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
-        STDOUT: None, //hio::hstdout().ok()
     }
 }
 
@@ -166,12 +164,12 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     if pressed != *r.NUM_PRESSED_KEYS {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
-        r.BLUETOOTH.send_report(&report, &mut r.DMA1, &mut r.STDOUT);
-        test_led(&mut r.LED, &mut r.DMA1, &mut r.STDOUT, &r.KEYBOARD.state);
+        r.BLUETOOTH.send_report(&report, &mut r.DMA1);
+        test_led(&mut r.LED, &mut r.DMA1, &r.KEYBOARD.state);
     }
 }
 
-fn test_led(led: &mut Led, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, state: &KeyState) {
+fn test_led(led: &mut Led, dma1: &mut DMA1, state: &KeyState) {
     if state[0] {
         led.off();
     }
@@ -179,48 +177,47 @@ fn test_led(led: &mut Led, dma1: &mut DMA1, stdout: &mut Option<hio::HStdout>, s
         led.on();
     }
     if state[2] {
-        led.next_theme(dma1, stdout);
+        led.next_theme(dma1);
     }
     if state[3] {
-        led.next_brightness(dma1, stdout);
+        led.next_brightness(dma1);
     }
     if state[4] {
-        led.next_animation_speed(dma1, stdout);
+        led.next_animation_speed(dma1);
     }
     if state[15] {
-        led.set_theme(0, dma1, stdout);
+        led.set_theme(0, dma1);
     }
     if state[16] {
-        led.set_theme(2, dma1, stdout);
+        led.set_theme(2, dma1);
     }
     if state[17] {
-        led.set_theme(2, dma1, stdout);
+        led.set_theme(2, dma1);
     }
     if state[18] {
-        led.set_theme(3, dma1, stdout);
+        led.set_theme(3, dma1);
     }
     if state[19] {
-        led.set_theme(14, dma1, stdout);
+        led.set_theme(14, dma1);
     }
     if state[20] {
-        led.set_theme(18, dma1, stdout);
+        led.set_theme(18, dma1);
     }
     if state[21] {
-        led.set_theme(17, dma1, stdout);
+        led.set_theme(17, dma1);
     }
     if state[22] {
         // sends O
-        led.send_keys(&[0,0,0,1,0,0,0,0,0], dma1, stdout);
+        led.send_keys(&[0,0,0,1,0,0,0,0,0], dma1);
     }
     if state[23] {
-        led.send_music(&[1,2,3,4,5,6,7,8,9], dma1, stdout);
+        led.send_music(&[1,2,3,4,5,6,7,8,9], dma1);
     }
 }
 
 fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
     // this (plus other exti) are key presses,
     // maybe use them instead of timer based scanning?
-    // write!(hio::hstdout().unwrap(), "EXTI9_5").ok();
 
     // maybe only clear set bits? or ones from 9-5?
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
