@@ -25,10 +25,9 @@ mod protocol;
 mod serial;
 //mod usb;
 
-use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
+use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
-use stm32l151::DMA1;
 
 use bluetooth::Bluetooth;
 use keyboard::{Keyboard, KeyState};
@@ -50,7 +49,6 @@ app! {
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
         //static USB: Usb;
-        static DMA1: stm32l151::DMA1;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
         static NUM_PRESSED_KEYS: usize = 0;
@@ -63,7 +61,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, DMA1, KEYBOARD, NUM_PRESSED_KEYS, SYST],
+            resources: [BLUETOOTH, LED, KEYBOARD, NUM_PRESSED_KEYS, SYST],
         },
     /*
         USB_LP: {
@@ -73,19 +71,19 @@ app! {
     */
         DMA1_CHANNEL2: {
             path: led::tx,
-            resources: [LED, DMA1],
+            resources: [LED],
         },
         DMA1_CHANNEL3: {
             path: led::rx,
-            resources: [LED, DMA1],
+            resources: [LED],
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, DMA1, KEYBOARD],
+            resources: [BLUETOOTH, KEYBOARD],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
-            resources: [BLUETOOTH, DMA1],
+            resources: [BLUETOOTH],
         },
         EXTI9_5: {
             path: exti9_5,
@@ -102,6 +100,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     clock::init_clock(&d);
     clock::enable_tick(&mut p.core.SYST, 100_000);
 
+    let dma = d.DMA1.split();
     let gpioa = d.GPIOA.split();
     let gpiob = d.GPIOB.split();
     let gpioc = d.GPIOC.split();
@@ -129,12 +128,12 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
 
     let keyboard = Keyboard::new(row_pins, column_pins);
 
-    let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, &d.DMA1, &mut d.RCC);
-    let led_serial = Serial::new(led_usart, &mut d.DMA1, r.LED_BUFFERS);
+    let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, dma.3, dma.2, &mut d.RCC);
+    let led_serial = Serial::new(led_usart, r.LED_BUFFERS);
     let mut led = Led::new(led_serial, gpioc.pc15);
 
-    let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, &mut d.DMA1, &mut d.RCC);
-    let bluetooth_serial = Serial::new(bluetooth_usart, &mut d.DMA1, r.BLUETOOTH_BUFFERS);
+    let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC);
+    let bluetooth_serial = Serial::new(bluetooth_usart, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
     led.on();
@@ -146,7 +145,6 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         KEYBOARD: keyboard,
         LED: led,
         //USB: usb,
-        DMA1: d.DMA1,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
     }
@@ -164,12 +162,12 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     if pressed != *r.NUM_PRESSED_KEYS {
         *r.NUM_PRESSED_KEYS = pressed;
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
-        r.BLUETOOTH.send_report(&report, &mut r.DMA1);
-        test_led(&mut r.LED, &mut r.DMA1, &r.KEYBOARD.state);
+        r.BLUETOOTH.send_report(&report);
+        test_led(&mut r.LED, &r.KEYBOARD.state);
     }
 }
 
-fn test_led(led: &mut Led, dma1: &mut DMA1, state: &KeyState) {
+fn test_led(led: &mut Led, state: &KeyState) {
     if state[0] {
         led.off();
     }
@@ -177,41 +175,41 @@ fn test_led(led: &mut Led, dma1: &mut DMA1, state: &KeyState) {
         led.on();
     }
     if state[2] {
-        led.next_theme(dma1);
+        led.next_theme();
     }
     if state[3] {
-        led.next_brightness(dma1);
+        led.next_brightness();
     }
     if state[4] {
-        led.next_animation_speed(dma1);
+        led.next_animation_speed();
     }
     if state[15] {
-        led.set_theme(0, dma1);
+        led.set_theme(0);
     }
     if state[16] {
-        led.set_theme(2, dma1);
+        led.set_theme(1);
     }
     if state[17] {
-        led.set_theme(2, dma1);
+        led.set_theme(2);
     }
     if state[18] {
-        led.set_theme(3, dma1);
+        led.set_theme(3);
     }
     if state[19] {
-        led.set_theme(14, dma1);
+        led.set_theme(14);
     }
     if state[20] {
-        led.set_theme(18, dma1);
+        led.set_theme(17);
     }
     if state[21] {
-        led.set_theme(17, dma1);
+        led.set_theme(18);
     }
     if state[22] {
         // sends O
-        led.send_keys(&[0,0,0,1,0,0,0,0,0], dma1);
+        led.send_keys(&[0,0,0,1,0,0,0,0,0]);
     }
     if state[23] {
-        led.send_music(&[1,2,3,4,5,6,7,8,9], dma1);
+        led.send_music(&[1,2,3,4,5,6,7,8,9]);
     }
 }
 

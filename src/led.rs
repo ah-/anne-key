@@ -2,7 +2,6 @@ use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use embedded_hal::digital::OutputPin;
 use rtfm::Threshold;
-use stm32l151::DMA1;
 use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
 use super::protocol::{Message, MsgType, LedOp};
@@ -32,33 +31,33 @@ impl<'a> Led<'a> {
     }
 
     // next_* cycles through themes/brightness/speed
-    pub fn next_theme(&mut self, dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0], dma1);
+    pub fn next_theme(&mut self) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0]);
     }
 
-    pub fn next_brightness(&mut self, dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0], dma1);
+    pub fn next_brightness(&mut self) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0]);
     }
 
-    pub fn next_animation_speed(&mut self, dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1], dma1);
+    pub fn next_animation_speed(&mut self) {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1]);
     }
 
-    pub fn set_theme(&mut self, theme: u8, dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme], dma1);
+    pub fn set_theme(&mut self, theme: u8) {
+        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme]);
     }
 
-    pub fn send_keys(&mut self, keys: &[u8], dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::Key as u8, keys, dma1);
+    pub fn send_keys(&mut self, keys: &[u8]) {
+        self.serial.send(MsgType::Led, LedOp::Key as u8, keys);
     }
 
-    pub fn send_music(&mut self, keys: &[u8], dma1: &mut DMA1) {
-        self.serial.send(MsgType::Led, LedOp::Music as u8, keys, dma1);
+    pub fn send_music(&mut self, keys: &[u8]) {
+        self.serial.send(MsgType::Led, LedOp::Music as u8, keys);
     }
 
-    pub fn get_theme_id(&mut self, dma1: &mut DMA1) {
+    pub fn get_theme_id(&mut self) {
         // responds with with [ThemeId]
-        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[], dma1);
+        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[]);
     }
 
     pub fn receive(message: &Message) {
@@ -87,9 +86,9 @@ impl<'a> Led<'a> {
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
     let callback = |msg: &Message| Led::receive(msg);
-    r.LED.serial.receive(&mut r.DMA1, callback);
+    r.LED.serial.receive(callback);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
-    r.LED.serial.tx_interrupt(&mut r.DMA1);
+    r.LED.serial.tx_interrupt();
 }

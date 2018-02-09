@@ -3,7 +3,6 @@
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::Threshold;
-use stm32l151::DMA1;
 use super::hidreport::HidReport;
 use super::protocol::{Message, MsgType, BleOp, KeyboardOp};
 use super::serial::Serial;
@@ -22,9 +21,9 @@ impl<'a> Bluetooth<'a> {
         }
     }
 
-    pub fn send_report(&mut self, report: &HidReport, dma1: &mut DMA1) {
+    pub fn send_report(&mut self, report: &HidReport) {
         self.serial.send(MsgType::Keyboard, KeyboardOp::KeyReport as u8,
-                         report.as_bytes(), dma1);
+                         report.as_bytes());
     }
 
     pub fn receive(message: &Message) {
@@ -32,7 +31,7 @@ impl<'a> Bluetooth<'a> {
             //(2, 1) => {
                 // SYSTEM Get ID
                 //let data = &[4, 1, 0, 1, 2, 3, 4][..];
-                //self.send(MsgType::System, 129, &data, dma, gpioa);
+                //self.send(MsgType::System, 129, &data, gpioa);
                 //}
             MsgType::Ble => {
                 match BleOp::from(message.operation)  {
@@ -53,9 +52,9 @@ impl<'a> Bluetooth<'a> {
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
     let callback = |msg: &Message| Bluetooth::receive(msg);
-    r.BLUETOOTH.serial.receive(&mut r.DMA1, callback);
+    r.BLUETOOTH.serial.receive(callback);
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {
-    r.BLUETOOTH.serial.tx_interrupt(&mut r.DMA1);
+    r.BLUETOOTH.serial.tx_interrupt();
 }
