@@ -12,7 +12,7 @@ extern crate stm32l151;
 extern crate stm32l151_hal as hal;
 
 #[macro_use]
-mod macros;
+mod debug;
 
 mod bluetooth;
 mod clock;
@@ -25,10 +25,9 @@ mod protocol;
 mod serial;
 //mod usb;
 
-use core::fmt::Write;
 use cortex_m_semihosting::hio;
 use rtfm::{app, Threshold};
-use hal::gpio::{GpioExt, Input, Pin, Output};
+use hal::gpio::GpioExt;
 use stm32l151::DMA1;
 
 use bluetooth::Bluetooth;
@@ -45,7 +44,7 @@ app! {
     device: stm32l151,
 
     resources: {
-        static KEYBOARD: Keyboard<Pin<Input>, Pin<Output>>;
+        static KEYBOARD: Keyboard;
         static BLUETOOTH_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
@@ -108,28 +107,28 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let gpiob = d.GPIOB.split();
     let gpioc = d.GPIOC.split();
 
-    let row_pins = [gpiob.pb9.pull_down().downgrade(),
-                    gpiob.pb8.pull_down().downgrade(),
-                    gpiob.pb7.pull_down().downgrade(),
-                    gpiob.pb6.pull_down().downgrade(),
-                    gpioa.pa0.pull_down().downgrade()];
+    let row_pins = (gpiob.pb9.pull_down(),
+                    gpiob.pb8.pull_down(),
+                    gpiob.pb7.pull_down(),
+                    gpiob.pb6.pull_down(),
+                    gpioa.pa0.pull_down());
 
-    let column_pins = [gpioa.pa5.into_output().pull_up().downgrade(),
-                       gpioa.pa6.into_output().pull_up().downgrade(),
-                       gpioa.pa7.into_output().pull_up().downgrade(),
-                       gpiob.pb0.into_output().pull_up().downgrade(),
-                       gpiob.pb1.into_output().pull_up().downgrade(),
-                       gpiob.pb12.into_output().pull_up().downgrade(),
-                       gpiob.pb13.into_output().pull_up().downgrade(),
-                       gpiob.pb14.into_output().pull_up().downgrade(),
-                       gpioa.pa8.into_output().pull_up().downgrade(),
-                       gpioa.pa9.into_output().pull_up().downgrade(),
-                       gpioa.pa15.into_output().pull_up().downgrade(),
-                       gpiob.pb3.into_output().pull_up().downgrade(),
-                       gpiob.pb4.into_output().pull_up().downgrade(),
-                       gpiob.pb5.into_output().pull_up().downgrade()];
+    let column_pins = (gpioa.pa5.into_output().pull_up(),
+                       gpioa.pa6.into_output().pull_up(),
+                       gpioa.pa7.into_output().pull_up(),
+                       gpiob.pb0.into_output().pull_up(),
+                       gpiob.pb1.into_output().pull_up(),
+                       gpiob.pb12.into_output().pull_up(),
+                       gpiob.pb13.into_output().pull_up(),
+                       gpiob.pb14.into_output().pull_up(),
+                       gpioa.pa8.into_output().pull_up(),
+                       gpioa.pa9.into_output().pull_up(),
+                       gpioa.pa15.into_output().pull_up(),
+                       gpiob.pb3.into_output().pull_up(),
+                       gpiob.pb4.into_output().pull_up(),
+                       gpiob.pb5.into_output().pull_up());
 
-    let keyboard = Keyboard::<Pin<Input>, Pin<Output>>::new(row_pins, column_pins);
+    let keyboard = Keyboard::new(row_pins, column_pins);
 
     let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, &d.DMA1, &mut d.RCC);
     let led_serial = Serial::new(led_usart, &mut d.DMA1, r.LED_BUFFERS);
