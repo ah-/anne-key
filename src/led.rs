@@ -7,6 +7,7 @@ use hal::gpio::gpioc::PC15;
 use super::protocol::{Message, MsgType, LedOp};
 use super::serial::Serial;
 use super::serial::led_usart::LedUsart;
+use super::keyboard::{KeyState, to_packed_bits};
 
 
 pub struct Led<'a> {
@@ -47,8 +48,9 @@ impl<'a> Led<'a> {
         self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme]);
     }
 
-    pub fn send_keys(&mut self, keys: &[u8]) {
-        self.serial.send(MsgType::Led, LedOp::Key as u8, keys);
+    pub fn send_keys(&mut self, state: &KeyState) {
+        let packed = to_packed_bits(state);
+        self.serial.send(MsgType::Led, LedOp::Key as u8, &packed.bytes);
     }
 
     pub fn send_music(&mut self, keys: &[u8]) {

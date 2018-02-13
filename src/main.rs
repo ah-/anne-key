@@ -151,6 +151,7 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
         let report = HidReport::from_key_state(&r.KEYBOARD.state);
         r.BLUETOOTH.send_report(&report);
         test_led(&mut r.LED, &r.KEYBOARD.state);
+        //r.LED.send_keys(&r.KEYBOARD.state);
     }
 }
 
@@ -192,8 +193,7 @@ fn test_led(led: &mut Led, state: &KeyState) {
         led.set_theme(18);
     }
     if state[22] {
-        // sends O
-        led.send_keys(&[0,0,0,1,0,0,0,0,0]);
+        led.send_keys(state);
     }
     if state[23] {
         led.send_music(&[1,2,3,4,5,6,7,8,9]);

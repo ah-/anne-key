@@ -17,6 +17,24 @@ type ColumnPins = (PA5<Output>, PA6<Output>, PA7<Output>, PB0<Output>,
 
 pub type KeyState = [bool; ROWS * COLUMNS];
 
+pub struct PackedKeyState {
+    // 5 * 14 = 70, upper(70 / 8) = 9 bytes
+    pub bytes: [u8; 9]
+}
+
+pub fn to_packed_bits(state: &KeyState) -> PackedKeyState {
+    let mut packed = [0; 9];
+
+    for (key, pressed) in state.iter().enumerate() {
+        let byte = key / 8;
+        let bit = key % 8;
+        if *pressed {
+            packed[byte] = packed[byte] | (1 << bit);
+        }
+    }
+
+    PackedKeyState { bytes: packed }
+}
 
 pub struct Keyboard {
     /// Stores the currently pressed down keys from last sample.
