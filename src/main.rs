@@ -23,7 +23,6 @@ mod layout;
 mod led;
 mod protocol;
 mod serial;
-mod usb;
 
 use rtfm::{app, Threshold};
 use hal::dma::DmaExt;
@@ -33,13 +32,9 @@ use bluetooth::Bluetooth;
 use keyboard::{Keyboard, KeyState};
 use hidreport::HidReport;
 use led::Led;
-use usb::Usb;
-use usb::log::Log;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
-
-static mut USB_LOG: Log = Log::new();
 
 app! {
     device: stm32l151,
@@ -50,7 +45,6 @@ app! {
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
-        static USB: Usb;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
         static NUM_PRESSED_KEYS: usize = 0;
@@ -64,10 +58,6 @@ app! {
         SYS_TICK: {
             path: tick,
             resources: [BLUETOOTH, LED, KEYBOARD, NUM_PRESSED_KEYS, SYST],
-        },
-        USB_LP: {
-            path: usb::usb_lp,
-            resources: [USB],
         },
         DMA1_CHANNEL2: {
             path: led::tx,
@@ -138,13 +128,10 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
 
     led.on();
 
-    let usb = unsafe { Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG, &mut USB_LOG) };
-
     init::LateResources {
         BLUETOOTH: bluetooth,
         KEYBOARD: keyboard,
         LED: led,
-        USB: usb,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
     }

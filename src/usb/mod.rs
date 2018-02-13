@@ -62,21 +62,20 @@ impl Usb {
     pub fn interrupt(&mut self) {
         //debug!("\n{:x}\n", self.usb.istr.read().bits()).ok();
 
-        if self.usb.istr.read().ctr().bit_is_set() {
-            while self.usb.istr.read().ctr().bit_is_set() {
-                let endpoint = self.usb.istr.read().ep_id().bits();
-                match endpoint {
-                    0 => {
-                        self.log.save(&mut self.usb, 4);
-                        self.ctr();
-                        self.log.save(&mut self.usb, 5);
-                    }
-                    1 => {
-                        // TODO
-                        hid::usb_hid_ctr(&mut self.usb);
-                    }
-                    _ => panic!(),
+        while self.usb.istr.read().ctr().bit_is_set() {
+            let endpoint = self.usb.istr.read().ep_id().bits();
+            match endpoint {
+                0 => {
+                    self.log.save(&mut self.usb, 1);
+                    self.ctr();
+                    self.log.save(&mut self.usb, 2);
                 }
+                1 => {
+                    self.log.save(&mut self.usb, 3);
+                    hid::usb_hid_ctr(&mut self.usb);
+                    self.log.save(&mut self.usb, 4);
+                }
+                _ => panic!(),
             }
         }
 
@@ -113,20 +112,16 @@ impl Usb {
         }
 
         self.usb.usb_ep0r.modify(|_, w| unsafe {
-            w.ep_type().bits(0b01).stat_tx().bits(0b10).stat_rx().bits(
-                0b11,
-            )
+            w.ep_type().bits(0b01)
+             .stat_tx().bits(0b10)
+             .stat_rx().bits(0b11)
         });
 
         self.usb.usb_ep1r.modify(|_, w| unsafe {
-            w.ep_type()
-                .bits(0b11)
-                .stat_tx()
-                .bits(0b11)
-                .stat_rx()
-                .bits(0b10)
-                .ea()
-                .bits(0b1)
+            w.ep_type().bits(0b11)
+             .stat_tx().bits(0b11)
+             .stat_rx().bits(0b10)
+             .ea().bits(0b1)
         });
 
         self.usb.daddr.modify(|_, w| w.ef().set_bit());
@@ -172,6 +167,17 @@ impl Usb {
                 match (request_type, request) {
                     (0, UsbRequest::SetAddress) => {
                         self.pending_daddr = value as u8;
+                        self.usb.set_ep_tx_status_valid();
+                    }
+                    (0, UsbRequest::GetStatus) => {
+                        (*pma).pma_area.set_u16(0x40, 0);
+                        (*pma).pma_area.set_u16(2, 2);
+                        self.usb.set_ep_tx_status_valid_dtog();
+                    }
+                    (0, UsbRequest::SetConfiguration) => {
+                        // TODO: check value?
+                        (*pma).pma_area.set_u16(2, 0);
+                        //self.usb.set_ep_tx_status_valid_dtog();
                         self.usb.set_ep_tx_status_valid();
                     }
                     (0x80, UsbRequest::GetDescriptor) => {
@@ -242,20 +248,10 @@ impl Usb {
                                     ),
                                 );
                                 // TODO: ep1?
-                                self.usb.set_ep_tx_status_valid_dtog();
+                                self.usb.set_ep1_tx_status_valid_dtog();
                             }
                             _ => panic!(),
                         }
-                    }
-                    (0, UsbRequest::GetStatus) => {
-                        (*pma).pma_area.set_u16(0x40, 0);
-                        (*pma).pma_area.set_u16(2, 2);
-                        self.usb.set_ep_tx_status_valid_dtog();
-                    }
-                    (0, UsbRequest::SetConfiguration) => {
-                        // TODO: check value?
-                        (*pma).pma_area.set_u16(2, 0);
-                        self.usb.set_ep_tx_status_valid_dtog();
                     }
                     (0x21, UsbRequest::GetInterface) => {
                         // USBHID SET_IDLE
