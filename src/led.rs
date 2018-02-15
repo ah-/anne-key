@@ -7,7 +7,7 @@ use hal::gpio::gpioc::PC15;
 use super::protocol::{Message, MsgType, LedOp};
 use super::serial::Serial;
 use super::serial::led_usart::LedUsart;
-use super::keyboard::{KeyState, to_packed_bits};
+use super::keymatrix::{KeyState, to_packed_bits};
 
 
 pub struct Led<'a> {

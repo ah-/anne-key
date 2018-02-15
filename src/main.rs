@@ -19,6 +19,7 @@ mod clock;
 mod hidreport;
 mod keyboard;
 mod keycodes;
+mod keymatrix;
 mod layout;
 mod led;
 mod protocol;
@@ -29,8 +30,8 @@ use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
 
 use bluetooth::Bluetooth;
-use keyboard::{Keyboard, KeyState};
-use hidreport::HidReport;
+use keyboard::Keyboard;
+use keymatrix::KeyMatrix;
 use led::Led;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
@@ -40,14 +41,14 @@ app! {
     device: stm32l151,
 
     resources: {
-        static KEYBOARD: Keyboard;
+        static KEYBOARD: Keyboard = Keyboard::new();
+        static KEY_MATRIX: KeyMatrix;
         static BLUETOOTH_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x10]; 2] = [[0; 0x10]; 2];
         static LED: Led<'static>;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
-        static NUM_PRESSED_KEYS: usize = 0;
     },
 
     init: {
@@ -57,7 +58,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, KEYBOARD, NUM_PRESSED_KEYS, SYST],
+            resources: [BLUETOOTH, LED, KEY_MATRIX, SYST, KEYBOARD],
         },
         DMA1_CHANNEL2: {
             path: led::tx,
@@ -69,7 +70,7 @@ app! {
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, KEYBOARD],
+            resources: [BLUETOOTH, KEY_MATRIX],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
@@ -83,7 +84,7 @@ app! {
 }
 
 fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
-    // vector table relocation because of bootloader
+    // re-locate vector table to 0x80004000 because bootloader uses 0x80000000
     unsafe { p.core.SCB.vtor.write(0x4000) };
 
     let mut d = p.device;
@@ -101,6 +102,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
                     gpiob.pb6.pull_down(),
                     gpioa.pa0.pull_down());
 
+    // TODO: make pin a generic trait, then iterate over list and call .into_output().pull_up()?
     let column_pins = (gpioa.pa5.into_output().pull_up(),
                        gpioa.pa6.into_output().pull_up(),
                        gpioa.pa7.into_output().pull_up(),
@@ -116,21 +118,19 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
                        gpiob.pb4.into_output().pull_up(),
                        gpiob.pb5.into_output().pull_up());
 
-    let keyboard = Keyboard::new(row_pins, column_pins);
+    let key_matrix = KeyMatrix::new(row_pins, column_pins);
 
     let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, dma.3, dma.2, &mut d.RCC);
     let led_serial = Serial::new(led_usart, r.LED_BUFFERS);
-    let mut led = Led::new(led_serial, gpioc.pc15);
+    let led = Led::new(led_serial, gpioc.pc15);
 
     let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC);
     let bluetooth_serial = Serial::new(bluetooth_usart, r.BLUETOOTH_BUFFERS);
     let bluetooth = Bluetooth::new(bluetooth_serial);
 
-    led.on();
-
     init::LateResources {
         BLUETOOTH: bluetooth,
-        KEYBOARD: keyboard,
+        KEY_MATRIX: key_matrix,
         LED: led,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
@@ -144,60 +144,8 @@ fn idle() -> ! {
 }
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
-    r.KEYBOARD.sample(&r.SYST);
-    let pressed = r.KEYBOARD.state.into_iter().filter(|s| **s).count();
-    if pressed != *r.NUM_PRESSED_KEYS {
-        *r.NUM_PRESSED_KEYS = pressed;
-        let report = HidReport::from_key_state(&r.KEYBOARD.state);
-        r.BLUETOOTH.send_report(&report);
-        test_led(&mut r.LED, &r.KEYBOARD.state);
-        //r.LED.send_keys(&r.KEYBOARD.state);
-    }
-}
-
-fn test_led(led: &mut Led, state: &KeyState) {
-    if state[0] {
-        led.off();
-    }
-    if state[1] {
-        led.on();
-    }
-    if state[2] {
-        led.next_theme();
-    }
-    if state[3] {
-        led.next_brightness();
-    }
-    if state[4] {
-        led.next_animation_speed();
-    }
-    if state[15] {
-        led.set_theme(0);
-    }
-    if state[16] {
-        led.set_theme(1);
-    }
-    if state[17] {
-        led.set_theme(2);
-    }
-    if state[18] {
-        led.set_theme(3);
-    }
-    if state[19] {
-        led.set_theme(14);
-    }
-    if state[20] {
-        led.set_theme(17);
-    }
-    if state[21] {
-        led.set_theme(18);
-    }
-    if state[22] {
-        led.send_keys(state);
-    }
-    if state[23] {
-        led.send_music(&[1,2,3,4,5,6,7,8,9]);
-    }
+    r.KEY_MATRIX.sample(&r.SYST);
+    r.KEYBOARD.process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
 }
 
 fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {

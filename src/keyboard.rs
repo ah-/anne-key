@@ -1,114 +1,109 @@
-#![feature(const_fn)]
-
-use embedded_hal::digital::{InputPin, OutputPin};
-use stm32l151::SYST;
-use hal::gpio::{Input, Output};
-use hal::gpio::gpioa::*;
-use hal::gpio::gpiob::*;
-
-const ROWS: usize = 5;
-const COLUMNS: usize = 14;
-
-type RowPins = (PB9<Input>, PB8<Input>, PB7<Input>, PB6<Input>, PA0<Input>);
-type ColumnPins = (PA5<Output>, PA6<Output>, PA7<Output>, PB0<Output>,
-                   PB1<Output>, PB12<Output>, PB13<Output>, PB14<Output>,
-                   PA8<Output>, PA9<Output>, PA15<Output>, PB3<Output>,
-                   PB4<Output>, PB5<Output>);
-
-pub type KeyState = [bool; ROWS * COLUMNS];
-
-pub struct PackedKeyState {
-    // 5 * 14 = 70, upper(70 / 8) = 9 bytes
-    pub bytes: [u8; 9]
-}
-
-pub fn to_packed_bits(state: &KeyState) -> PackedKeyState {
-    let mut packed = [0; 9];
-
-    for (key, pressed) in state.iter().enumerate() {
-        let byte = key / 8;
-        let bit = key % 8;
-        if *pressed {
-            packed[byte] = packed[byte] | (1 << bit);
-        }
-    }
-
-    PackedKeyState { bytes: packed }
-}
+use bluetooth::Bluetooth;
+use hidreport::HidReport;
+use keycodes::KeyCode;
+use keymatrix::KeyState;
+use layout::DEFAULT;
+use led::Led;
 
 pub struct Keyboard {
-    /// Stores the currently pressed down keys from last sample.
-    pub state: KeyState,
-    row_pins: RowPins,
-    column_pins: ColumnPins
+    // TODO: instead of counting keys just store full previous packed snapshot and compare that
+    // or might not even need that after switching to wakeup only handling?
+    num_pressed_keys: usize,
 }
 
 impl Keyboard {
-    pub fn new(row_pins: RowPins, column_pins: ColumnPins) -> Self {
-        Self {
-            state: [false; ROWS * COLUMNS],
-            row_pins: row_pins,
-            column_pins: column_pins,
-        }
-    }
+    pub const fn new() -> Keyboard { Keyboard { num_pressed_keys: 0 } }
 
-    pub fn sample(&mut self, syst: &SYST) {
-        for column in 0..COLUMNS {
-            self.enable_column(column);
+    pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth, led: &mut Led) {
+        let pressed = state.into_iter().filter(|s| **s).count();
+        if pressed != self.num_pressed_keys {
+            self.num_pressed_keys = pressed;
 
-            // Busy wait a short while before sampling the keys
-            // to let the pins settle
-            let current_tick = syst.cvr.read();
-            let wait_until_tick = current_tick - 100;
-            while syst.cvr.read() > wait_until_tick {}
+            let mut hid = HidProcessor::new();
 
-            self.state[column              ] = self.row_pins.0.is_high();
-            self.state[column +     COLUMNS] = self.row_pins.1.is_high();
-            self.state[column + 2 * COLUMNS] = self.row_pins.2.is_high();
-            self.state[column + 3 * COLUMNS] = self.row_pins.3.is_high();
-            self.state[column + 4 * COLUMNS] = self.row_pins.4.is_high();
+            let layout = &DEFAULT;
 
-            self.disable_column(column);
-        }
-    }
+            for (key, pressed) in state.iter().enumerate() {
+                if *pressed {
+                    let code = &layout[key];
+                    hid.process(*code);
+                }
+            }
 
-    fn enable_column(&mut self, column: usize) {
-        match column {
-            0 => self.column_pins.0.set_high(),
-            1 => self.column_pins.1.set_high(),
-            2 => self.column_pins.2.set_high(),
-            3 => self.column_pins.3.set_high(),
-            4 => self.column_pins.4.set_high(),
-            5 => self.column_pins.5.set_high(),
-            6 => self.column_pins.6.set_high(),
-            7 => self.column_pins.7.set_high(),
-            8 => self.column_pins.8.set_high(),
-            9 => self.column_pins.9.set_high(),
-            10 => self.column_pins.10.set_high(),
-            11 => self.column_pins.11.set_high(),
-            12 => self.column_pins.12.set_high(),
-            13 => self.column_pins.13.set_high(),
-            _ => {}
-        }
-    }
-
-    fn disable_column(&mut self, column: usize) {
-        match column {
-            0 => self.column_pins.0.set_low(),
-            1 => self.column_pins.1.set_low(),
-            2 => self.column_pins.2.set_low(),
-            3 => self.column_pins.3.set_low(),
-            4 => self.column_pins.4.set_low(),
-            5 => self.column_pins.5.set_low(),
-            6 => self.column_pins.6.set_low(),
-            7 => self.column_pins.7.set_low(),
-            8 => self.column_pins.8.set_low(),
-            9 => self.column_pins.9.set_low(),
-            10 => self.column_pins.10.set_low(),
-            11 => self.column_pins.11.set_low(),
-            12 => self.column_pins.12.set_low(),
-            13 => self.column_pins.13.set_low(),
-            _ => {}
+            bluetooth.send_report(&hid.report);
+            test_led(led, state);
+            led.send_keys(state);
         }
     }
 }
+
+
+#[repr(packed)]
+struct HidProcessor {
+    pub report: HidReport,
+    i: usize,
+}
+
+impl HidProcessor {
+    fn new() -> HidProcessor {
+        HidProcessor {
+            report: HidReport::new(),
+            i: 0
+        }
+    }
+
+    fn process(&mut self, code: KeyCode) {
+        if code.is_modifier() {
+            self.report.modifiers |= 1 << (code as u8 - KeyCode::LCtrl as u8);
+        } else if code.is_normal_key() && self.i < self.report.keys.len() {
+            self.report.keys[self.i] = code as u8;
+            self.i += 1;
+        }
+    }
+}
+
+fn test_led(led: &mut Led, state: &KeyState) {
+    if state[0] {
+        led.off();
+    }
+    if state[1] {
+        led.on();
+    }
+    if state[2] {
+        led.next_theme();
+    }
+    if state[3] {
+        led.next_brightness();
+    }
+    if state[4] {
+        led.next_animation_speed();
+    }
+    if state[15] {
+        led.set_theme(0);
+    }
+    if state[16] {
+        led.set_theme(1);
+    }
+    if state[17] {
+        led.set_theme(2);
+    }
+    if state[18] {
+        led.set_theme(3);
+    }
+    if state[19] {
+        led.set_theme(14);
+    }
+    if state[20] {
+        led.set_theme(17);
+    }
+    if state[21] {
+        led.set_theme(18);
+    }
+    if state[22] {
+        led.send_keys(state);
+    }
+    if state[23] {
+        led.send_music(&[1,2,3,4,5,6,7,8,9]);
+    }
+}
+
