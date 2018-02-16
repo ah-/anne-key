@@ -14,6 +14,7 @@ extern crate stm32l151_hal as hal;
 #[macro_use]
 mod debug;
 
+mod action;
 mod bluetooth;
 mod clock;
 mod hidreport;

@@ -1,18 +1,26 @@
+use action::Action;
 use bluetooth::Bluetooth;
 use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::DEFAULT;
+use layout::TEST;
 use led::Led;
 
 pub struct Keyboard {
     // TODO: instead of counting keys just store full previous packed snapshot and compare that
     // or might not even need that after switching to wakeup only handling?
     num_pressed_keys: usize,
+    layers: Layers,
 }
 
 impl Keyboard {
-    pub const fn new() -> Keyboard { Keyboard { num_pressed_keys: 0 } }
+    pub const fn new() -> Keyboard {
+        Keyboard {
+            num_pressed_keys: 0,
+            layers: Layers::new(),
+        }
+    }
 
     pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth, led: &mut Led) {
         let pressed = state.into_iter().filter(|s| **s).count();
@@ -21,24 +29,61 @@ impl Keyboard {
 
             let mut hid = HidProcessor::new();
 
-            let layout = &DEFAULT;
+            let layout = &TEST;
 
             for (key, pressed) in state.iter().enumerate() {
                 if *pressed {
-                    let code = &layout[key];
-                    hid.process(*code);
+                    let action = &layout[key];
+                    hid.process(action);
+                    led.process(action);
+                    self.layers.process(action);
                 }
             }
 
             bluetooth.send_report(&hid.report);
-            test_led(led, state);
             led.send_keys(state);
+            self.layers.finish();
         }
     }
 }
 
+trait EventProcessor {
+    fn process(&mut self, action: &Action);
+    fn finish(&mut self) {}
+}
 
-#[repr(packed)]
+struct Layers {
+    current: u8,
+    next: u8,
+}
+
+impl Layers {
+    const fn new() -> Layers {
+        Layers {
+            // TODO: array of layers -> enabled or not
+            current: 0,
+            next: 0,
+        }
+    }
+}
+
+impl EventProcessor for Layers {
+    fn process(&mut self, action: &Action) {
+        match action {
+            &Action::LayerMomentary(layer) => { self.next = layer },
+            &Action::LayerToggle(layer) => { self.next = layer }, // TODO
+            &Action::LayerOn(layer) => { self.next = layer }, // TODO
+            &Action::LayerOff(layer) => { self.next = layer }, // TODO
+            _ => {}
+        }
+    }
+
+    fn finish(&mut self) {
+        self.current = self.next;
+        self.next = 0;
+    }
+}
+
 struct HidProcessor {
     pub report: HidReport,
     i: usize,
@@ -48,62 +93,37 @@ impl HidProcessor {
     fn new() -> HidProcessor {
         HidProcessor {
             report: HidReport::new(),
-            i: 0
-        }
-    }
-
-    fn process(&mut self, code: KeyCode) {
-        if code.is_modifier() {
-            self.report.modifiers |= 1 << (code as u8 - KeyCode::LCtrl as u8);
-        } else if code.is_normal_key() && self.i < self.report.keys.len() {
-            self.report.keys[self.i] = code as u8;
-            self.i += 1;
+            i: 0,
         }
     }
 }
 
-fn test_led(led: &mut Led, state: &KeyState) {
-    if state[0] {
-        led.off();
-    }
-    if state[1] {
-        led.on();
-    }
-    if state[2] {
-        led.next_theme();
-    }
-    if state[3] {
-        led.next_brightness();
-    }
-    if state[4] {
-        led.next_animation_speed();
-    }
-    if state[15] {
-        led.set_theme(0);
-    }
-    if state[16] {
-        led.set_theme(1);
-    }
-    if state[17] {
-        led.set_theme(2);
-    }
-    if state[18] {
-        led.set_theme(3);
-    }
-    if state[19] {
-        led.set_theme(14);
-    }
-    if state[20] {
-        led.set_theme(17);
-    }
-    if state[21] {
-        led.set_theme(18);
-    }
-    if state[22] {
-        led.send_keys(state);
-    }
-    if state[23] {
-        led.send_music(&[1,2,3,4,5,6,7,8,9]);
+impl EventProcessor for HidProcessor {
+    fn process(&mut self, action: &Action) {
+        match action {
+            &Action::Key(code) => {
+                if code.is_modifier() {
+                    self.report.modifiers |= 1 << (code as u8 - KeyCode::LCtrl as u8);
+                } else if code.is_normal_key() && self.i < self.report.keys.len() {
+                    self.report.keys[self.i] = code as u8;
+                    self.i += 1;
+                }
+            },
+            _ => {}
+        }
     }
 }
 
+impl<'a> EventProcessor for Led<'a> {
+    fn process(&mut self, action: &Action) {
+        match action {
+            &Action::LedOn => self.on(),
+            &Action::LedOff => self.off(),
+            &Action::LedNextTheme => self.next_theme(),
+            &Action::LedNextBrightness => self.next_brightness(),
+            &Action::LedNextAnimationSpeed => self.next_animation_speed(),
+            &Action::LedTheme(theme_id) => self.set_theme(theme_id),
+            _ => {}
+        }
+    }
+}
