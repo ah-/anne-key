@@ -3,7 +3,7 @@ use keycodes::KeyCode;
 #[derive(Copy, Clone)]
 pub enum Action {
     Nop,
-    Trans,
+    Transparent,
 
     Key(KeyCode), // = 0x10
 
@@ -20,4 +20,27 @@ pub enum Action {
     LedTheme(u8),
 
     //Bluetooth = 0x40,
+}
+
+// Allow auto-conversion of KeyCodes to Action for nicer layout formatting
+macro_rules! layout {
+    ( $( $e: expr ),* ) => {
+        [
+            $(
+                $e.to_action(),
+            )*
+        ]
+    };
+}
+
+impl KeyCode {
+    pub const fn to_action(self) -> Action {
+        Action::Key(self)
+    }
+}
+
+impl Action {
+    pub const fn to_action(self) -> Action {
+        self
+    }
 }
