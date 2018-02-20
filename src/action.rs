@@ -1,6 +1,6 @@
 use keycodes::KeyCode;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Action {
     Nop,
     Transparent,
@@ -23,8 +23,9 @@ pub enum Action {
 }
 
 // Allow auto-conversion of KeyCodes to Action for nicer layout formatting
+// and drop commas
 macro_rules! layout {
-    ( $( $e: expr ),* ) => {
+    ( $( $e: expr )* ) => {
         [
             $(
                 $e.to_action(),

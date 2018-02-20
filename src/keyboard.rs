@@ -3,8 +3,7 @@ use bluetooth::Bluetooth;
 use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
-use layout::DEFAULT;
-use layout::TEST;
+use layout::{Layout, BASE, FN1, NONE};
 use led::Led;
 
 pub struct Keyboard {
@@ -14,12 +13,29 @@ pub struct Keyboard {
     layers: Layers,
 }
 
+const LAYERS: [Layout; 4] = [BASE, FN1, NONE, NONE];
+
 impl Keyboard {
     pub const fn new() -> Keyboard {
         Keyboard {
             num_pressed_keys: 0,
             layers: Layers::new(),
         }
+    }
+
+    fn get_action(&self, key: usize) -> Action {
+        let mut action = Action::Transparent;
+
+        for i in (0..LAYERS.len()).rev() {
+            if self.layers.current & (1 << i) != 0 {
+                action = LAYERS[i][key];
+            }
+            if action != Action::Transparent {
+                break;
+            }
+        }
+
+        action
     }
 
     pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth, led: &mut Led) {
@@ -29,14 +45,12 @@ impl Keyboard {
 
             let mut hid = HidProcessor::new();
 
-            let layout = &TEST;
-
             for (key, pressed) in state.iter().enumerate() {
                 if *pressed {
-                    let action = &layout[key];
-                    hid.process(action);
-                    led.process(action);
-                    self.layers.process(action);
+                    let action = self.get_action(key);
+                    hid.process(&action);
+                    led.process(&action);
+                    self.layers.process(&action);
                 }
             }
 
@@ -61,8 +75,8 @@ impl Layers {
     const fn new() -> Layers {
         Layers {
             // TODO: array of layers -> enabled or not
-            current: 0,
-            next: 0,
+            current: 0b1,
+            next: 0b1,
         }
     }
 }
@@ -70,17 +84,18 @@ impl Layers {
 impl EventProcessor for Layers {
     fn process(&mut self, action: &Action) {
         match action {
-            &Action::LayerMomentary(layer) => { self.next = layer },
-            &Action::LayerToggle(layer) => { self.next = layer }, // TODO
-            &Action::LayerOn(layer) => { self.next = layer }, // TODO
-            &Action::LayerOff(layer) => { self.next = layer }, // TODO
+            &Action::LayerMomentary(layer) => { self.next |= 1 << layer }, // TODO: needs pressed to turn it back off
+            &Action::LayerToggle(layer) => { self.next = self.current ^ (1 << layer) },
+            &Action::LayerOn(layer) => { self.next |= 1 << layer },
+            &Action::LayerOff(layer) => { self.next &= !(1 << layer)},
             _ => {}
         }
     }
 
     fn finish(&mut self) {
         self.current = self.next;
-        self.next = 0;
+        // lowest layer is always active
+        self.next = 0b1;
     }
 }
 
