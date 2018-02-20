@@ -1,0 +1,33 @@
+language: rust
+
+matrix:
+  include:
+    - env: TARGET=thumbv7m-none-eabi
+      rust: nightly
+      addons:
+        apt:
+          sources:
+            - debian-sid
+          packages:
+            - binutils-arm-none-eabi
+
+before_install: set -e
+
+install:
+  - bash ci/install.sh
+
+script:
+  - xargo build --target $TARGET --release
+
+cache:
+  cargo: true
+  directories:
+    - $HOME/.xargo
+
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    - master
