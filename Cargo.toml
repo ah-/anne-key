@@ -29,10 +29,10 @@ version = "0.1.0"
 
 [dependencies.stm32l151]
 features = ["rt"]
-path = "../../stm32l151"
+version = "0.2.1"
 
 [dependencies.stm32l151-hal]
-path = "../stm32l151-hal"
+version = "0.1.0"
 
 [profile.release]
 debug = true
