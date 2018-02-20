@@ -19,8 +19,10 @@ use keycodes::KeyCode::*;
 
 pub type Layout = [Action; 70];
 
+const LM1: Action = LayerMomentary(1);
 const LON1: Action = LayerOn(1);
 const LOFF1: Action = LayerOff(1);
+const LT1: Action = LayerToggle(1);
 const __: Action = Transparent;
 
 pub const BASE: Layout = layout![
@@ -28,7 +30,7 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    NonUSHash Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   LON1     LOFF1     RCtrl
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   LM1      LT1       RCtrl
 ];
 
 pub const FN1: Layout = layout![
