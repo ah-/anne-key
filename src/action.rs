@@ -20,6 +20,14 @@ pub enum Action {
     LedTheme(u8),
 
     //Bluetooth = 0x40,
+    BtOn,
+    BtOff,
+    BtSaveHost(u8),
+    BtConnectHost(u8),
+    BtDeleteHost(u8),
+    BtBroadcast,
+    BtCompatibilityMode(bool),
+    BtHostListQuery, // TODO: remove? this shouldn't really be here
 }
 
 // Allow auto-conversion of KeyCodes to Action for nicer layout formatting

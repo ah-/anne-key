@@ -49,6 +49,8 @@ pub enum BleOp {
     AckFail = 10,
     CurrentHostQuery = 11,
     CompatibilityMode = 12,
+    Pair = 13,
+    Disconnect = 14,
     AckReserved = 128,
     AckOn = 129,
     AckOff = 130,
@@ -58,7 +60,7 @@ pub enum BleOp {
     AckHostListQuery = 134,
     AckBroadcast = 135,
     AckBattery = 136,
-    AckAckOu = 137,
+    AckAckOk = 137,
     AckAckFaiL = 138,
     AckCurrentHostQuery = 139,
     AckCompatibilityMode = 140,
@@ -122,6 +124,21 @@ pub enum LedOp {
 }
 
 impl From<u8> for LedOp {
+    #[inline]
+    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+}
+
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug,Copy,Clone)]
+pub enum SystemOp {
+    Reserved = 0,
+    IsSyncCode = 8,
+    SetSyncCode = 9,
+    AckReserved = 128,
+}
+
+impl From<u8> for SystemOp {
     #[inline]
     fn from(b: u8) -> Self { unsafe { transmute(b) } }
 }

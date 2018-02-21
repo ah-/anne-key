@@ -3,7 +3,7 @@ use bluetooth::Bluetooth;
 use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
-use layout::{Layout, BASE, FN1, NONE};
+use layout::{Layout, LAYERS};
 use led::Led;
 
 pub struct Keyboard {
@@ -11,7 +11,6 @@ pub struct Keyboard {
     previous_state: KeyState, // TODO: use packed state here
 }
 
-const LAYERS: [Layout; 4] = [BASE, FN1, NONE, NONE];
 
 fn eq(sa: &KeyState, sb: &KeyState) -> bool {
     sa.iter().zip(sb.iter()).all(|(a,b)| a == b)
@@ -54,10 +53,14 @@ impl Keyboard {
                     let action = self.get_action(key);
                     hid.process(&action, *pressed, changed);
                     led.process(&action, *pressed, changed);
+                    bluetooth.process(&action, *pressed, changed);
                     self.layers.process(&action, *pressed, changed);
                 }
             }
 
+            // TODO: need to comment this out for now for setup msgs to go through
+            // probably needs a buffer / or not send this when setup got sent
+            // or not send this if nothing changed
             bluetooth.send_report(&hid.report);
             led.send_keys(state);
             self.layers.finish();
@@ -147,6 +150,24 @@ impl<'a> EventProcessor for Led<'a> {
                 &Action::LedNextBrightness => self.next_brightness(),
                 &Action::LedNextAnimationSpeed => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
+                _ => {}
+            }
+        }
+    }
+}
+
+impl<'a> EventProcessor for Bluetooth<'a> {
+    fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
+        if changed && pressed {
+            match action {
+                &Action::BtOn => self.on(),
+                &Action::BtOff => self.off(),
+                &Action::BtSaveHost(host) => self.save_host(host),
+                &Action::BtConnectHost(host) => self.connect_host(host),
+                &Action::BtDeleteHost(host) => self.delete_host(host),
+                &Action::BtBroadcast => self.broadcast(),
+                &Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
+                &Action::BtHostListQuery => self.host_list_query(),
                 _ => {}
             }
         }

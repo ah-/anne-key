@@ -16,7 +16,7 @@ cortex-m-rtfm = "0.3.1"
 vcell = "0.1.0"
 
 [features]
-default = []
+default = ["use_semihosting"]
 use_semihosting = []
 
 [dependencies.cortex-m-rt]
