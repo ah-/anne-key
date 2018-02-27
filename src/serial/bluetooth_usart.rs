@@ -40,14 +40,16 @@ impl DmaUsart for BluetoothUsart {
         // Don't actually send anything yet, just enqueue and wait for wakeup package
         // we can still safely modify the buffer while waiting to send it,
         // just call this method again to transmit
-        self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
-        self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(2) });
-        self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
-
         self.dma_tx.cmar().write(|w| unsafe { w.ma().bits(buffer) });
 
-        self.pa1.set_low();
-        self.pa1.set_high();
+        if self.pending_tx == 0 {
+            self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
+            self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(2) });
+            self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
+
+            self.pa1.set_low();
+            self.pa1.set_high();
+        }
 
         self.pending_tx = len;
     }

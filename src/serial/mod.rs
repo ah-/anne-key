@@ -114,7 +114,7 @@ impl<'a, USART> Serial<'a, USART>
     }
 
     pub fn tx_interrupt(&mut self) {
-        self.usart.tx_interrupt();
         self.send_buffer_pos = 0;
+        self.usart.tx_interrupt();
     }
 }
