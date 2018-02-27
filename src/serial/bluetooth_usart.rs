@@ -13,6 +13,7 @@ pub struct BluetoothUsart {
     _usart: USART2,
     dma_rx: C6,
     dma_tx: C7,
+    pending_tx: u16, // number of bits pending while waiting for bt to wake up
 }
 
 impl DmaUsart for BluetoothUsart {
@@ -32,11 +33,13 @@ impl DmaUsart for BluetoothUsart {
     }
 
     fn is_send_ready(&mut self) -> bool {
-        self.dma_tx.cndtr().read().ndt().bits() == 0
+        self.dma_tx.cndtr().read().ndt().bits() == 0 || self.pending_tx != 0
     }
 
-    fn send(&mut self, buffer: u32, _len: u16) {
+    fn send(&mut self, buffer: u32, len: u16) {
         // Don't actually send anything yet, just enqueue and wait for wakeup package
+        // we can still safely modify the buffer while waiting to send it,
+        // just call this method again to transmit
         self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
         self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(2) });
         self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
@@ -45,12 +48,16 @@ impl DmaUsart for BluetoothUsart {
 
         self.pa1.set_low();
         self.pa1.set_high();
+
+        self.pending_tx = len;
     }
 
     fn ack_wakeup(&mut self) {
-        // TODO: correct length, not just hardcoded 0xb
-        self.dma_tx.cndtr().modify(|_, w| unsafe { w.ndt().bits(0xb) });
+        let n_pending = self.pending_tx;
+        self.dma_tx.cndtr().modify(|_, w| unsafe { w.ndt().bits(n_pending) });
         self.dma_tx.ccr().modify(|_, w| w.en().set_bit());
+
+        self.pending_tx = 0;
     }
 
     fn tx_interrupt(&mut self) {
@@ -101,6 +108,6 @@ impl BluetoothUsart {
              .en().clear_bit()
         });
 
-        BluetoothUsart { pa1: pa1, _pa2: pa2, _pa3: pa3, _usart: usart, dma_rx: dma_rx, dma_tx: dma_tx  }
+        BluetoothUsart { pa1: pa1, _pa2: pa2, _pa3: pa3, _usart: usart, dma_rx: dma_rx, dma_tx: dma_tx, pending_tx: 0 }
     }
 }
