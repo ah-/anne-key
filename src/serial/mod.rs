@@ -1,8 +1,7 @@
 pub mod bluetooth_usart;
 pub mod led_usart;
 
-use core::fmt::Write;
-use cortex_m_semihosting::hio;
+use nb;
 use super::protocol::{Message, MsgType};
 
 
@@ -89,7 +88,7 @@ impl<'a, USART> Serial<'a, USART>
         &mut self,
         message_type: MsgType,
         operation: u8, // TODO: make this typed?
-        data: &[u8]) {
+        data: &[u8]) -> nb::Result<(), !> {
         if self.usart.is_send_ready() {
             self.send_buffer[0] = message_type as u8;
             self.send_buffer[1] = 1 + data.len() as u8;
@@ -98,11 +97,10 @@ impl<'a, USART> Serial<'a, USART>
 
             self.usart.send(self.send_buffer.as_mut_ptr() as u32, 3 + data.len() as u16);
             self.receive_stage = ReceiveStage::Header;
+
+            return Ok(())
         } else {
-            // TODO: return an error instead
-            // saying we're busy
-            // using https://docs.rs/nb/0.1.1/nb/
-            debug!("tx busy").ok();
+            return Err(nb::Error::WouldBlock)
         }
     }
 

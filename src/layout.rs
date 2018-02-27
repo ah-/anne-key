@@ -1,6 +1,5 @@
 use action::Action;
 use action::Action::*;
-use keycodes::KeyCode;
 use keycodes::KeyCode::*;
 
 /*

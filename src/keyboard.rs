@@ -1,9 +1,10 @@
 use action::Action;
 use bluetooth::Bluetooth;
+use debug::UnwrapLog;
 use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
-use layout::{Layout, LAYERS};
+use layout::LAYERS;
 use led::Led;
 
 pub struct Keyboard {
@@ -61,8 +62,8 @@ impl Keyboard {
             // TODO: need to comment this out for now for setup msgs to go through
             // probably needs a buffer / or not send this when setup got sent
             // or not send this if nothing changed
-            bluetooth.send_report(&hid.report);
-            led.send_keys(state);
+            bluetooth.send_report(&hid.report).log_error();
+            led.send_keys(state).log_error();
             self.layers.finish();
 
             self.previous_state = *state;
@@ -143,15 +144,16 @@ impl EventProcessor for HidProcessor {
 impl<'a> EventProcessor for Led<'a> {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
-            match action {
+            let result = match action {
                 &Action::LedOn => self.on(),
                 &Action::LedOff => self.off(),
                 &Action::LedNextTheme => self.next_theme(),
                 &Action::LedNextBrightness => self.next_brightness(),
                 &Action::LedNextAnimationSpeed => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
-                _ => {}
-            }
+                _ => Ok(())
+            };
+            result.log_error()
         }
     }
 }
@@ -159,7 +161,7 @@ impl<'a> EventProcessor for Led<'a> {
 impl<'a> EventProcessor for Bluetooth<'a> {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
-            match action {
+            let result = match action {
                 &Action::BtOn => self.on(),
                 &Action::BtOff => self.off(),
                 &Action::BtSaveHost(host) => self.save_host(host),
@@ -168,8 +170,9 @@ impl<'a> EventProcessor for Bluetooth<'a> {
                 &Action::BtBroadcast => self.broadcast(),
                 &Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
                 &Action::BtHostListQuery => self.host_list_query(),
-                _ => {}
-            }
+                _ => Ok(())
+            };
+            result.log_error()
         }
     }
 }

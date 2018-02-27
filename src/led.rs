@@ -4,6 +4,7 @@ use embedded_hal::digital::OutputPin;
 use rtfm::Threshold;
 use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
+use nb;
 use super::protocol::{Message, MsgType, LedOp};
 use super::serial::Serial;
 use super::serial::led_usart::LedUsart;
@@ -23,43 +24,45 @@ impl<'a> Led<'a> {
         }
     }
 
-    pub fn on(&mut self) {
+    pub fn on(&mut self) -> nb::Result<(), !> {
         self.pc15.set_high();
+        Ok(())
     }
 
-    pub fn off(&mut self) {
+    pub fn off(&mut self) -> nb::Result<(), !> {
         self.pc15.set_low();
+        Ok(())
     }
 
     // next_* cycles through themes/brightness/speed
-    pub fn next_theme(&mut self) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0]);
+    pub fn next_theme(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0])
     }
 
-    pub fn next_brightness(&mut self) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0]);
+    pub fn next_brightness(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
     }
 
-    pub fn next_animation_speed(&mut self) {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1]);
+    pub fn next_animation_speed(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
     }
 
-    pub fn set_theme(&mut self, theme: u8) {
-        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme]);
+    pub fn set_theme(&mut self, theme: u8) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme])
     }
 
-    pub fn send_keys(&mut self, state: &KeyState) {
+    pub fn send_keys(&mut self, state: &KeyState) -> nb::Result<(), !> {
         let packed = to_packed_bits(state);
-        self.serial.send(MsgType::Led, LedOp::Key as u8, &packed.bytes);
+        self.serial.send(MsgType::Led, LedOp::Key as u8, &packed.bytes)
     }
 
-    pub fn send_music(&mut self, keys: &[u8]) {
-        self.serial.send(MsgType::Led, LedOp::Music as u8, keys);
+    pub fn send_music(&mut self, keys: &[u8]) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::Music as u8, keys)
     }
 
-    pub fn get_theme_id(&mut self) {
+    pub fn get_theme_id(&mut self) -> nb::Result<(), !> {
         // responds with with [ThemeId]
-        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[]);
+        self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[])
     }
 
     pub fn receive(message: &Message) {

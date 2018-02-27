@@ -1,5 +1,6 @@
 #![feature(const_fn)]
 #![feature(proc_macro)]
+#![feature(never_type)]
 #![feature(non_exhaustive)]
 #![no_std]
 
@@ -8,6 +9,7 @@ extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
 extern crate embedded_hal;
+extern crate nb;
 extern crate stm32l151;
 extern crate stm32l151_hal as hal;
 

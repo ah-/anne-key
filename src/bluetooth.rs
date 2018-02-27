@@ -2,9 +2,10 @@
 
 use core::fmt::Write;
 use cortex_m_semihosting::hio;
+use nb;
 use rtfm::Threshold;
 use super::hidreport::HidReport;
-use super::protocol::{Message, MsgType, BleOp, KeyboardOp, SystemOp};
+use super::protocol::{Message, MsgType, BleOp, KeyboardOp};
 use super::serial::Serial;
 use super::serial::bluetooth_usart::BluetoothUsart;
 
@@ -21,46 +22,44 @@ impl<'a> Bluetooth<'a> {
         }
     }
 
-    pub fn on(&mut self) {
-        // TODO: check arguments
-        // unused?
-        self.serial.send(MsgType::Ble, BleOp::On as u8, &[]);
+    pub fn on(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::On as u8, &[])
     }
 
-    pub fn off(&mut self) {
-        self.serial.send(MsgType::Ble, BleOp::Off as u8, &[]);
+    pub fn off(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::Off as u8, &[])
     }
 
-    pub fn save_host(&mut self, host: u8) {
+    pub fn save_host(&mut self, host: u8) -> nb::Result<(), !> {
         // TODO: host < 4?
-        self.serial.send(MsgType::Ble, BleOp::SaveHost as u8, &[host]);
+        self.serial.send(MsgType::Ble, BleOp::SaveHost as u8, &[host])
     }
 
-    pub fn connect_host(&mut self, host: u8) {
-        self.serial.send(MsgType::Ble, BleOp::ConnectHost as u8, &[host]);
+    pub fn connect_host(&mut self, host: u8) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::ConnectHost as u8, &[host])
     }
 
-    pub fn delete_host(&mut self, host: u8) {
-        self.serial.send(MsgType::Ble, BleOp::DeleteHost as u8, &[host]);
+    pub fn delete_host(&mut self, host: u8) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::DeleteHost as u8, &[host])
     }
 
-    pub fn broadcast(&mut self) {
-        self.serial.send(MsgType::Ble, BleOp::Broadcast as u8, &[]);
+    pub fn broadcast(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::Broadcast as u8, &[])
     }
 
-    pub fn enable_compatibility_mode(&mut self, enabled: bool) {
+    pub fn enable_compatibility_mode(&mut self, enabled: bool) -> nb::Result<(), !> {
         let on = if enabled { 1 } else { 0 };
-        self.serial.send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on]);
+        self.serial.send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on])
     }
 
-    pub fn host_list_query(&mut self) {
-        self.serial.send(MsgType::Ble, BleOp::HostListQuery as u8, &[]);
+    pub fn host_list_query(&mut self) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Ble, BleOp::HostListQuery as u8, &[])
     }
 
-    pub fn send_report(&mut self, report: &HidReport) {
+    pub fn send_report(&mut self, report: &HidReport) -> nb::Result<(), !> {
         self.serial.send(MsgType::Keyboard,
                          KeyboardOp::KeyReport as u8,
-                         report.as_bytes());
+                         report.as_bytes())
     }
 
     pub fn receive(message: &Message) {

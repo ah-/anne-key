@@ -1,5 +1,6 @@
 use keycodes::KeyCode;
 
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum Action {
     Nop,
