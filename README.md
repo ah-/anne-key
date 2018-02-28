@@ -3,6 +3,31 @@ Firmware for Anne Pro Keyboard written in Rust
 
 [![Travis Build Status](https://travis-ci.org/ah-/anne-key.svg?branch=master)](https://travis-ci.org/ah-/anne-key)
 
+This is an alternative firmware for the [Anne Pro Keyboard](http://en.obins.net/anne-pro), with the goal of being more stable than the original firmware and adding extra features.
+
+Status
+------
+
+This project is still under heavy development and probably not quite ready yet to serve as your only keyboard.
+
+Working today:
+
+- Basic keyboard functionality
+- Bluetooth (as a keyboard)
+- LED control (switching on/off, changing themes)
+- USB charging
+- Drop in replacement as a simple firmware update
+
+Not yet implemented:
+
+- USB
+- Bluetooth communication with the Anne Pro App
+- Media controls / special keys
+- Uploading custom lighting settings
+- Uploading custom keymaps
+- Power Management
+- BT setup mode with LEDs etc.
+
 Community
 ---------
 
@@ -55,5 +80,5 @@ And that's it. Press the reset button again to exit the bootloader and return to
 If you want to return to the original firmware you can flash the [original firmware](http://en.obins.net/firmware) with:
 
 ```
-$ dfu-util --alt 0 --intf 0 --download "anne pro key 1.4.dfu"`
+$ dfu-util --alt 0 --intf 0 --download "anne pro key 1.4.dfu"
 ```
