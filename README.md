@@ -13,7 +13,7 @@ Then you can either follow the [obins firmware update steps](http://en.obins.net
 
 ### dfu-util
 
-First you'll need to [install dfu-util](https://docs.particle.io/faq/particle-tools/installing-dfu-util/core/<Paste>).
+First you'll need to [install dfu-util](https://docs.particle.io/faq/particle-tools/installing-dfu-util/core/).
 
 To flash your Anne Pro connect via USB, then hold down the Esc button, press the little reset switch on the back and finally release Esc.
 
