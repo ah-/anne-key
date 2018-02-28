@@ -42,4 +42,8 @@ done parsing DfuSe file
 
 And that's it. Press the reset button again to exit the bootloader and return to normal keyboard mode and you're done!
 
-If you want to return to the original firmware you can flash the [original firmware](http://en.obins.net/firmware) similarly with `dfu-util --alt 0 --intf 0 --download "anne pro key 1.4.dfu"`.
+If you want to return to the original firmware you can flash the [original firmware](http://en.obins.net/firmware) with:
+
+```
+$ dfu-util --alt 0 --intf 0 --download "anne pro key 1.4.dfu"`
+```
