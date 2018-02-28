@@ -3,6 +3,9 @@ Firmware for Anne Pro Keyboard written in Rust
 
 [![Travis Build Status](https://travis-ci.org/ah-/anne-key.svg?branch=master)](https://travis-ci.org/ah-/anne-key)
 
+<img src="docs/images/ferris.png" width=40%/> <img src="docs/images/anne.jpg" width=40%/>
+
+
 This is an alternative firmware for the [Anne Pro Keyboard](http://en.obins.net/anne-pro), with the goal of being more stable than the original firmware and adding extra features.
 
 Status
