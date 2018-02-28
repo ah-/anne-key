@@ -3,6 +3,10 @@ Firmware for Anne Pro Keyboard written in Rust
 
 [![Travis Build Status](https://travis-ci.org/ah-/anne-key.svg?branch=master)](https://travis-ci.org/ah-/anne-key)
 
+Community
+---------
+
+We hang out in the [Anne Pro discord](https://discord.gg/vZrBPQJ). Please observe the [Rust Code of Conduct](https://rust-lang.org/conduct.html) within our community.
 
 Flashing
 --------
