@@ -36,6 +36,11 @@ Community
 
 We hang out in the [Anne Pro discord](https://discord.gg/vZrBPQJ). Please observe the [Rust Code of Conduct](https://rust-lang.org/conduct.html) within our community.
 
+Documentation
+---------
+
+There is some documentation on hardware [here](docs/hardware.md).
+
 Flashing
 --------
 
