@@ -7,6 +7,8 @@ Firmware for Anne Pro Keyboard written in Rust
 Flashing
 --------
 
+You can find the latest build on the [Releases page](https://github.com/ah-/anne-key/releases). Download `anne-key.dfu`.
+
 To flash your Anne Pro connect via USB, then hold down the Esc button, press the little reset switch on the back and finally release Esc.
 
 Now your keyboard is in DfuSe mode. It should show up in dfu-util:
