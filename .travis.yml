@@ -33,6 +33,11 @@ branches:
   only:
     - master
 
+before_deploy:
+  - git config --local user.name "Andreas Heider"
+  - git config --local user.email "andreas@heider.io"
+  - git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
+
 deploy:
   provider: releases
   api_key:

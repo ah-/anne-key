@@ -92,7 +92,6 @@ impl<'a> Bluetooth<'a> {
                         //debug!("bt ack delete host: {:?}", message.data).ok();
                     }
                     BleOp::Pair => {
-                        // check this? sent after off, 14
                         debug!("bt pair").ok();
                         /*
                         self.serial.send(MsgType::System,
