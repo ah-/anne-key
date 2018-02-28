@@ -9,7 +9,7 @@ Flashing
 
 You can find the latest build on the [Releases page](https://github.com/ah-/anne-key/releases). Download `anne-key.dfu`.
 
-Then can either follow the [obins firmware update steps](http://en.obins.net/firmware) (click Update manual) or use `dfu-util`.
+Then you can either follow the [obins firmware update steps](http://en.obins.net/firmware) (click Update manual) or use `dfu-util`.
 
 ### dfu-util
 
