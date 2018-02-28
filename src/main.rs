@@ -80,6 +80,26 @@ app! {
             path: bluetooth::tx,
             resources: [BLUETOOTH],
         },
+        EXTI0: {
+            path: exti0,
+            resources: [EXTI],
+        },
+        EXTI1: {
+            path: exti1,
+            resources: [EXTI],
+        },
+        EXTI2: {
+            path: exti2,
+            resources: [EXTI],
+        },
+        EXTI3: {
+            path: exti3,
+            resources: [EXTI],
+        },
+        EXTI4: {
+            path: exti4,
+            resources: [EXTI],
+        },
         EXTI9_5: {
             path: exti9_5,
             resources: [EXTI],
@@ -150,6 +170,26 @@ fn idle() -> ! {
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     r.KEY_MATRIX.sample(&r.SYST);
     r.KEYBOARD.process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
+}
+
+fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {
+    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+}
+
+fn exti1(_t: &mut Threshold, r: EXTI1::Resources) {
+    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+}
+
+fn exti2(_t: &mut Threshold, r: EXTI2::Resources) {
+    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+}
+
+fn exti3(_t: &mut Threshold, r: EXTI3::Resources) {
+    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+}
+
+fn exti4(_t: &mut Threshold, r: EXTI4::Resources) {
+    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
