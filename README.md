@@ -9,6 +9,12 @@ Flashing
 
 You can find the latest build on the [Releases page](https://github.com/ah-/anne-key/releases). Download `anne-key.dfu`.
 
+Then can either follow the [obins firmware update steps](http://en.obins.net/firmware) (click Update manual) or use `dfu-util`.
+
+### dfu-util
+
+First you'll need to [install dfu-util](https://docs.particle.io/faq/particle-tools/installing-dfu-util/core/<Paste>).
+
 To flash your Anne Pro connect via USB, then hold down the Esc button, press the little reset switch on the back and finally release Esc.
 
 Now your keyboard is in DfuSe mode. It should show up in dfu-util:
