@@ -21,6 +21,8 @@ main() {
         rustup component list | grep 'rust-src.*installed' || \
             rustup component add rust-src
     fi
+
+    which mdbook || cargo install mdbook
 }
 
 main
