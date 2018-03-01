@@ -1,15 +1,13 @@
 {
     "structure": {
-        "summary": "_summary.md"
+        "summary": "SUMMARY.md"
     },
     "plugins" : [
       "edit-link",
       "forkmegithub",
       "hints",
-      "page-toc",
       "terminal",
-      "toolbar",
-      "bulk-redirect"
+      "toolbar"
     ],
     "pluginsConfig": {
       "edit-link": {
