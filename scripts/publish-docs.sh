@@ -8,7 +8,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ||
    exit 0
 fi
 
-pushd book
+cd book
 
 echo -e "Initializing Git"
 git init
@@ -27,5 +27,3 @@ git commit -m "rebuild pages at ${rev}" --quiet
 git push -q upstream HEAD:gh-pages
 
 echo -e "Deployed docs to GitHub Pages"
-
-popd
