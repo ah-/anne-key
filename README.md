@@ -39,7 +39,7 @@ We hang out in the [Anne Pro Dev discord](https://discord.gg/ARQmrNn). Please ob
 Documentation
 ---------
 
-There is some documentation on hardware [here](docs/hardware.md).
+There is some documentation on hardware [here](docs/hardware.md) and [here](https://ah-.github.io/anne-key/).
 
 Flashing
 --------
