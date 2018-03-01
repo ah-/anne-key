@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set -euxo pipefail
 
 main() {
