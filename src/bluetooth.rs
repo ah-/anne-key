@@ -67,8 +67,8 @@ impl<'a> Bluetooth<'a> {
             MsgType::System => {
                 match SystemOp::from(message.operation)  {
                     SystemOp::GetId => {
-                        const DEVICE_MODEL_ANNE_PRO: u8 = 2;
                         const DEVICE_TYPE_KEYBOARD: u8 = 1;
+                        const DEVICE_MODEL_ANNE_PRO: u8 = 2;
                         //const DEVICE_ID = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
                         // send two packets

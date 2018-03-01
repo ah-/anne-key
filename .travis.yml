@@ -17,8 +17,7 @@ install:
   - bash ./scripts/install.sh
 
 script:
-  - xargo build --target $TARGET --release
-  - bash ./scripts/generate_dfu.sh
+  - make
 
 cache:
   cargo: true
