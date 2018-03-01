@@ -35,6 +35,7 @@ branches:
     - master
 
 before_deploy:
+  - ./scripts/publish-docs.sh
   - git config --local user.name "Andreas Heider"
   - git config --local user.email "andreas@heider.io"
   - git tag "$(date +'%Y-%m-%d')-$TRAVIS_BUILD_NUMBER-$(git log --format=%h -1)"

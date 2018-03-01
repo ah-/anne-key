@@ -18,7 +18,7 @@ touch .
 echo -e "Pushing changes to gh-pages"
 git add -A . 
 git commit -m "rebuild pages at ${rev}" --quiet
-git push -q upstream HEAD:gh-pages --quiet
+git push -q upstream HEAD:gh-pages
 
 echo -e "Deployed docs to GitHub Pages"
 
