@@ -1,6 +1,6 @@
 {
     "structure": {
-        "summary": "docs/SUMMARY.md"
+        "summary": "_summary.md"
     },
     "plugins" : [
       "edit-link",
