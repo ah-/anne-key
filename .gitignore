@@ -4,3 +4,5 @@ Cargo.lock
 *.bin
 *.dfu
 target/
+book/
+todo.txt
