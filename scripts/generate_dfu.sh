@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set -ex
 
 arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/release/anne-key anne-key.bin
