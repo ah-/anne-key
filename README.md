@@ -34,7 +34,7 @@ Not yet implemented:
 Community
 ---------
 
-We hang out in the [Anne Pro discord](https://discord.gg/ARQmrNn). Please observe the [Rust Code of Conduct](https://rust-lang.org/conduct.html) within our community.
+We hang out in the [Anne Pro Dev discord](https://discord.gg/ARQmrNn). Please observe the [Rust Code of Conduct](https://rust-lang.org/conduct.html) within our community.
 
 Documentation
 ---------
