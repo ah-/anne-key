@@ -47,3 +47,7 @@ deploy:
     - "target/thumbv7m-none-eabi/release/anne-key"
     - "anne-key.dfu"
   skip_cleanup: true
+
+env:
+  global:
+    secure: Rm5hMT+6S1yU01Xt37Q2Nl3nCnhI0kRqWGupWXceoGDdO2L9KS2fnvSs29d6X1DoaS+FQKthvsx4ZEelVdNm20z0Rih+33HlrTweEsSoj4gMQ41NuR3e7Umrb3uWGGcPJNmtE5lzoK/e2iXhv+oQYzvirxfMoNYEbVV2YK7GbLsC+cfp/TKVree3N8nf5PRNF+Apq97LTbKIwQ0tyFZ5Q01EXK32eSVWnPFbC46jrDua2Bui4fsuo/TdvSyeqjygtKB6nIfpsTt2pxrzMV7zx3jTB9fTJKHAPrxLuNijRWWSV3Nm4/ZOkDsUCIka4ZrJPGuOEWrUEhDFmf3WJU0gknk1b0QYCQN56S8vdzPQ9rb5d28qVFs04Z+A05GrAv6OpHh2DJVtPLO1HogG+kRfojFteghTrkTLb0xsHJIN3GbiaEr3qjWju/pClQJ0WSDn+KbxfhkRD2GJIhKZhl4WQGroSeaBeMQjB9MUZwmcKNr2hpW86CifDj3Tc176gY8bPcUZpXKpIDp0hmXnLT5u7hoGX0fCfiVqP7bKQNBVBFnaOAJuaF2yha4zy7R3iXdEq07YpBof3e0muC7cKDvcxoZT5+fR4kcMayu/J3RGoreR291W6gwn4KMv5UTK9VSp/i5eAVErxpZXXnQHta2KHtHnDZXDVkirIEK20/a0K6E=
