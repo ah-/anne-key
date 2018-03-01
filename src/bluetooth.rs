@@ -78,8 +78,8 @@ impl<'a> Bluetooth<'a> {
 
                         let data1 = [10, 2, 0, DEVICE_TYPE_KEYBOARD, DEVICE_MODEL_ANNE_PRO, 1, 2, 3, 4, 5, 6];
                         let data2 = [8, 2, 1, 7, 8, 9, 10, 11, 12];
-                        self.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
-                        self.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
+                        //self.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
+                        //self.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
                     }
                     _ => {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();
