@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -euxo pipefail
+set -eux
 
 main() {
     if [ $TARGET = thumbv7m-none-eabi ]; then

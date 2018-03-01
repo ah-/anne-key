@@ -1,6 +1,12 @@
 #!/bin/sh
 
-set -euxo pipefail
+set -eux
+
+# Only run this on the master branch
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] ||
+   [ "$TRAVIS_BRANCH" != "master" ]; then
+   exit 0
+fi
 
 pushd book
 
