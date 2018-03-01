@@ -15,7 +15,7 @@ git init
 git config user.name "Andreas Heider"
 git config user.email "andreas@heider.io"
 
-git remote add upstream "https://$GH_TOKEN@github.com/ah-/anne-key.git"
+git remote add upstream "https://$GH_TOKEN@github.com/ah-/anne-key.git" > /dev/null 2>&1
 git fetch upstream --quiet
 git reset upstream/gh-pages --quiet
 
