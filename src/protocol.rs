@@ -133,9 +133,11 @@ impl From<u8> for LedOp {
 #[derive(Debug,Copy,Clone)]
 pub enum SystemOp {
     Reserved = 0,
+    GetId = 1,
     IsSyncCode = 8,
     SetSyncCode = 9,
     AckReserved = 128,
+    AckGetId = 129,
 }
 
 impl From<u8> for SystemOp {

@@ -5,7 +5,7 @@ use cortex_m_semihosting::hio;
 use nb;
 use rtfm::Threshold;
 use super::hidreport::HidReport;
-use super::protocol::{Message, MsgType, BleOp, KeyboardOp};
+use super::protocol::{Message, MsgType, BleOp, KeyboardOp, SystemOp};
 use super::serial::Serial;
 use super::serial::bluetooth_usart::BluetoothUsart;
 
@@ -64,13 +64,27 @@ impl<'a> Bluetooth<'a> {
 
     pub fn receive(message: &Message) {
         match message.msg_type {
-            //(2, 1) => {
-                // SYSTEM Get ID
-                //let data = &[4, 1, 0, 1, 2, 3, 4][..];
-                //self.send(MsgType::System, 129, &data, gpioa);
-                //}
             MsgType::System => {
-                debug!("msg: System {} {:?}", message.operation, message.data).ok();
+                match SystemOp::from(message.operation)  {
+                    SystemOp::GetId => {
+                        const DEVICE_MODEL_ANNE_PRO: u8 = 2;
+                        const DEVICE_TYPE_KEYBOARD: u8 = 1;
+                        //const DEVICE_ID = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+                        // send two packets
+                        // nblock = 2
+                        // [datalen, nblock, iblock = 0, data...]
+                        // [datalen, nblock, iblock = 1, data...]
+
+                        let data1 = [10, 2, 0, DEVICE_TYPE_KEYBOARD, DEVICE_MODEL_ANNE_PRO, 1, 2, 3, 4, 5, 6];
+                        let data2 = [8, 2, 1, 7, 8, 9, 10, 11, 12];
+                        self.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
+                        self.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
+                    }
+                    _ => {
+                        debug!("msg: System {} {:?}", message.operation, message.data).ok();
+                    }
+                }
             }
             MsgType::Ble => {
                 match BleOp::from(message.operation)  {
