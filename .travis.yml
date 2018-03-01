@@ -15,9 +15,11 @@ before_install: set -e
 
 install:
   - bash ./scripts/install.sh
+  - cargo install mdbook
 
 script:
   - make
+  - make docs
 
 cache:
   cargo: true
