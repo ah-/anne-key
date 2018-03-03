@@ -21,9 +21,9 @@ pub type Layout = [Action; 70];
 pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
 
 // activate by indexing into LAYERS
-const LM1: Action = LayerMomentary(1);
-const LM2: Action = LayerMomentary(2);
-const LT3: Action = LayerToggle(3);
+const FN_M: Action = LayerMomentary(1);
+const LED_M: Action = LayerMomentary(2);
+const BT_T: Action = LayerToggle(3);
 const __: Action = Transparent;
 
 pub const BASE: Layout = layout![
@@ -31,7 +31,7 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    No        Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   LM2      LT3       RCtrl
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   LED_M    BT_T      RCtrl
 ];
 
 pub const FN: Layout = layout![
