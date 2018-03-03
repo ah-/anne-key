@@ -18,6 +18,7 @@ use keycodes::KeyCode::*;
 
 pub type Layout = [Action; 70];
 
+const LM1: Action = LayerMomentary(1);
 const LM2: Action = LayerMomentary(2);
 const LT3: Action = LayerToggle(3);
 const __: Action = Transparent;
