@@ -18,6 +18,9 @@ use keycodes::KeyCode::*;
 
 pub type Layout = [Action; 70];
 
+pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
+
+// activate by indexing into LAYERS
 const LM1: Action = LayerMomentary(1);
 const LM2: Action = LayerMomentary(2);
 const LT3: Action = LayerToggle(3);
@@ -54,5 +57,3 @@ pub const BT: Layout = layout![
     BtCompatibilityMode(false) __ __ __ __ __ __ __ __ __ __ __ __ __
     LedNextTheme BtHostListQuery __ __ __ __ __ __ __ __ __ __ __ __
 ];
-
-pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
