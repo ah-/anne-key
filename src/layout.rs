@@ -31,7 +31,7 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    No        Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   LED_M    BT_T      RCtrl
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     BT_T      LED_M
 ];
 
 pub const FN: Layout = layout![
