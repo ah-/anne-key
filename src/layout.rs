@@ -31,11 +31,11 @@ pub const BASE: Layout = layout![
 ];
 
 pub const FN: Layout = layout![
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
+  Grave F1   F2   F3    F4 F5 F6 F7   F8   F9         F10   F11    F12    __
+  __    __   Up   __    __ __ __ __   Up   Scrolllock Pause Home   End    PScreen
+  __    Left Down Right __ __ __ Left Down Right      PgUp  PgDown No     __
+  __    __   __   __    __ __ __ __   __   __         __    Insert Delete __
+  __    __   __   No    No __ No No   No   No         __    __     __     __
 ];
 
 pub const LED: Layout = layout![
