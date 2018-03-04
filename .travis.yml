@@ -3,7 +3,7 @@ language: rust
 matrix:
   include:
     - env: TARGET=thumbv7m-none-eabi
-      rust: nightly
+      rust: nightly-2018-03-02
       addons:
         apt:
           sources:
