@@ -32,12 +32,11 @@ pub enum Action {
 }
 
 // Allow auto-conversion of KeyCodes to Action for nicer layout formatting
-// and drop commas
 macro_rules! layout {
-    ( $( $e: expr )* ) => {
+    ( $( $key: expr );* ) => {
         [
             $(
-                $e.to_action(),
+                $key.to_action(),
             )*
         ]
     };
