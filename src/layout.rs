@@ -32,8 +32,8 @@ pub const FN: Layout = layout![
     __       ;  __ ;  Up ;  __ ;  __ ;  __ ;  __ ;  __ ; Up ; Scrolllock; Pause; Home; End; PScreen;
 // Row 3:
     __        ; Left; Down; Right;  __ ;  __ ;  __ ; Left; Down;     Right; PgUp ; PgDown ;   No;__;
-// Row 4: will fix Insert/Delete
-    __          ;  __ ;  __ ;  __ ;  __ ;  __  ;  __ ;  __ ;   __ ;    __ ; __ ;   Insert;Delete;__;
+// Row 4:
+    __          ;  __ ;  __ ;  __ ;  __ ;  __  ;  __ ;  __ ;   __ ;   Insert; Delete;      __;__;__;
 // Row 5:
     __   ; __    ; __   ;  No;No;       __    ; No;No;No;No;  __    ;     __  ;    __  ;  __
 ];
