@@ -53,7 +53,7 @@ pub const LED: Layout = layout![
 
 pub const BT: Layout = layout![
 // Row 1:
-    BtOff ; BtOn ; BtConnectHost(0) ; BtConnectHost(1) ; BtConnectHost(2) ; BtConnectHost(3) ; __ ; __ ; __ ; __ ; __ ; __ ; __ ; __;
+    BtOff ; BtConnectHost(0) ; BtConnectHost(1) ; BtConnectHost(2) ; BtConnectHost(3) ; __ ; __ ; __ ; __ ; __ ; BtCompatibilityMode(true) ; BtOff ; BtBroadcast ; BtOn;
 // Row 2:
     BtBroadcast ; BtSaveHost(0) ; BtSaveHost(1) ; BtSaveHost(2) ; BtSaveHost(3) ; __ ; __ ; __ ; __ ; __ ; __ ; __ ; __ ; __;
 // Row 3:
