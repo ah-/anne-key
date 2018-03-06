@@ -15,9 +15,9 @@ pub enum Action {
 
     LedOn, // = 0x30,
     LedOff,
-    LedNextTheme,
-    LedNextBrightness,
-    LedNextAnimationSpeed,
+    LedNT, //LedNextTheme
+    LedNB, //LedNextBrightness
+    LedNAS, //LedNextAnimationSpeed
     LedTheme(u8),
 
     //Bluetooth = 0x40,

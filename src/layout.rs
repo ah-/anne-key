@@ -35,15 +35,15 @@ pub const BASE: Layout = layout![
 ];
 
 pub const FN: Layout = layout![
-  Grave F1   F2   F3    F4    F5                    F6                F7             F8   F9         F10    F11    F12    __
-  __    __   Up   __    LedOn LedNextAnimationSpeed LedNextBrightness LedNextTheme   Up   Scrolllock Pause  Home   End    PScreen
-  __    Left Down Right __    __                    __                Left           Down Right      PgUp   PgDown No     __
-  __    __   __   __    __    __                    __                __             __   Insert     Delete No     No     __
-  __    __   __   No    No    __                    No                No             No   No         __     __     __     __
+  Grave F1   F2   F3    F4    F5     F6    F7      F8   F9         F10    F11    F12    __
+  __    __   Up   __    LedOn LedNAS LedNB LedNT   Up   Scrolllock Pause  Home   End    PScreen
+  __    Left Down Right __    __     __    Left    Down Right      PgUp   PgDown No     __
+  __    __   __   __    __    __     __    __      __   Insert     Delete No     No     __
+  __    __   __   No    No    __     No    No      No   No         __     __     __     __
 ];
 
 pub const LED: Layout = layout![
-    LedOff LedOn LedNextTheme LedNextAnimationSpeed LedNextBrightness __ __ __ __ __ __ __ __ __
+    LedOff LedOn LedNT LedNAS LedNB __ __ __ __ __ __ __ __ __
     __ LedTheme(0) LedTheme(1) LedTheme(2) LedTheme(14) LedTheme(17) LedTheme(18) __ __ __ __ __ __ __
     __ __ __ __ __ __ __ __ __ __ __ __ No __
     __ __ __ __ __ __ __ __ __ __ __ __ __ __
@@ -55,5 +55,5 @@ pub const BT: Layout = layout![
     BtBroadcast BtSaveHost(0) BtSaveHost(1) BtSaveHost(2) BtSaveHost(3) __ __ __ __ __ __ __ __ __
     BtCompatibilityMode(true) BtDeleteHost(0) BtDeleteHost(1) BtDeleteHost(2) BtDeleteHost(3) __ __ __ __ __ __ __ No __
     BtCompatibilityMode(false) __ __ __ __ __ __ __ __ __ __ __ __ __
-    LedNextTheme BtHostListQuery __ No No __ No No No No __ __ __ __
+    LedNT BtHostListQuery __ No No __ No No No No __ __ __ __
 ];

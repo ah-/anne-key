@@ -147,9 +147,9 @@ impl<'a> EventProcessor for Led<'a> {
             let result = match action {
                 &Action::LedOn => self.on(),
                 &Action::LedOff => self.off(),
-                &Action::LedNextTheme => self.next_theme(),
-                &Action::LedNextBrightness => self.next_brightness(),
-                &Action::LedNextAnimationSpeed => self.next_animation_speed(),
+                &Action::LedNT => self.next_theme(),
+                &Action::LedNB => self.next_brightness(),
+                &Action::LedNAS => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
                 _ => Ok(())
             };
