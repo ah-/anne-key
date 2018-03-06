@@ -25,7 +25,7 @@ mod keyboard;
 mod keycodes;
 mod keymatrix;
 mod layout;
-mod led;
+//mod led;
 mod protocol;
 mod serial;
 
@@ -36,7 +36,7 @@ use hal::gpio::GpioExt;
 use bluetooth::Bluetooth;
 use keyboard::Keyboard;
 use keymatrix::KeyMatrix;
-use led::Led;
+//use led::Led;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
@@ -49,29 +49,29 @@ app! {
         static KEY_MATRIX: KeyMatrix;
         static BLUETOOTH_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
         static BLUETOOTH: Bluetooth<'static>;
-        static LED_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
-        static LED: Led<'static>;
+        //static LED_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
+        //static LED: Led<'static>;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
     },
 
     init: {
-        resources: [BLUETOOTH_BUFFERS, LED_BUFFERS],
+        resources: [BLUETOOTH_BUFFERS /*, LED_BUFFERS*/],
     },
 
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, KEY_MATRIX, SYST, KEYBOARD],
+            resources: [BLUETOOTH, /*LED,*/ KEY_MATRIX, SYST, KEYBOARD],
         },
-        DMA1_CHANNEL2: {
+        /*8DMA1_CHANNEL2: {
             path: led::tx,
             resources: [LED],
         },
         DMA1_CHANNEL3: {
             path: led::rx,
             resources: [LED],
-        },
+        },*/
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
             resources: [BLUETOOTH, KEY_MATRIX],
@@ -144,18 +144,21 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
 
     let key_matrix = KeyMatrix::new(row_pins, column_pins);
 
+    /*
     let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, dma.3, dma.2, &mut d.RCC);
     let led_serial = Serial::new(led_usart, r.LED_BUFFERS);
     let led = Led::new(led_serial, gpioc.pc15);
+    */
 
     let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC);
-    let bluetooth_serial = Serial::new(bluetooth_usart, r.BLUETOOTH_BUFFERS);
-    let bluetooth = Bluetooth::new(bluetooth_serial);
+    let (bt_send_buffer, bt_receive_buffer) = r.BLUETOOTH_BUFFERS.split_at_mut(1);
+    let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
+    let bluetooth = Bluetooth::new(bluetooth_serial, &mut bt_receive_buffer[0]);
 
     init::LateResources {
         BLUETOOTH: bluetooth,
         KEY_MATRIX: key_matrix,
-        LED: led,
+        //LED: led,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
     }
@@ -169,7 +172,7 @@ fn idle() -> ! {
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     r.KEY_MATRIX.sample(&r.SYST);
-    r.KEYBOARD.process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
+    r.KEYBOARD.process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH /*, &mut r.LED*/);
 }
 
 fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {

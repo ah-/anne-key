@@ -6,19 +6,22 @@ use nb;
 use rtfm::Threshold;
 use super::hidreport::HidReport;
 use super::protocol::{Message, MsgType, BleOp, KeyboardOp, SystemOp};
-use super::serial::Serial;
+use super::serial::{Serial, Transfer, DmaUsart};
 use super::serial::bluetooth_usart::BluetoothUsart;
 
 
 pub struct Bluetooth<'a> {
     pub serial: Serial<'a, BluetoothUsart>,
+    pub rx_transfer: Option<Transfer>,
 }
 
 
 impl<'a> Bluetooth<'a> {
-    pub fn new(serial: Serial<'a, BluetoothUsart>) -> Bluetooth {
+    pub fn new(mut serial: Serial<'a, BluetoothUsart>, rx_buffer: &'static mut[u8; 0x20]) -> Bluetooth<'a> {
+        let rx_transfer = serial.receive(rx_buffer);
         Bluetooth {
             serial: serial,
+            rx_transfer: Some(rx_transfer),
         }
     }
 
@@ -62,7 +65,7 @@ impl<'a> Bluetooth<'a> {
                          report.as_bytes())
     }
 
-    pub fn receive(message: &Message) {
+    pub fn handle_message(&mut self, message: &Message) {
         match message.msg_type {
             MsgType::System => {
                 match SystemOp::from(message.operation)  {
@@ -78,8 +81,8 @@ impl<'a> Bluetooth<'a> {
 
                         let data1 = [10, 2, 0, DEVICE_TYPE_KEYBOARD, DEVICE_MODEL_ANNE_PRO, 1, 2, 3, 4, 5, 6];
                         let data2 = [8, 2, 1, 7, 8, 9, 10, 11, 12];
-                        //self.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
-                        //self.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
+                        self.serial.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
+                        self.serial.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
                     }
                     _ => {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();
@@ -130,10 +133,40 @@ impl<'a> Bluetooth<'a> {
             }
         }
     }
+
+    pub fn poll(&mut self) {
+        let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
+        match result {
+            Err(nb::Error::WouldBlock) => {},
+            Err(_) => panic!("bt rx error"),
+            Ok(()) => {
+                let buffer = self.rx_transfer.take().unwrap().finish();
+                {
+                    let message = Message {
+                        msg_type: MsgType::from(buffer[0]),
+                        operation: buffer[2],
+                        data: &buffer[3..3 + buffer[1] as usize - 1],
+                    };
+                    self.handle_message(&message);
+
+                    match (message.msg_type, message.operation) {
+                        (MsgType::Ble, 170) => {
+                            // Wakeup acknowledged, send data
+                            self.serial.usart.ack_wakeup();
+                            self.serial.send_buffer_pos = 0;
+                        },
+                        _ => {}
+                    }
+                }
+
+                self.rx_transfer = Some(self.serial.receive(buffer));
+            }
+        }
+    }
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    r.BLUETOOTH.serial.receive(Bluetooth::receive);
+    r.BLUETOOTH.poll()
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {

@@ -11,6 +11,7 @@ use super::serial::led_usart::LedUsart;
 use super::keymatrix::{KeyState, to_packed_bits};
 
 
+/*
 pub struct Led<'a> {
     pub serial: Serial<'a, LedUsart>,
     pub pc15: PC15<Output>,
@@ -88,7 +89,9 @@ impl<'a> Led<'a> {
         }
     }
 }
+*/
 
+/*
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
     r.LED.serial.receive(Led::receive);
 }
@@ -96,3 +99,4 @@ pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
     r.LED.serial.tx_interrupt();
 }
+*/
