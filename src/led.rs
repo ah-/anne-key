@@ -6,21 +6,23 @@ use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
 use nb;
 use super::protocol::{Message, MsgType, LedOp};
-use super::serial::Serial;
+use super::serial::{Serial, Transfer};
 use super::serial::led_usart::LedUsart;
 use super::keymatrix::{KeyState, to_packed_bits};
 
 
-/*
 pub struct Led<'a> {
     pub serial: Serial<'a, LedUsart>,
+    pub rx_transfer: Option<Transfer>,
     pub pc15: PC15<Output>,
 }
 
 impl<'a> Led<'a> {
-    pub fn new(serial: Serial<'a, LedUsart>, pc15: PC15<Input>) -> Led<'a> {
+    pub fn new(mut serial: Serial<'a, LedUsart>, rx_buffer: &'static mut[u8; 0x20], pc15: PC15<Input>) -> Led<'a> {
+        let rx_transfer = serial.receive(rx_buffer);
         Led {
             serial: serial,
+            rx_transfer: Some(rx_transfer),
             pc15: pc15.into_output().pull_up(),
         }
     }
@@ -66,7 +68,7 @@ impl<'a> Led<'a> {
         self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[])
     }
 
-    pub fn receive(message: &Message) {
+    pub fn handle_message(&mut self, message: &Message) {
         match message.msg_type {
             MsgType::Led => {
                 match LedOp::from(message.operation) {
@@ -88,15 +90,34 @@ impl<'a> Led<'a> {
             }
         }
     }
-}
-*/
 
-/*
+    pub fn poll(&mut self) {
+        let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
+        match result {
+            Err(nb::Error::WouldBlock) => {},
+            Err(_) => panic!("led rx error"),
+            Ok(()) => {
+                let buffer = self.rx_transfer.take().unwrap().finish();
+
+                {
+                    let message = Message {
+                        msg_type: MsgType::from(buffer[0]),
+                        operation: buffer[2],
+                        data: &buffer[3..3 + buffer[1] as usize - 1],
+                    };
+                    self.handle_message(&message);
+                }
+
+                self.rx_transfer = Some(self.serial.receive(buffer));
+            }
+        }
+    }
+}
+
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
-    r.LED.serial.receive(Led::receive);
+    r.LED.poll();
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
     r.LED.serial.tx_interrupt();
 }
-*/

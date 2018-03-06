@@ -5,7 +5,7 @@ use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::LAYERS;
-//use led::Led;
+use led::Led;
 
 pub struct Keyboard {
     layers: Layers,
@@ -40,7 +40,7 @@ impl Keyboard {
         action
     }
 
-    pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth /*, led: &mut Led*/) {
+    pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth, led: &mut Led) {
         // TODO: might not even need this check after switching to wakeup only handling?
         if !eq(&self.previous_state, state) {
             let mut hid = HidProcessor::new();
@@ -53,7 +53,7 @@ impl Keyboard {
                 if *pressed || changed {
                     let action = self.get_action(key);
                     hid.process(&action, *pressed, changed);
-                    //led.process(&action, *pressed, changed);
+                    led.process(&action, *pressed, changed);
                     bluetooth.process(&action, *pressed, changed);
                     self.layers.process(&action, *pressed, changed);
                 }
@@ -63,7 +63,7 @@ impl Keyboard {
             // probably needs a buffer / or not send this when setup got sent
             // or not send this if nothing changed
             bluetooth.send_report(&hid.report).log_error();
-            //led.send_keys(state).log_error();
+            led.send_keys(state).log_error();
             self.layers.finish();
 
             self.previous_state = *state;
@@ -141,7 +141,6 @@ impl EventProcessor for HidProcessor {
     }
 }
 
-/*
 impl<'a> EventProcessor for Led<'a> {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
@@ -158,7 +157,6 @@ impl<'a> EventProcessor for Led<'a> {
         }
     }
 }
-*/
 
 impl<'a> EventProcessor for Bluetooth<'a> {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
