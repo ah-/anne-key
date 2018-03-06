@@ -43,11 +43,11 @@ impl<'a> Led<'a> {
     }
 
     pub fn next_brightness(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
     }
 
     pub fn next_animation_speed(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
+        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
     }
 
     pub fn set_theme(&mut self, theme: u8) -> nb::Result<(), !> {
