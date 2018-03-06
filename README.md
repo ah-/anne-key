@@ -20,11 +20,11 @@ Working today:
 - LED control (switching on/off, changing themes)
 - USB charging
 - Drop in replacement as a simple firmware update
+- Partial bluetooth communication with the Anne Pro App (tested with [Anne Pro Mac App](https://github.com/msvisser/AnnePro-mac))
 
 Not yet implemented:
 
 - USB
-- Bluetooth communication with the Anne Pro App
 - Media controls / special keys
 - Uploading custom lighting settings
 - Uploading custom keymaps

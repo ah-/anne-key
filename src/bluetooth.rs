@@ -5,7 +5,8 @@ use cortex_m_semihosting::hio;
 use nb;
 use rtfm::Threshold;
 use super::hidreport::HidReport;
-use super::protocol::{Message, MsgType, BleOp, KeyboardOp, SystemOp};
+use super::led::Led;
+use super::protocol::{Message, MsgType, BleOp, LedOp, KeyboardOp, SystemOp};
 use super::serial::{Serial, Transfer, DmaUsart};
 use super::serial::bluetooth_usart::BluetoothUsart;
 
@@ -65,7 +66,7 @@ impl<'a> Bluetooth<'a> {
                          report.as_bytes())
     }
 
-    pub fn handle_message(&mut self, message: &Message) {
+    pub fn handle_message(&mut self, message: &Message, led: &mut Led) {
         match message.msg_type {
             MsgType::System => {
                 match SystemOp::from(message.operation)  {
@@ -88,7 +89,7 @@ impl<'a> Bluetooth<'a> {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();
                     }
                 }
-            }
+            },
             MsgType::Ble => {
                 match BleOp::from(message.operation)  {
                     BleOp::AckOn => {
@@ -128,13 +129,23 @@ impl<'a> Bluetooth<'a> {
                     }
                 }
             },
+            MsgType::Led => {
+                match LedOp::from(message.operation)  {
+                    LedOp::ThemeMode => {
+                        led.set_theme(message.data[0]);
+                    }
+                    _ => {
+                        debug!("msg: Led {} {:?}", message.operation, message.data).ok();
+                    }
+                }
+            },
             _ => {
                 debug!("msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
             }
         }
     }
 
-    pub fn poll(&mut self) {
+    pub fn poll(&mut self, led: &mut Led) {
         let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
         match result {
             Err(nb::Error::WouldBlock) => {},
@@ -147,7 +158,7 @@ impl<'a> Bluetooth<'a> {
                         operation: buffer[2],
                         data: &buffer[3..3 + buffer[1] as usize - 1],
                     };
-                    self.handle_message(&message);
+                    self.handle_message(&message, led);
 
                     match (message.msg_type, message.operation) {
                         (MsgType::Ble, 170) => {
@@ -166,7 +177,7 @@ impl<'a> Bluetooth<'a> {
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    r.BLUETOOTH.poll()
+    r.BLUETOOTH.poll(&mut r.LED)
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {

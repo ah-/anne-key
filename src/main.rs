@@ -74,7 +74,7 @@ app! {
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, KEY_MATRIX],
+            resources: [BLUETOOTH, KEY_MATRIX, LED],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
