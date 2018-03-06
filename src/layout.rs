@@ -25,6 +25,10 @@ const FN_M: Action = LayerMomentary(1);
 const LED_M: Action = LayerMomentary(2);
 const BT_T: Action = LayerToggle(3);
 const __: Action = Transparent;
+const LedNT: Action = LedNextTheme;
+const LedNB: Action = LedNextBrightness;
+const LedNAS: Action = LedNextAnimationSpeed;
+
 
 pub const BASE: Layout = layout![
     Escape   N1     N2   N3 N4 N5    N6 N7 N8    N9  N0     Minus    Equal     BSpace
