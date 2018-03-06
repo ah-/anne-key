@@ -15,6 +15,7 @@ pub struct Led<'a> {
     pub serial: Serial<'a, LedUsart>,
     pub rx_transfer: Option<Transfer>,
     pub pc15: PC15<Output>,
+    pub state: bool
 }
 
 impl<'a> Led<'a> {
@@ -24,6 +25,7 @@ impl<'a> Led<'a> {
             serial: serial,
             rx_transfer: Some(rx_transfer),
             pc15: pc15.into_output().pull_up(),
+            state: true
         }
     }
 
@@ -35,6 +37,16 @@ impl<'a> Led<'a> {
     pub fn off(&mut self) -> nb::Result<(), !> {
         self.pc15.set_low();
         Ok(())
+    }
+
+    pub fn toggle(&mut self) -> nb::Result<(), !> {
+        if(!self.state){
+            self.pc15.set_high();
+	} else {
+	    self.pc15.set_low();
+        }
+	self.state = !self.state;
+	Ok(())
     }
 
     // next_* cycles through themes/brightness/speed

@@ -15,6 +15,7 @@ pub enum Action {
 
     LedOn, // = 0x30,
     LedOff,
+    LedToggle,
     LedNextTheme,
     LedNextBrightness,
     LedNextAnimationSpeed,
