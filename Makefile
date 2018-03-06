@@ -10,7 +10,7 @@ dfu: build
 	./scripts/generate_dfu.sh
 
 debug: build
-	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-led
+	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
 
 clean:
 	$(XARGO) clean
