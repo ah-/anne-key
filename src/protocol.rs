@@ -64,6 +64,7 @@ pub enum BleOp {
     AckAckFaiL = 138,
     AckCurrentHostQuery = 139,
     AckCompatibilityMode = 140,
+    AckWakeup = 170,
 }
 
 impl From<u8> for BleOp {
@@ -109,6 +110,7 @@ pub enum LedOp {
     GetUsedThemeId = 8,
     GetUserStaticTheme = 9,
     GetUserStaticCrcId = 10,
+    SetIndividualKeys = 11,
     GetThemeId = 0xc,
     AckReserved = 128,
     AckThemeMode = 129,
@@ -121,6 +123,7 @@ pub enum LedOp {
     AckGetUsedThemeId = 136,
     AckGetUserStaticTheme = 137,
     AckGetUserStaticCrcId = 138,
+    AckSetIndividualKeys = 139,
 }
 
 impl From<u8> for LedOp {

@@ -2,6 +2,7 @@
 #![feature(proc_macro)]
 #![feature(never_type)]
 #![feature(non_exhaustive)]
+#![feature(unsize)]
 #![no_std]
 
 extern crate bare_metal;
@@ -47,6 +48,7 @@ app! {
     resources: {
         static KEYBOARD: Keyboard = Keyboard::new();
         static KEY_MATRIX: KeyMatrix;
+        //static BLUETOOTH_BUFFERS: [[u8; 0x100]; 2] = [[0; 0x100]; 2];
         static BLUETOOTH_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
         static BLUETOOTH: Bluetooth<'static>;
         static LED_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];

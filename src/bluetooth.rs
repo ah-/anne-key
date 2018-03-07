@@ -13,12 +13,13 @@ use super::serial::bluetooth_usart::BluetoothUsart;
 
 pub struct Bluetooth<'a> {
     pub serial: Serial<'a, BluetoothUsart>,
-    pub rx_transfer: Option<Transfer>,
+    pub rx_transfer: Option<Transfer<[u8; 0x20]>>,
 }
 
 
 impl<'a> Bluetooth<'a> {
     pub fn new(mut serial: Serial<'a, BluetoothUsart>, rx_buffer: &'static mut[u8; 0x20]) -> Bluetooth<'a> {
+    //pub fn new<T>(mut serial: Serial<'a, BluetoothUsart>, rx_buffer: &'static mut T) -> Bluetooth<'a> {
         let rx_transfer = serial.receive(rx_buffer);
         Bluetooth {
             serial: serial,
@@ -92,6 +93,10 @@ impl<'a> Bluetooth<'a> {
             },
             MsgType::Ble => {
                 match BleOp::from(message.operation)  {
+                    BleOp::AckWakeup => {
+                        // nothing to do here, this message only only lets us know
+                        // that we can now safely send
+                    },
                     BleOp::AckOn => {
                         // data = [0]
                         // TODO: always getting a [0] too much?

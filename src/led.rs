@@ -13,7 +13,7 @@ use super::keymatrix::{KeyState, to_packed_bits};
 
 pub struct Led<'a> {
     pub serial: Serial<'a, LedUsart>,
-    pub rx_transfer: Option<Transfer>,
+    pub rx_transfer: Option<Transfer<[u8; 0x20]>>,
     pub pc15: PC15<Output>,
     pub state: bool
 }
@@ -78,6 +78,23 @@ impl<'a> Led<'a> {
     pub fn get_theme_id(&mut self) -> nb::Result<(), !> {
         // responds with with [ThemeId]
         self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[])
+    }
+
+    pub fn bluetooth_mode(&mut self) -> nb::Result<(), !> {
+        let payload = [0xca, 0x0a,
+            0x00, 0xff, 0xff, 0x00, 0x01, //key:Esc color:Y
+            0x01, 0x00, 0xff, 0x00, 0x02, //key:1   color:G mode:flash
+            0x02, 0xff, 0x00, 0x00, 0x01, //key:2   color:R
+            0x03, 0xff, 0x00, 0x00, 0x01, //key:3   color:R
+            0x04, 0xff, 0x00, 0x00, 0x01, //key:4   color:R
+            0x0c, 0x00, 0xff, 0x00, 0x01, //key:+   color:G
+            0x2f, 0x00, 0xff, 0x00, 0x02, //key:B   color:G mode:flash
+            0x0b, 0xff, 0x00, 0x00, 0x01, //key:-   color:R
+            0x0a, 0x00, 0xff, 0x00, 0x01, //key:0   color:G
+            0x1d, 0x00, 0xff, 0x00, 0x01, //key:A   color:G
+        ];
+
+        self.serial.send(MsgType::Led, LedOp::SetIndividualKeys as u8, &payload)
     }
 
     pub fn handle_message(&mut self, message: &Message) {

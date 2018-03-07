@@ -59,9 +59,6 @@ impl Keyboard {
                 }
             }
 
-            // TODO: need to comment this out for now for setup msgs to go through
-            // probably needs a buffer / or not send this when setup got sent
-            // or not send this if nothing changed
             bluetooth.send_report(&hid.report).log_error();
             led.send_keys(state).log_error();
             self.layers.finish();
@@ -149,7 +146,7 @@ impl<'a> EventProcessor for Led<'a> {
                 &Action::LedOff => self.off(),
 		&Action::LedToggle => self.toggle(),
                 &Action::LedNextTheme => self.next_theme(),
-                &Action::LedNextBrightness => self.next_brightness(),
+                &Action::LedNextBrightness => self.bluetooth_mode(),
                 &Action::LedNextAnimationSpeed => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
                 _ => Ok(())

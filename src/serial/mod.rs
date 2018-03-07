@@ -4,6 +4,7 @@ pub mod led_usart;
 use nb;
 use super::protocol::MsgType;
 use core::marker::PhantomData;
+use core::marker::Unsize;
 
 
 pub struct Serial<'a, USART>
@@ -32,13 +33,13 @@ enum ReceiveStage {
 
 const HEADER_SIZE: u16 = 2;
 
-pub struct Transfer {
-    pub buffer: &'static mut [u8; 0x20],
+pub struct Transfer<T: 'static> {
+    pub buffer: &'static mut T,
     receive_stage: ReceiveStage,
-    //_usart: PhantomData<&USART>,
 }
 
-impl Transfer
+impl<T> Transfer<T>
+    where T: Unsize<[u8]>
 {
     pub fn poll<USART>(&mut self, usart: &mut USART) -> nb::Result<(), !>
       where USART: DmaUsart
@@ -46,9 +47,10 @@ impl Transfer
         if usart.is_receive_pending() {
             match self.receive_stage {
                 ReceiveStage::Header => {
+                    let buffer: &[u8] = self.buffer;
                     self.receive_stage = ReceiveStage::Body;
-                    usart.receive(u16::from(self.buffer[1]),
-                        self.buffer.as_mut_ptr() as u32 + u32::from(HEADER_SIZE));
+                    usart.receive(u16::from(buffer[1]),
+                        buffer.as_ptr() as u32 + u32::from(HEADER_SIZE));
 
                     return Err(nb::Error::WouldBlock)
                 }
@@ -61,7 +63,7 @@ impl Transfer
         }
     }
 
-    pub fn finish(self) -> &'static mut [u8; 0x20] {
+    pub fn finish(self) -> &'static mut T {
         self.buffer
     }
 }
@@ -78,7 +80,7 @@ impl<'a, USART> Serial<'a, USART>
         }
     }
 
-    pub fn receive(&mut self, recv_buffer: &'static mut [u8; 0x20]) -> Transfer
+    pub fn receive(&mut self, recv_buffer: &'static mut [u8; 0x20]) -> Transfer<[u8; 0x20]>
     {
         self.usart.receive(HEADER_SIZE, recv_buffer.as_mut_ptr() as u32);
 

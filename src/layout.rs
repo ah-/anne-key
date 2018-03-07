@@ -22,7 +22,7 @@ pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
 
 // activate by indexing into LAYERS
 const FN_M: Action = LayerMomentary(1);
-const LED_M: Action = LayerMomentary(2);
+const LED_T: Action = LayerToggle(2);
 const BT_T: Action = LayerToggle(3);
 const __: Action = Transparent;
 const LedNT: Action = LedNextTheme;
@@ -35,15 +35,15 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    No        Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     BT_T      LED_M
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     BT_T      LED_T
 ];
 
 pub const FN: Layout = layout![
-  Grave F1   F2   F3    F4        F5     F6    F7      F8   F9         F10    F11    F12    __
-  __    __   Up   __    LedToggle LedNAS LedNB LedNT   Up   Scrolllock Pause  Home   End    PScreen
-  __    Left Down Right __        __     __    Left    Down Right      PgUp   PgDown No     __
-  __    __   __   __    __        __     __    __      __   Insert     Delete No     No     __
-  __    __   __   No    No        __     No    No      No   No         __     __     __     __
+  Grave F1   F2   F3    F4        F5     F6    F7    F8   F9         F10    F11    F12 __
+  __    __   Up   __    LedToggle LedNAS LedNB LedNT Up   Scrolllock Pause  Home   End PScreen
+  __    Left Down Right __        __     __    Left  Down Right      PgUp   PgDown No  __
+  __    __   __   __    __        __     __    __    __   Insert     Delete No     No  __
+  __    __   __   No    No        __     No    No    No   No         __     __     __  __
 ];
 
 pub const LED: Layout = layout![
