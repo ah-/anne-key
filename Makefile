@@ -12,6 +12,9 @@ dfu: build
 debug: build
 	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
 
+bloat:
+	$(XARGO) bloat --release --target thumbv7m-none-eabi
+
 clean:
 	$(XARGO) clean
 	rm -f anne-key.bin
