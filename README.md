@@ -105,3 +105,8 @@ To build your own firmware, you need [xargo](https://github.com/japaric/xargo) w
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
 
 Then, `make dfu` in the top directory will build your `anne-key.dfu`.
+
+To analyze the firmware's code size, you need [cargo-bloat](https://github.com/RazrFalcon/cargo-bloat):
+
+- `cargo install cargo-bloat`
+- `make bloat`
