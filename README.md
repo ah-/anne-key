@@ -96,6 +96,7 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 - [metr1xx's APK reverse engineering](https://github.com/metr1xx/anne-pro-community-app)
 - [kprinssu's Windows app](https://github.com/kprinssu/anne-keyboard-windows)
+- [fcoury's Node.js library](https://github.com/fcoury/node-anne-pro)
 
 To build your own firmware, you need [xargo](https://github.com/japaric/xargo) with the following components:
 
