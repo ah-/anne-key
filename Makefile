@@ -13,7 +13,7 @@ debug: build
 	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
 
 bloat:
-	$(XARGO) bloat --release --target thumbv7m-none-eabi
+	$(XARGO) bloat --release --target thumbv7m-none-eabi $(BLOAT_ARGS)
 
 clean:
 	$(XARGO) clean
