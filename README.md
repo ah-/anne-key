@@ -111,3 +111,4 @@ To analyze the firmware's code size, you need [cargo-bloat](https://github.com/R
 
 - `cargo install cargo-bloat`
 - `make bloat`
+- `make bloat BLOAT_ARGS="--crates" # passing arguments to cargo-bloat`
