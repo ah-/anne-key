@@ -96,6 +96,7 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 - [metr1xx's APK reverse engineering](https://github.com/metr1xx/anne-pro-community-app)
 - [kprinssu's Windows app](https://github.com/kprinssu/anne-keyboard-windows)
+- [fcoury's Node.js library](https://github.com/fcoury/node-anne-pro)
 
 To build your own firmware, you need [xargo](https://github.com/japaric/xargo) with the following components:
 
@@ -105,3 +106,9 @@ To build your own firmware, you need [xargo](https://github.com/japaric/xargo) w
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
 
 Then, `make dfu` in the top directory will build your `anne-key.dfu`.
+
+To analyze the firmware's code size, you need [cargo-bloat](https://github.com/RazrFalcon/cargo-bloat):
+
+- `cargo install cargo-bloat`
+- `make bloat`
+- `make bloat BLOAT_ARGS="--crates" # passing arguments to cargo-bloat`
