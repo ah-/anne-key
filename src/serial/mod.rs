@@ -7,11 +7,11 @@ use core::marker::PhantomData;
 use core::marker::Unsize;
 
 
-pub struct Serial<'a, USART>
+pub struct Serial<USART, T: 'static>
     where USART: DmaUsart
 {
     pub usart: USART,
-    send_buffer: &'a mut[u8; 0x20],
+    send_buffer: &'static mut T,
     pub send_buffer_pos: u16,
 }
 
@@ -68,11 +68,12 @@ impl<T> Transfer<T>
     }
 }
 
-impl<'a, USART> Serial<'a, USART>
-    where USART: DmaUsart
+impl<USART, T> Serial<USART, T>
+    where USART: DmaUsart,
+          T: Unsize<[u8]>
 {
-    pub fn new(usart: USART, send_buffer: &'a mut [u8; 0x20])
-        -> Serial<'a, USART> {
+    pub fn new(usart: USART, send_buffer: &'static mut T)
+        -> Serial<USART, T> {
         Serial {
             usart: usart,
             send_buffer: send_buffer,
@@ -80,9 +81,12 @@ impl<'a, USART> Serial<'a, USART>
         }
     }
 
-    pub fn receive(&mut self, recv_buffer: &'static mut [u8; 0x20]) -> Transfer<[u8; 0x20]>
+    pub fn receive(&mut self, recv_buffer: &'static mut T) -> Transfer<T>
     {
-        self.usart.receive(HEADER_SIZE, recv_buffer.as_mut_ptr() as u32);
+        {
+            let buffer: &mut [u8] = recv_buffer;
+            self.usart.receive(HEADER_SIZE, buffer.as_mut_ptr() as u32);
+        }
 
         Transfer { buffer: recv_buffer, receive_stage: ReceiveStage::Header }
     }
@@ -93,18 +97,19 @@ impl<'a, USART> Serial<'a, USART>
         operation: u8, // TODO: make this typed?
         data: &[u8]) -> nb::Result<(), !> {
         let tx_len = 3 + data.len() as u16;
-        if self.usart.is_send_ready() && self.send_buffer_pos + tx_len < self.send_buffer.len() as u16 {
+        let send_buffer: &mut [u8] = self.send_buffer;
+        if self.usart.is_send_ready() && self.send_buffer_pos + tx_len < send_buffer.len() as u16 {
             // TODO: put this into buffer, but then increase buffer offset
             // keep counter, use counter when calling send()
             let pos = self.send_buffer_pos as usize;
-            self.send_buffer[pos] = message_type as u8;
-            self.send_buffer[pos + 1] = 1 + data.len() as u8;
-            self.send_buffer[pos + 2] = operation;
-            self.send_buffer[pos + 3..pos + tx_len as usize].clone_from_slice(data);
+            send_buffer[pos] = message_type as u8;
+            send_buffer[pos + 1] = 1 + data.len() as u8;
+            send_buffer[pos + 2] = operation;
+            send_buffer[pos + 3..pos + tx_len as usize].clone_from_slice(data);
 
             self.send_buffer_pos += tx_len;
 
-            self.usart.send(self.send_buffer.as_mut_ptr() as u32, self.send_buffer_pos);
+            self.usart.send(send_buffer.as_ptr() as u32, self.send_buffer_pos);
 
             return Ok(())
         } else {

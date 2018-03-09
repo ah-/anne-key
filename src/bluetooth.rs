@@ -1,25 +1,28 @@
 #![feature(const_fn)]
 
 use core::fmt::Write;
+use core::marker::Unsize;
 use cortex_m_semihosting::hio;
 use nb;
 use rtfm::Threshold;
 use super::hidreport::HidReport;
 use super::led::Led;
-use super::protocol::{Message, MsgType, BleOp, LedOp, KeyboardOp, SystemOp};
-use super::serial::{Serial, Transfer, DmaUsart};
+use super::protocol::{BleOp, KeyboardOp, LedOp, Message, MsgType, SystemOp};
+use super::serial::{DmaUsart, Serial, Transfer};
 use super::serial::bluetooth_usart::BluetoothUsart;
 
-
-pub struct Bluetooth<'a> {
-    pub serial: Serial<'a, BluetoothUsart>,
-    pub rx_transfer: Option<Transfer<[u8; 0x20]>>,
+pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
+    pub serial: Serial<BluetoothUsart, BUFFER>,
+    pub rx_transfer: Option<Transfer<BUFFER>>,
 }
 
-
-impl<'a> Bluetooth<'a> {
-    pub fn new(mut serial: Serial<'a, BluetoothUsart>, rx_buffer: &'static mut[u8; 0x20]) -> Bluetooth<'a> {
-    //pub fn new<T>(mut serial: Serial<'a, BluetoothUsart>, rx_buffer: &'static mut T) -> Bluetooth<'a> {
+impl<BUFFER> Bluetooth<BUFFER>
+    where BUFFER: Unsize<[u8]>
+{
+    pub fn new(
+        mut serial: Serial<BluetoothUsart, BUFFER>,
+        rx_buffer: &'static mut BUFFER,
+    ) -> Bluetooth<BUFFER> {
         let rx_transfer = serial.receive(rx_buffer);
         Bluetooth {
             serial: serial,
@@ -37,15 +40,18 @@ impl<'a> Bluetooth<'a> {
 
     pub fn save_host(&mut self, host: u8) -> nb::Result<(), !> {
         // TODO: host < 4?
-        self.serial.send(MsgType::Ble, BleOp::SaveHost as u8, &[host])
+        self.serial
+            .send(MsgType::Ble, BleOp::SaveHost as u8, &[host])
     }
 
     pub fn connect_host(&mut self, host: u8) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Ble, BleOp::ConnectHost as u8, &[host])
+        self.serial
+            .send(MsgType::Ble, BleOp::ConnectHost as u8, &[host])
     }
 
     pub fn delete_host(&mut self, host: u8) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Ble, BleOp::DeleteHost as u8, &[host])
+        self.serial
+            .send(MsgType::Ble, BleOp::DeleteHost as u8, &[host])
     }
 
     pub fn broadcast(&mut self) -> nb::Result<(), !> {
@@ -54,23 +60,27 @@ impl<'a> Bluetooth<'a> {
 
     pub fn enable_compatibility_mode(&mut self, enabled: bool) -> nb::Result<(), !> {
         let on = if enabled { 1 } else { 0 };
-        self.serial.send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on])
+        self.serial
+            .send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on])
     }
 
     pub fn host_list_query(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Ble, BleOp::HostListQuery as u8, &[])
+        self.serial
+            .send(MsgType::Ble, BleOp::HostListQuery as u8, &[])
     }
 
     pub fn send_report(&mut self, report: &HidReport) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Keyboard,
-                         KeyboardOp::KeyReport as u8,
-                         report.as_bytes())
+        self.serial.send(
+            MsgType::Keyboard,
+            KeyboardOp::KeyReport as u8,
+            report.as_bytes(),
+        )
     }
 
-    pub fn handle_message(&mut self, message: &Message, led: &mut Led) {
+    pub fn handle_message(&mut self, message: &Message, led: &mut Led<BUFFER>) {
         match message.msg_type {
             MsgType::System => {
-                match SystemOp::from(message.operation)  {
+                match SystemOp::from(message.operation) {
                     SystemOp::GetId => {
                         const DEVICE_TYPE_KEYBOARD: u8 = 1;
                         const DEVICE_MODEL_ANNE_PRO: u8 = 2;
@@ -81,22 +91,36 @@ impl<'a> Bluetooth<'a> {
                         // [datalen, nblock, iblock = 0, data...]
                         // [datalen, nblock, iblock = 1, data...]
 
-                        let data1 = [10, 2, 0, DEVICE_TYPE_KEYBOARD, DEVICE_MODEL_ANNE_PRO, 1, 2, 3, 4, 5, 6];
+                        let data1 = [
+                            10,
+                            2,
+                            0,
+                            DEVICE_TYPE_KEYBOARD,
+                            DEVICE_MODEL_ANNE_PRO,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                        ];
                         let data2 = [8, 2, 1, 7, 8, 9, 10, 11, 12];
-                        self.serial.send(MsgType::System, SystemOp::AckGetId as u8, &data1);
-                        self.serial.send(MsgType::System, SystemOp::AckGetId as u8, &data2);
+                        self.serial
+                            .send(MsgType::System, SystemOp::AckGetId as u8, &data1);
+                        self.serial
+                            .send(MsgType::System, SystemOp::AckGetId as u8, &data2);
                     }
                     _ => {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();
                     }
                 }
-            },
+            }
             MsgType::Ble => {
-                match BleOp::from(message.operation)  {
+                match BleOp::from(message.operation) {
                     BleOp::AckWakeup => {
                         // nothing to do here, this message only only lets us know
                         // that we can now safely send
-                    },
+                    }
                     BleOp::AckOn => {
                         // data = [0]
                         // TODO: always getting a [0] too much?
@@ -133,31 +157,36 @@ impl<'a> Bluetooth<'a> {
                         debug!("msg: Ble {} {:?}", message.operation, message.data).ok();
                     }
                 }
-            },
-            MsgType::Led => {
-                match LedOp::from(message.operation)  {
-                    LedOp::ThemeMode => {
-                        led.set_theme(message.data[0]);
-                    }
-                    _ => {
-                        debug!("msg: Led {} {:?}", message.operation, message.data).ok();
-                    }
+            }
+            MsgType::Led => match LedOp::from(message.operation) {
+                LedOp::ThemeMode => {
+                    led.set_theme(message.data[0]);
+                }
+                _ => {
+                    debug!("msg: Led {} {:?}", message.operation, message.data).ok();
                 }
             },
             _ => {
-                debug!("msg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                debug!(
+                    "msg: {:?} {} {:?}",
+                    message.msg_type, message.operation, message.data
+                ).ok();
             }
         }
     }
 
-    pub fn poll(&mut self, led: &mut Led) {
-        let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
+    pub fn poll(&mut self, led: &mut Led<BUFFER>) {
+        let result = self.rx_transfer
+            .as_mut()
+            .unwrap()
+            .poll(&mut self.serial.usart);
         match result {
-            Err(nb::Error::WouldBlock) => {},
+            Err(nb::Error::WouldBlock) => {}
             Err(_) => panic!("bt rx error"),
             Ok(()) => {
                 let buffer = self.rx_transfer.take().unwrap().finish();
                 {
+                    let buffer: &mut [u8] = buffer;
                     let message = Message {
                         msg_type: MsgType::from(buffer[0]),
                         operation: buffer[2],
@@ -170,7 +199,7 @@ impl<'a> Bluetooth<'a> {
                             // Wakeup acknowledged, send data
                             self.serial.usart.ack_wakeup();
                             self.serial.send_buffer_pos = 0;
-                        },
+                        }
                         _ => {}
                     }
                 }

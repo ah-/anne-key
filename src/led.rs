@@ -1,4 +1,5 @@
 use core::fmt::Write;
+use core::marker::Unsize;
 use cortex_m_semihosting::hio;
 use embedded_hal::digital::OutputPin;
 use rtfm::Threshold;
@@ -11,15 +12,17 @@ use super::serial::led_usart::LedUsart;
 use super::keymatrix::{KeyState, to_packed_bits};
 
 
-pub struct Led<'a> {
-    pub serial: Serial<'a, LedUsart>,
-    pub rx_transfer: Option<Transfer<[u8; 0x20]>>,
+pub struct Led<BUFFER: 'static + Unsize<[u8]>> {
+    pub serial: Serial<LedUsart, BUFFER>,
+    pub rx_transfer: Option<Transfer<BUFFER>>,
     pub pc15: PC15<Output>,
     pub state: bool
 }
 
-impl<'a> Led<'a> {
-    pub fn new(mut serial: Serial<'a, LedUsart>, rx_buffer: &'static mut[u8; 0x20], pc15: PC15<Input>) -> Led<'a> {
+impl<BUFFER> Led<BUFFER>
+    where BUFFER: Unsize<[u8]>
+{
+    pub fn new(mut serial: Serial<LedUsart, BUFFER>, rx_buffer: &'static mut BUFFER, pc15: PC15<Input>) -> Led<BUFFER> {
         let rx_transfer = serial.receive(rx_buffer);
         Led {
             serial: serial,
@@ -129,6 +132,7 @@ impl<'a> Led<'a> {
                 let buffer = self.rx_transfer.take().unwrap().finish();
 
                 {
+                    let buffer: &mut [u8] = buffer;
                     let message = Message {
                         msg_type: MsgType::from(buffer[0]),
                         operation: buffer[2],

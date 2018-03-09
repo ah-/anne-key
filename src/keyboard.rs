@@ -6,6 +6,7 @@ use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::LAYERS;
 use led::Led;
+use core::marker::Unsize;
 
 pub struct Keyboard {
     layers: Layers,
@@ -40,7 +41,9 @@ impl Keyboard {
         action
     }
 
-    pub fn process(&mut self, state: &KeyState, bluetooth: &mut Bluetooth, led: &mut Led) {
+    pub fn process<BUFFER>(&mut self, state: &KeyState, bluetooth: &mut Bluetooth<BUFFER>, led: &mut Led<BUFFER>)
+        where BUFFER: Unsize<[u8]>
+    {
         // TODO: might not even need this check after switching to wakeup only handling?
         if !eq(&self.previous_state, state) {
             let mut hid = HidProcessor::new();
@@ -138,7 +141,9 @@ impl EventProcessor for HidProcessor {
     }
 }
 
-impl<'a> EventProcessor for Led<'a> {
+impl<BUFFER> EventProcessor for Led<BUFFER>
+    where BUFFER: Unsize<[u8]>
+{
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
             let result = match action {
@@ -156,7 +161,9 @@ impl<'a> EventProcessor for Led<'a> {
     }
 }
 
-impl<'a> EventProcessor for Bluetooth<'a> {
+impl<BUFFER> EventProcessor for Bluetooth<BUFFER>
+    where BUFFER: Unsize<[u8]>
+{
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
             let result = match action {

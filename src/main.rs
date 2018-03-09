@@ -49,10 +49,10 @@ app! {
         static KEYBOARD: Keyboard = Keyboard::new();
         static KEY_MATRIX: KeyMatrix;
         //static BLUETOOTH_BUFFERS: [[u8; 0x100]; 2] = [[0; 0x100]; 2];
-        static BLUETOOTH_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
-        static BLUETOOTH: Bluetooth<'static>;
-        static LED_BUFFERS: [[u8; 0x20]; 2] = [[0; 0x20]; 2];
-        static LED: Led<'static>;
+        static BLUETOOTH_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
+        static BLUETOOTH: Bluetooth<[u8; 0x80]>;
+        static LED_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
+        static LED: Led<[u8; 0x80]>;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
     },
