@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+// USB HID KeyCodes
 #[derive(PartialOrd, PartialEq)]
 #[derive(Copy, Clone)]
 pub enum KeyCode {
@@ -125,4 +126,13 @@ impl KeyCode {
     pub fn is_normal_key(&self) -> bool {
         self >= &KeyCode::A && self <= &KeyCode::Application
     }
+}
+
+// Index of each physical Key in the scan matrix
+pub enum KeyIndex {
+    Escape,   N1,    N2,   N3,  N4,  N5,    N6,  N7,  N8,     N9,  N0,      Minus,    Equal,    BSpace,
+    Tab,      Q,     W,    E,   R,   T,     Y,   U,   I,      O,   P,       LBracket, RBracket, BSlash,
+    Capslock, A,     S,    D,   F,   G,     H,   J,   K,      L,   SColon,  Quote,    No1,      Enter,
+    LShift,   Z,     X,    C,   V,   B,     N,   M,   Comma,  Dot, Slash,   No2,      No3,      RShift,
+    LCtrl,    LMeta, LAlt, No4, No5, Space, No6, No7, No8,    No9,  RAlt,   FN,       Anne,     RCtrl
 }
