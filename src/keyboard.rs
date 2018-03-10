@@ -72,8 +72,7 @@ impl Keyboard {
             if bt_layer_next && !bt_layer_current {
                 bluetooth.update_led(led).log_error();
             } else if bt_layer_current && !bt_layer_next {
-                // TODO: go back to previous theme?
-                led.next_theme().log_error();
+                led.theme_mode().log_error();
             }
 
             self.layers.finish();

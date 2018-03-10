@@ -103,6 +103,11 @@ where
             .send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
     }
 
+    pub fn theme_mode(&mut self) -> nb::Result<(), !> {
+        self.serial
+            .send(MsgType::Led, LedOp::ThemeMode as u8, &[])
+    }
+
     pub fn bluetooth_mode(&mut self, mode: BluetoothMode) -> nb::Result<(), !> {
         let mode_color = match mode {
             BluetoothMode::Unknown => (0, 0, 0xff),
