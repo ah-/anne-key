@@ -10,7 +10,7 @@ use debug::UnwrapLog;
 use nb;
 use rtfm::Threshold;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum BluetoothMode {
     Unknown,
     Legacy,
@@ -71,6 +71,11 @@ where
         let on = if enabled { 1 } else { 0 };
         self.serial
             .send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on])
+    }
+
+    pub fn toggle_compatibility_mode(&mut self) -> nb::Result<(), !> {
+        let enabled: bool = self.mode == BluetoothMode::Ble;
+        self.enable_compatibility_mode(enabled)
     }
 
     pub fn host_list_query(&mut self) -> nb::Result<(), !> {

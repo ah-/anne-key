@@ -191,6 +191,7 @@ where
                 Action::BtDeleteHost(host) => self.delete_host(host),
                 Action::BtBroadcast => self.broadcast(),
                 Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
+                Action::BtToggleCompatibilityMode => self.toggle_compatibility_mode(),
                 Action::BtHostListQuery => self.host_list_query(),
                 _ => Ok(()),
             };
