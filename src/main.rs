@@ -122,27 +122,31 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let gpiob = d.GPIOB.split();
     let gpioc = d.GPIOC.split();
 
-    let row_pins = (gpiob.pb9.pull_down(),
-                    gpiob.pb8.pull_down(),
-                    gpiob.pb7.pull_down(),
-                    gpiob.pb6.pull_down(),
-                    gpioa.pa0.pull_down());
+    let row_pins = (
+        gpiob.pb9.pull_down(),
+        gpiob.pb8.pull_down(),
+        gpiob.pb7.pull_down(),
+        gpiob.pb6.pull_down(),
+        gpioa.pa0.pull_down(),
+    );
 
     // TODO: make pin a generic trait, then iterate over list and call .into_output().pull_up()?
-    let column_pins = (gpioa.pa5.into_output().pull_up(),
-                       gpioa.pa6.into_output().pull_up(),
-                       gpioa.pa7.into_output().pull_up(),
-                       gpiob.pb0.into_output().pull_up(),
-                       gpiob.pb1.into_output().pull_up(),
-                       gpiob.pb12.into_output().pull_up(),
-                       gpiob.pb13.into_output().pull_up(),
-                       gpiob.pb14.into_output().pull_up(),
-                       gpioa.pa8.into_output().pull_up(),
-                       gpioa.pa9.into_output().pull_up(),
-                       gpioa.pa15.into_output().pull_up(),
-                       gpiob.pb3.into_output().pull_up(),
-                       gpiob.pb4.into_output().pull_up(),
-                       gpiob.pb5.into_output().pull_up());
+    let column_pins = (
+        gpioa.pa5.into_output().pull_up(),
+        gpioa.pa6.into_output().pull_up(),
+        gpioa.pa7.into_output().pull_up(),
+        gpiob.pb0.into_output().pull_up(),
+        gpiob.pb1.into_output().pull_up(),
+        gpiob.pb12.into_output().pull_up(),
+        gpiob.pb13.into_output().pull_up(),
+        gpiob.pb14.into_output().pull_up(),
+        gpioa.pa8.into_output().pull_up(),
+        gpioa.pa9.into_output().pull_up(),
+        gpioa.pa15.into_output().pull_up(),
+        gpiob.pb3.into_output().pull_up(),
+        gpiob.pb4.into_output().pull_up(),
+        gpiob.pb5.into_output().pull_up(),
+    );
 
     let key_matrix = KeyMatrix::new(row_pins, column_pins);
 
@@ -151,7 +155,15 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let led_serial = Serial::new(led_usart, &mut led_send_buffer[0]);
     let led = Led::new(led_serial, &mut led_receive_buffer[0], gpioc.pc15);
 
-    let bluetooth_usart = BluetoothUsart::new(d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC);
+    let bluetooth_usart = BluetoothUsart::new(
+        d.USART2,
+        gpioa.pa1,
+        gpioa.pa2,
+        gpioa.pa3,
+        dma.6,
+        dma.7,
+        &mut d.RCC,
+    );
     let (bt_send_buffer, bt_receive_buffer) = r.BLUETOOTH_BUFFERS.split_at_mut(1);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
     let bluetooth = Bluetooth::new(bluetooth_serial, &mut bt_receive_buffer[0]);
@@ -173,7 +185,8 @@ fn idle() -> ! {
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     r.KEY_MATRIX.sample(&r.SYST);
-    r.KEYBOARD.process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
+    r.KEYBOARD
+        .process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
 }
 
 fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {

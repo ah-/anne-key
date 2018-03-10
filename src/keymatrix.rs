@@ -10,16 +10,28 @@ const ROWS: usize = 5;
 const COLUMNS: usize = 14;
 
 type RowPins = (PB9<Input>, PB8<Input>, PB7<Input>, PB6<Input>, PA0<Input>);
-type ColumnPins = (PA5<Output>, PA6<Output>, PA7<Output>, PB0<Output>,
-                   PB1<Output>, PB12<Output>, PB13<Output>, PB14<Output>,
-                   PA8<Output>, PA9<Output>, PA15<Output>, PB3<Output>,
-                   PB4<Output>, PB5<Output>);
+type ColumnPins = (
+    PA5<Output>,
+    PA6<Output>,
+    PA7<Output>,
+    PB0<Output>,
+    PB1<Output>,
+    PB12<Output>,
+    PB13<Output>,
+    PB14<Output>,
+    PA8<Output>,
+    PA9<Output>,
+    PA15<Output>,
+    PB3<Output>,
+    PB4<Output>,
+    PB5<Output>,
+);
 
 pub type KeyState = [bool; ROWS * COLUMNS];
 
 pub struct PackedKeyState {
     // 5 * 14 = 70, upper(70 / 8) = 9 bytes
-    pub bytes: [u8; 9]
+    pub bytes: [u8; 9],
 }
 
 pub fn to_packed_bits(state: &KeyState) -> PackedKeyState {
@@ -40,7 +52,7 @@ pub struct KeyMatrix {
     /// Stores the currently pressed down keys from last sample.
     pub state: KeyState,
     row_pins: RowPins,
-    column_pins: ColumnPins
+    column_pins: ColumnPins,
 }
 
 impl KeyMatrix {
@@ -62,8 +74,8 @@ impl KeyMatrix {
             let wait_until_tick = current_tick - 100;
             while syst.cvr.read() > wait_until_tick {}
 
-            self.state[column              ] = self.row_pins.0.is_high();
-            self.state[column +     COLUMNS] = self.row_pins.1.is_high();
+            self.state[column] = self.row_pins.0.is_high();
+            self.state[column + COLUMNS] = self.row_pins.1.is_high();
             self.state[column + 2 * COLUMNS] = self.row_pins.2.is_high();
             self.state[column + 3 * COLUMNS] = self.row_pins.3.is_high();
             self.state[column + 4 * COLUMNS] = self.row_pins.4.is_high();

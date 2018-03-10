@@ -1,5 +1,5 @@
 use embedded_hal::digital::OutputPin;
-use stm32l151::{RCC, USART2};
+use stm32l151::{USART2, RCC};
 use hal::dma::dma1::{C6, C7};
 use hal::gpio::{Alternate, Input, Output};
 use hal::gpio::gpioa::{PA1, PA2, PA3};
@@ -26,10 +26,12 @@ impl DmaUsart for BluetoothUsart {
         self.pa1.set_low();
 
         self.dma_rx.cgif();
-        self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
+        self.dma_rx.ccr().modify(|_, w| w.en().clear_bit());
         self.dma_rx.cmar().write(|w| unsafe { w.ma().bits(buffer) });
-        self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(length) });
-        self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
+        self.dma_rx
+            .cndtr()
+            .modify(|_, w| unsafe { w.ndt().bits(length) });
+        self.dma_rx.ccr().modify(|_, w| w.en().set_bit());
     }
 
     fn is_send_ready(&mut self) -> bool {
@@ -43,9 +45,11 @@ impl DmaUsart for BluetoothUsart {
         self.dma_tx.cmar().write(|w| unsafe { w.ma().bits(buffer) });
 
         if self.pending_tx == 0 {
-            self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
-            self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(2) });
-            self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
+            self.dma_rx.ccr().modify(|_, w| w.en().clear_bit());
+            self.dma_rx
+                .cndtr()
+                .modify(|_, w| unsafe { w.ndt().bits(2) });
+            self.dma_rx.ccr().modify(|_, w| w.en().set_bit());
 
             self.pa1.set_low();
             self.pa1.set_high();
@@ -56,7 +60,9 @@ impl DmaUsart for BluetoothUsart {
 
     fn ack_wakeup(&mut self) {
         let n_pending = self.pending_tx;
-        self.dma_tx.cndtr().modify(|_, w| unsafe { w.ndt().bits(n_pending) });
+        self.dma_tx
+            .cndtr()
+            .modify(|_, w| unsafe { w.ndt().bits(n_pending) });
         self.dma_tx.ccr().modify(|_, w| w.en().set_bit());
 
         self.pending_tx = 0;
@@ -69,8 +75,15 @@ impl DmaUsart for BluetoothUsart {
 }
 
 impl BluetoothUsart {
-    pub fn new(usart: USART2, pa1: PA1<Input>, pa2: PA2<Input>, pa3: PA3<Input>,
-               mut dma_rx: C6, mut dma_tx: C7, rcc: &mut RCC) -> BluetoothUsart {
+    pub fn new(
+        usart: USART2,
+        pa1: PA1<Input>,
+        pa2: PA2<Input>,
+        pa3: PA3<Input>,
+        mut dma_rx: C6,
+        mut dma_tx: C7,
+        rcc: &mut RCC,
+    ) -> BluetoothUsart {
         let mut pa1 = pa1.into_output().pull_up();
         let pa2 = pa2.into_alternate(7).pull_up();
         let pa3 = pa3.into_alternate(7).pull_up();
@@ -80,13 +93,16 @@ impl BluetoothUsart {
         rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
 
         usart.brr.modify(|_, w| unsafe { w.bits(417) });
-        usart.cr3.modify(|_, w| w.dmat().set_bit()
-                                      .dmar().set_bit());
+        usart.cr3.modify(|_, w| w.dmat().set_bit().dmar().set_bit());
         usart.cr1.modify(|_, w| {
-            w.rxneie().set_bit()
-             .re().set_bit()
-             .te().set_bit()
-             .ue().set_bit()
+            w.rxneie()
+                .set_bit()
+                .re()
+                .set_bit()
+                .te()
+                .set_bit()
+                .ue()
+                .set_bit()
         });
 
         dma_rx.cpar().write(|w| unsafe { w.pa().bits(0x4000_4404) });
@@ -94,8 +110,7 @@ impl BluetoothUsart {
             unsafe {
                 w.pl().bits(2);
             }
-            w.minc().set_bit()
-             .tcie().set_bit()
+            w.minc().set_bit().tcie().set_bit()
         });
 
         dma_tx.cpar().write(|w| unsafe { w.pa().bits(0x4000_4404) });
@@ -104,12 +119,24 @@ impl BluetoothUsart {
             unsafe {
                 w.pl().bits(2);
             }
-            w.minc().set_bit()
-             .dir().set_bit()
-             .tcie().set_bit()
-             .en().clear_bit()
+            w.minc()
+                .set_bit()
+                .dir()
+                .set_bit()
+                .tcie()
+                .set_bit()
+                .en()
+                .clear_bit()
         });
 
-        BluetoothUsart { pa1: pa1, _pa2: pa2, _pa3: pa3, _usart: usart, dma_rx: dma_rx, dma_tx: dma_tx, pending_tx: 0 }
+        BluetoothUsart {
+            pa1: pa1,
+            _pa2: pa2,
+            _pa3: pa3,
+            _usart: usart,
+            dma_rx: dma_rx,
+            dma_tx: dma_tx,
+            pending_tx: 0,
+        }
     }
 }

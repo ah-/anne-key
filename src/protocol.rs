@@ -4,12 +4,12 @@ use core::mem::transmute;
 pub struct Message<'a> {
     pub msg_type: MsgType,
     pub operation: u8,
-    pub data: &'a[u8],
+    pub data: &'a [u8],
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum MsgType {
     Reserved = 0,
     Error = 1,
@@ -29,12 +29,14 @@ pub enum MsgType {
 
 impl From<u8> for MsgType {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum BleOp {
     Reserved = 0,
     On = 1,
@@ -69,12 +71,14 @@ pub enum BleOp {
 
 impl From<u8> for BleOp {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum KeyboardOp {
     Reserved = 0,
     KeyReport = 1,
@@ -92,12 +96,14 @@ pub enum KeyboardOp {
 
 impl From<u8> for KeyboardOp {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum LedOp {
     Reserved = 0,
     ThemeMode = 1,
@@ -128,12 +134,14 @@ pub enum LedOp {
 
 impl From<u8> for LedOp {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum SystemOp {
     Reserved = 0,
     GetId = 1,
@@ -145,5 +153,7 @@ pub enum SystemOp {
 
 impl From<u8> for SystemOp {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }

@@ -5,9 +5,9 @@ use nb;
 use super::protocol::MsgType;
 use core::marker::Unsize;
 
-
 pub struct Serial<USART, T: 'static>
-    where USART: DmaUsart
+where
+    USART: DmaUsart,
 {
     pub usart: USART,
     send_buffer: &'static mut T,
@@ -38,27 +38,29 @@ pub struct Transfer<T: 'static> {
 }
 
 impl<T> Transfer<T>
-    where T: Unsize<[u8]>
+where
+    T: Unsize<[u8]>,
 {
     pub fn poll<USART>(&mut self, usart: &mut USART) -> nb::Result<(), !>
-      where USART: DmaUsart
+    where
+        USART: DmaUsart,
     {
         if usart.is_receive_pending() {
             match self.receive_stage {
                 ReceiveStage::Header => {
                     let buffer: &[u8] = self.buffer;
                     self.receive_stage = ReceiveStage::Body;
-                    usart.receive(u16::from(buffer[1]),
-                        buffer.as_ptr() as u32 + u32::from(HEADER_SIZE));
+                    usart.receive(
+                        u16::from(buffer[1]),
+                        buffer.as_ptr() as u32 + u32::from(HEADER_SIZE),
+                    );
 
-                    return Err(nb::Error::WouldBlock)
+                    return Err(nb::Error::WouldBlock);
                 }
-                ReceiveStage::Body => {
-                    return Ok(())
-                }
+                ReceiveStage::Body => return Ok(()),
             }
         } else {
-            return Err(nb::Error::WouldBlock)
+            return Err(nb::Error::WouldBlock);
         }
     }
 
@@ -68,11 +70,11 @@ impl<T> Transfer<T>
 }
 
 impl<USART, T> Serial<USART, T>
-    where USART: DmaUsart,
-          T: Unsize<[u8]>
+where
+    USART: DmaUsart,
+    T: Unsize<[u8]>,
 {
-    pub fn new(usart: USART, send_buffer: &'static mut T)
-        -> Serial<USART, T> {
+    pub fn new(usart: USART, send_buffer: &'static mut T) -> Serial<USART, T> {
         Serial {
             usart: usart,
             send_buffer: send_buffer,
@@ -80,21 +82,24 @@ impl<USART, T> Serial<USART, T>
         }
     }
 
-    pub fn receive(&mut self, recv_buffer: &'static mut T) -> Transfer<T>
-    {
+    pub fn receive(&mut self, recv_buffer: &'static mut T) -> Transfer<T> {
         {
             let buffer: &mut [u8] = recv_buffer;
             self.usart.receive(HEADER_SIZE, buffer.as_mut_ptr() as u32);
         }
 
-        Transfer { buffer: recv_buffer, receive_stage: ReceiveStage::Header }
+        Transfer {
+            buffer: recv_buffer,
+            receive_stage: ReceiveStage::Header,
+        }
     }
 
     pub fn send(
         &mut self,
         message_type: MsgType,
         operation: u8, // TODO: make this typed?
-        data: &[u8]) -> nb::Result<(), !> {
+        data: &[u8],
+    ) -> nb::Result<(), !> {
         let tx_len = 3 + data.len() as u16;
         let send_buffer: &mut [u8] = self.send_buffer;
         if self.usart.is_send_ready() && self.send_buffer_pos + tx_len < send_buffer.len() as u16 {
@@ -108,11 +113,12 @@ impl<USART, T> Serial<USART, T>
 
             self.send_buffer_pos += tx_len;
 
-            self.usart.send(send_buffer.as_ptr() as u32, self.send_buffer_pos);
+            self.usart
+                .send(send_buffer.as_ptr() as u32, self.send_buffer_pos);
 
-            return Ok(())
+            return Ok(());
         } else {
-            return Err(nb::Error::WouldBlock)
+            return Err(nb::Error::WouldBlock);
         }
     }
 

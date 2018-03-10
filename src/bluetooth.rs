@@ -18,7 +18,8 @@ pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
 }
 
 impl<BUFFER> Bluetooth<BUFFER>
-    where BUFFER: Unsize<[u8]>
+where
+    BUFFER: Unsize<[u8]>,
 {
     pub fn new(
         mut serial: Serial<BluetoothUsart, BUFFER>,
@@ -107,9 +108,11 @@ impl<BUFFER> Bluetooth<BUFFER>
                         ];
                         let data2 = [8, 2, 1, 7, 8, 9, 10, 11, 12];
                         self.serial
-                            .send(MsgType::System, SystemOp::AckGetId as u8, &data1).log_error();
+                            .send(MsgType::System, SystemOp::AckGetId as u8, &data1)
+                            .log_error();
                         self.serial
-                            .send(MsgType::System, SystemOp::AckGetId as u8, &data2).log_error();
+                            .send(MsgType::System, SystemOp::AckGetId as u8, &data2)
+                            .log_error();
                     }
                     _ => {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();

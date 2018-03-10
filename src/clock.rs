@@ -20,6 +20,7 @@ pub fn init_clock(p: &stm32l151::Peripherals) {
     });
     while p.PWR.csr.read().vosf().bit_is_set() {}
 
+    #[rustfmt_skip]
     p.RCC.cfgr.modify(|_, w| unsafe {
         w.ppre1().bits(0b100)
          .ppre2().bits(0b100)
@@ -36,6 +37,7 @@ pub fn init_clock(p: &stm32l151::Peripherals) {
 
     p.RCC.cr.modify(|_, w| w.msion().clear_bit());
 
+    #[rustfmt_skip]
     p.RCC.ahbenr.modify(|_, w|
         w.gpiopaen().set_bit()
          .gpiopben().set_bit()

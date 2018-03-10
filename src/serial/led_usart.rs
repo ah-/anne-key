@@ -1,4 +1,4 @@
-use stm32l151::{RCC, USART3};
+use stm32l151::{USART3, RCC};
 use hal::dma::dma1::{C2, C3};
 use hal::gpio::{Alternate, Input};
 use hal::gpio::gpiob::{PB10, PB11};
@@ -19,10 +19,12 @@ impl DmaUsart for LedUsart {
 
     fn receive(&mut self, length: u16, buffer: u32) {
         self.dma_rx.cgif();
-        self.dma_rx.ccr().modify(|_, w| { w.en().clear_bit() });
+        self.dma_rx.ccr().modify(|_, w| w.en().clear_bit());
         self.dma_rx.cmar().write(|w| unsafe { w.ma().bits(buffer) });
-        self.dma_rx.cndtr().modify(|_, w| unsafe { w.ndt().bits(length) });
-        self.dma_rx.ccr().modify(|_, w| { w.en().set_bit() });
+        self.dma_rx
+            .cndtr()
+            .modify(|_, w| unsafe { w.ndt().bits(length) });
+        self.dma_rx.ccr().modify(|_, w| w.en().set_bit());
     }
 
     fn is_send_ready(&mut self) -> bool {
@@ -32,7 +34,9 @@ impl DmaUsart for LedUsart {
     fn send(&mut self, buffer: u32, length: u16) {
         self.dma_tx.ccr().modify(|_, w| w.en().clear_bit());
         self.dma_tx.cmar().write(|w| unsafe { w.ma().bits(buffer) });
-        self.dma_tx.cndtr().modify(|_, w| unsafe { w.ndt().bits(length) });
+        self.dma_tx
+            .cndtr()
+            .modify(|_, w| unsafe { w.ndt().bits(length) });
         self.dma_tx.ccr().modify(|_, w| w.en().set_bit());
     }
 
@@ -45,8 +49,14 @@ impl DmaUsart for LedUsart {
 }
 
 impl LedUsart {
-    pub fn new(usart: USART3, pb10: PB10<Input>, pb11: PB11<Input>,
-               mut dma_rx: C3, mut dma_tx: C2, rcc: &mut RCC) -> LedUsart {
+    pub fn new(
+        usart: USART3,
+        pb10: PB10<Input>,
+        pb11: PB11<Input>,
+        mut dma_rx: C3,
+        mut dma_tx: C2,
+        rcc: &mut RCC,
+    ) -> LedUsart {
         let pb10 = pb10.into_alternate(7).pull_up();
         let pb11 = pb11.into_alternate(7).pull_up();
 
@@ -54,16 +64,22 @@ impl LedUsart {
         rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
 
         usart.brr.modify(|_, w| unsafe { w.bits(417) });
-        usart.cr3.modify(|_, w| w.dmat().set_bit()
-                                 .dmar().set_bit());
+        usart.cr3.modify(|_, w| w.dmat().set_bit().dmar().set_bit());
         usart.cr1.modify(|_, w| {
-            w.rxneie().clear_bit()
-             .re().set_bit()
-             .te().set_bit()
-             .ue().set_bit()
-             .idleie().clear_bit()
-             .txeie().clear_bit()
-             .tcie().clear_bit()
+            w.rxneie()
+                .clear_bit()
+                .re()
+                .set_bit()
+                .te()
+                .set_bit()
+                .ue()
+                .set_bit()
+                .idleie()
+                .clear_bit()
+                .txeie()
+                .clear_bit()
+                .tcie()
+                .clear_bit()
         });
 
         dma_rx.cpar().write(|w| unsafe { w.pa().bits(0x4000_4804) });
@@ -71,8 +87,7 @@ impl LedUsart {
             unsafe {
                 w.pl().bits(2);
             }
-            w.minc().set_bit()
-             .tcie().set_bit()
+            w.minc().set_bit().tcie().set_bit()
         });
 
         dma_tx.cpar().write(|w| unsafe { w.pa().bits(0x4000_4804) });
@@ -81,12 +96,22 @@ impl LedUsart {
             unsafe {
                 w.pl().bits(2);
             }
-            w.minc().set_bit()
-             .dir().set_bit()
-             .tcie().set_bit()
-             .en().clear_bit()
+            w.minc()
+                .set_bit()
+                .dir()
+                .set_bit()
+                .tcie()
+                .set_bit()
+                .en()
+                .clear_bit()
         });
 
-        LedUsart { _pb10: pb10, _pb11: pb11, _usart: usart, dma_rx: dma_rx, dma_tx: dma_tx }
+        LedUsart {
+            _pb10: pb10,
+            _pb11: pb11,
+            _usart: usart,
+            dma_rx: dma_rx,
+            dma_tx: dma_tx,
+        }
     }
 }

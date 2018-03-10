@@ -6,35 +6,40 @@ use rtfm::Threshold;
 use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
 use nb;
-use super::protocol::{Message, MsgType, LedOp};
+use super::protocol::{LedOp, Message, MsgType};
 use super::serial::{Serial, Transfer};
 use super::serial::led_usart::LedUsart;
-use super::keymatrix::{KeyState, to_packed_bits};
+use super::keymatrix::{to_packed_bits, KeyState};
 use keycodes::KeyIndex;
 
 pub enum LedMode {
     _Off,
     On,
-    Flash
+    Flash,
 }
 
 pub struct Led<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<LedUsart, BUFFER>,
     pub rx_transfer: Option<Transfer<BUFFER>>,
     pub pc15: PC15<Output>,
-    pub state: bool
+    pub state: bool,
 }
 
 impl<BUFFER> Led<BUFFER>
-    where BUFFER: Unsize<[u8]>
+where
+    BUFFER: Unsize<[u8]>,
 {
-    pub fn new(mut serial: Serial<LedUsart, BUFFER>, rx_buffer: &'static mut BUFFER, pc15: PC15<Input>) -> Led<BUFFER> {
+    pub fn new(
+        mut serial: Serial<LedUsart, BUFFER>,
+        rx_buffer: &'static mut BUFFER,
+        pc15: PC15<Input>,
+    ) -> Led<BUFFER> {
         let rx_transfer = serial.receive(rx_buffer);
         Led {
             serial: serial,
             rx_transfer: Some(rx_transfer),
             pc15: pc15.into_output().pull_up(),
-            state: true
+            state: true,
         }
     }
 
@@ -60,24 +65,29 @@ impl<BUFFER> Led<BUFFER>
 
     // next_* cycles through themes/brightness/speed
     pub fn next_theme(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0])
+        self.serial
+            .send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0])
     }
 
     pub fn next_brightness(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
+        self.serial
+            .send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
     }
 
     pub fn next_animation_speed(&mut self) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
+        self.serial
+            .send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
     }
 
     pub fn set_theme(&mut self, theme: u8) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[theme])
+        self.serial
+            .send(MsgType::Led, LedOp::ThemeMode as u8, &[theme])
     }
 
     pub fn send_keys(&mut self, state: &KeyState) -> nb::Result<(), !> {
         let packed = to_packed_bits(state);
-        self.serial.send(MsgType::Led, LedOp::Key as u8, &packed.bytes)
+        self.serial
+            .send(MsgType::Led, LedOp::Key as u8, &packed.bytes)
     }
 
     pub fn send_music(&mut self, keys: &[u8]) -> nb::Result<(), !> {
@@ -90,10 +100,12 @@ impl<BUFFER> Led<BUFFER>
     }
 
     pub fn set_keys(&mut self, payload: &[u8]) -> nb::Result<(), !> {
-        self.serial.send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
+        self.serial
+            .send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
     }
 
     pub fn bluetooth_mode(&mut self) -> nb::Result<(), !> {
+        #[rustfmt_skip]
         let payload = &[0xca, 0x0a,
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             KeyIndex::N1 as u8,     0xff, 0x00, 0x00, LedMode::Flash as u8,
@@ -117,26 +129,35 @@ impl<BUFFER> Led<BUFFER>
                     LedOp::AckThemeMode => {
                         // data: [theme id]
                         //debug!("Led AckThemeMode {:?}", message.data).ok();
-                    },
+                    }
                     LedOp::AckConfigCmd => {
                         // data: [theme id, brightness, animation speed]
                         //debug!("Led AckConfigCmd {:?}", message.data).ok();
-                    },
+                    }
                     _ => {
-                        debug!("lmsg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                        debug!(
+                            "lmsg: {:?} {} {:?}",
+                            message.msg_type, message.operation, message.data
+                        ).ok();
                     }
                 }
-            },
+            }
             _ => {
-                debug!("lmsg: {:?} {} {:?}", message.msg_type, message.operation, message.data).ok();
+                debug!(
+                    "lmsg: {:?} {} {:?}",
+                    message.msg_type, message.operation, message.data
+                ).ok();
             }
         }
     }
 
     pub fn poll(&mut self) {
-        let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
+        let result = self.rx_transfer
+            .as_mut()
+            .unwrap()
+            .poll(&mut self.serial.usart);
         match result {
-            Err(nb::Error::WouldBlock) => {},
+            Err(nb::Error::WouldBlock) => {}
             Ok(()) => {
                 let buffer = self.rx_transfer.take().unwrap().finish();
 

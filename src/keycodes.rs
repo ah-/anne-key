@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 
 // USB HID KeyCodes
-#[derive(PartialOrd, PartialEq)]
-#[derive(Copy, Clone)]
+#[derive(PartialOrd, PartialEq, Copy, Clone)]
 pub enum KeyCode {
     No = 0x00,
     RollOver,
@@ -52,15 +51,15 @@ pub enum KeyCode {
     Minus,
     Equal,
     LBracket,
-    RBracket, // 0x30
-    BSlash, // \ (and |)
+    RBracket,  // 0x30
+    BSlash,    // \ (and |)
     NonUSHash, // Non-US # and ~ (Typically near the Enter key)
-    SColon, // ; (and :)
-    Quote, // ' and "
-    Grave, // Grave accent and tilde
-    Comma, // , and <
-    Dot,   // . and >
-    Slash, // / and ?
+    SColon,    // ; (and :)
+    Quote,     // ' and "
+    Grave,     // Grave accent and tilde
+    Comma,     // , and <
+    Dot,       // . and >
+    Slash,     // / and ?
     Capslock,
     F1,
     F2,
@@ -105,7 +104,7 @@ pub enum KeyCode {
     Kp0,
     KpDot,
     NonUSBackslash, // Non-US \ and | (Typically near the Left-Shift key)
-    Application, // 0x65 - Max keycode the Bluetooth HID descriptor supports
+    Application,    // 0x65 - Max keycode the Bluetooth HID descriptor supports
 
     // Modifiers
     LCtrl = 0xE0,
@@ -129,6 +128,7 @@ impl KeyCode {
 }
 
 // Index of each physical Key in the scan matrix
+#[rustfmt_skip]
 pub enum KeyIndex {
     Escape,   N1,    N2,   N3,  N4,  N5,    N6,  N7,  N8,     N9,  N0,      Minus,    Equal,    BSpace,
     Tab,      Q,     W,    E,   R,   T,     Y,   U,   I,      O,   P,       LBracket, RBracket, BSlash,

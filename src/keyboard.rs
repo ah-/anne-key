@@ -14,9 +14,8 @@ pub struct Keyboard {
     previous_state: KeyState, // TODO: use packed state here
 }
 
-
 fn eq(sa: &KeyState, sb: &KeyState) -> bool {
-    sa.iter().zip(sb.iter()).all(|(a,b)| a == b)
+    sa.iter().zip(sb.iter()).all(|(a, b)| a == b)
 }
 
 impl Keyboard {
@@ -42,8 +41,13 @@ impl Keyboard {
         action
     }
 
-    pub fn process<BUFFER>(&mut self, state: &KeyState, bluetooth: &mut Bluetooth<BUFFER>, led: &mut Led<BUFFER>)
-        where BUFFER: Unsize<[u8]>
+    pub fn process<BUFFER>(
+        &mut self,
+        state: &KeyState,
+        bluetooth: &mut Bluetooth<BUFFER>,
+        led: &mut Led<BUFFER>,
+    ) where
+        BUFFER: Unsize<[u8]>,
     {
         // TODO: might not even need this check after switching to wakeup only handling?
         if !eq(&self.previous_state, state) {
@@ -105,11 +109,11 @@ impl EventProcessor for Layers {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed {
             match (action, pressed) {
-                (&Action::LayerMomentary(layer), true) => { self.next |= 1 << layer },
-                (&Action::LayerMomentary(layer), false) => { self.next &= !(1 << layer) },
-                (&Action::LayerToggle(layer), true) => { self.next ^= 1 << layer },
-                (&Action::LayerOn(layer), true) => { self.next |= 1 << layer },
-                (&Action::LayerOff(layer), true) => { self.next &= !(1 << layer)},
+                (&Action::LayerMomentary(layer), true) => self.next |= 1 << layer,
+                (&Action::LayerMomentary(layer), false) => self.next &= !(1 << layer),
+                (&Action::LayerToggle(layer), true) => self.next ^= 1 << layer,
+                (&Action::LayerOn(layer), true) => self.next |= 1 << layer,
+                (&Action::LayerOff(layer), true) => self.next &= !(1 << layer),
                 _ => {}
             }
         }
@@ -145,7 +149,7 @@ impl EventProcessor for HidProcessor {
                         self.report.keys[self.i] = code as u8;
                         self.i += 1;
                     }
-                },
+                }
                 _ => {}
             }
         }
@@ -153,7 +157,8 @@ impl EventProcessor for HidProcessor {
 }
 
 impl<BUFFER> EventProcessor for Led<BUFFER>
-    where BUFFER: Unsize<[u8]>
+where
+    BUFFER: Unsize<[u8]>,
 {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
@@ -165,7 +170,7 @@ impl<BUFFER> EventProcessor for Led<BUFFER>
                 &Action::LedNextBrightness => self.next_brightness(),
                 &Action::LedNextAnimationSpeed => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
-                _ => Ok(())
+                _ => Ok(()),
             };
             result.log_error()
         }
@@ -173,7 +178,8 @@ impl<BUFFER> EventProcessor for Led<BUFFER>
 }
 
 impl<BUFFER> EventProcessor for Bluetooth<BUFFER>
-    where BUFFER: Unsize<[u8]>
+where
+    BUFFER: Unsize<[u8]>,
 {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
@@ -186,7 +192,7 @@ impl<BUFFER> EventProcessor for Bluetooth<BUFFER>
                 &Action::BtBroadcast => self.broadcast(),
                 &Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
                 &Action::BtHostListQuery => self.host_list_query(),
-                _ => Ok(())
+                _ => Ok(()),
             };
             result.log_error()
         }

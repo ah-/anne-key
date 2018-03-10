@@ -33,7 +33,6 @@ const LED_NB: Action = LedNextBrightness;
 const LED_NAS: Action = LedNextAnimationSpeed;
 const BT_ON: Action = LayerOn(LAYER_BT);
 
-
 pub const BASE: Layout = layout![
     Escape   N1     N2   N3 N4 N5    N6 N7 N8    N9  N0     Minus    Equal     BSpace
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash

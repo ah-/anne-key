@@ -31,13 +31,12 @@ pub trait UnwrapLog {
     fn log_error(self);
 }
 
-impl<E: fmt::Debug> UnwrapLog for Result<(), E>
-{
+impl<E: fmt::Debug> UnwrapLog for Result<(), E> {
     #[inline]
     fn log_error(self) {
         match self {
-            Err(e) => { debug!("{:?}", e).unwrap() },
-            _ => {},
+            Err(e) => debug!("{:?}", e).unwrap(),
+            _ => {}
         }
     }
 }
