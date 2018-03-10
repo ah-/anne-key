@@ -38,7 +38,7 @@ where
             serial,
             rx_transfer: Some(rx_transfer),
             pc15: pc15.into_output().pull_up(),
-            state: true,
+            state: false,
         }
     }
 
