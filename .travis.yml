@@ -27,6 +27,7 @@ install:
 
 script:
   - cargo fmt --all -- --write-mode=diff
+  - make bloat
   - make
 
 cache:
