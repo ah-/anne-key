@@ -20,6 +20,9 @@ main() {
 
         rustup component list | grep 'rust-src.*installed' || \
             rustup component add rust-src
+
+        rustup component list | grep 'rustfmt.*installed' || \
+            rustup component add rustfmt
     fi
 }
 
