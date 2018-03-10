@@ -18,15 +18,15 @@ use keycodes::KeyCode::*;
 
 pub type Layout = [Action; 70];
 
-pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
+pub const LAYERS: [Layout; 4] = [BASE, FN, FN2, BT];
 
 pub const LAYER_FN: u8 = 1;
-pub const LAYER_LED: u8 = 2;
+pub const LAYER_FN2: u8 = 2;
 pub const LAYER_BT: u8 = 3;
 
 // activate by indexing into LAYERS
 const FN_M: Action = LayerMomentary(LAYER_FN);
-const LED_T: Action = LayerToggle(LAYER_LED);
+const FN2_M: Action = LayerMomentary(LAYER_FN2);
 const __: Action = Transparent;
 const LED_NT: Action = LedNextTheme;
 const LED_NB: Action = LedNextBrightness;
@@ -38,7 +38,7 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    No        Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     LED_T     RCtrl
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     FN2_M     RCtrl
 ];
 
 pub const FN: Layout = layout![
@@ -49,7 +49,7 @@ pub const FN: Layout = layout![
   __    __   __   No    No        __      No     No     No   No         __     __     __  __
 ];
 
-pub const LED: Layout = layout![
+pub const FN2: Layout = layout![
     LedOff LedOn LED_NT LED_NAS LED_NB __ __ __ __ __ __ __ __ __
     __     __    __     __      __     __ __ __ __ __ __ __ __ __
     __     __    __     __      __     __ __ __ __ __ __ __ No __
