@@ -1,13 +1,13 @@
 use action::Action;
 use bluetooth::Bluetooth;
+use core::marker::Unsize;
 use debug::UnwrapLog;
 use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::LAYERS;
-use led::Led;
-use core::marker::Unsize;
 use layout::LAYER_BT;
+use led::Led;
 
 pub struct Keyboard {
     layers: Layers,

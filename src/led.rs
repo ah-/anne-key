@@ -1,16 +1,16 @@
+use super::keymatrix::{to_packed_bits, KeyState};
+use super::protocol::{LedOp, Message, MsgType};
+use super::serial::{Serial, Transfer};
+use super::serial::led_usart::LedUsart;
 use core::fmt::Write;
 use core::marker::Unsize;
 use cortex_m_semihosting::hio;
 use embedded_hal::digital::OutputPin;
-use rtfm::Threshold;
 use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
-use nb;
-use super::protocol::{LedOp, Message, MsgType};
-use super::serial::{Serial, Transfer};
-use super::serial::led_usart::LedUsart;
-use super::keymatrix::{to_packed_bits, KeyState};
 use keycodes::KeyIndex;
+use nb;
+use rtfm::Threshold;
 
 pub enum LedMode {
     _Off,

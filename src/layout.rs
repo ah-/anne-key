@@ -32,6 +32,7 @@ const LED_NT: Action = LedNextTheme;
 const LED_NB: Action = LedNextBrightness;
 const LED_NAS: Action = LedNextAnimationSpeed;
 const BT_ON: Action = LayerOn(LAYER_BT);
+const LT: Action = LedTheme;
 
 pub const BASE: Layout = layout![
     Escape   N1     N2   N3 N4 N5    N6 N7 N8    N9  N0     Minus    Equal     BSpace
@@ -50,13 +51,14 @@ pub const FN: Layout = layout![
 ];
 
 pub const LED: Layout = layout![
-    LedOff LedOn LED_NT LED_NAS LED_NB __ __ __ __ __ __ __ __ __
-    __ LedTheme(0) LedTheme(1) LedTheme(2) LedTheme(14) LedTheme(17) LedTheme(18) __ __ __ __ __ __ __
-    __ __ __ __ __ __ __ __ __ __ __ __ No __
-    __ __ __ __ __ __ __ __ __ __ __ __ __ __
-    __ __ __ No No __ No No No No __ __ __ __
+    LedOff LedOn LED_NT LED_NAS LED_NB __     __     __ __ __ __ __ __ __
+    __     LT(0) LT(1)  LT(2)   LT(14) LT(17) LT(18) __ __ __ __ __ __ __
+    __     __    __     __      __     __     __     __ __ __ __ __ No __
+    __     __    __     __      __     __     __     __ __ __ __ __ __ __
+    __     __    __     No      No     __     No     No No No __ __ __ __
 ];
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub const BT: Layout = layout![
     LayerOff(LAYER_BT) BtConnectHost(0) BtConnectHost(1) BtConnectHost(2) BtConnectHost(3) __ __ __ __ BtCompatibilityMode(false) BtCompatibilityMode(true) BtOff BtBroadcast BtOn
     __ BtSaveHost(0) BtSaveHost(1) BtSaveHost(2) BtSaveHost(3) __ __ __ __ __ __ __ __ __

@@ -1,9 +1,9 @@
 pub mod bluetooth_usart;
 pub mod led_usart;
 
-use nb;
 use super::protocol::MsgType;
 use core::marker::Unsize;
+use nb;
 
 pub struct Serial<USART, T: 'static>
 where
@@ -57,7 +57,7 @@ where
 
                     Err(nb::Error::WouldBlock)
                 }
-                ReceiveStage::Body => Ok(())
+                ReceiveStage::Body => Ok(()),
             }
         } else {
             Err(nb::Error::WouldBlock)

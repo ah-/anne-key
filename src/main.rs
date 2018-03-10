@@ -30,9 +30,9 @@ mod led;
 mod protocol;
 mod serial;
 
-use rtfm::{app, Threshold};
 use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
+use rtfm::{app, Threshold};
 
 use bluetooth::Bluetooth;
 use keyboard::Keyboard;

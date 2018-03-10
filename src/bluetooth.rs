@@ -1,16 +1,16 @@
 #![feature(const_fn)]
 
-use core::fmt::Write;
-use core::marker::Unsize;
-use cortex_m_semihosting::hio;
-use nb;
-use rtfm::Threshold;
 use super::hidreport::HidReport;
 use super::led::Led;
 use super::protocol::{BleOp, KeyboardOp, LedOp, Message, MsgType, SystemOp};
 use super::serial::{DmaUsart, Serial, Transfer};
 use super::serial::bluetooth_usart::BluetoothUsart;
+use core::fmt::Write;
+use core::marker::Unsize;
+use cortex_m_semihosting::hio;
 use debug::UnwrapLog;
+use nb;
+use rtfm::Threshold;
 
 pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<BluetoothUsart, BUFFER>,

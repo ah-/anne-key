@@ -1,10 +1,10 @@
 #![feature(const_fn)]
 
 use embedded_hal::digital::{InputPin, OutputPin};
-use stm32l151::SYST;
 use hal::gpio::{Input, Output};
 use hal::gpio::gpioa::*;
 use hal::gpio::gpiob::*;
+use stm32l151::SYST;
 
 const ROWS: usize = 5;
 const COLUMNS: usize = 14;
