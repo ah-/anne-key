@@ -32,6 +32,7 @@ const __: Action = Transparent;
 const LedNT: Action = LedNextTheme;
 const LedNB: Action = LedNextBrightness;
 const LedNAS: Action = LedNextAnimationSpeed;
+const BT_ON: Action = LayerOn(LAYER_BT);
 
 
 pub const BASE: Layout = layout![
@@ -39,14 +40,14 @@ pub const BASE: Layout = layout![
     Tab      Q      W    E  R  T     Y  U  I     O   P      LBracket RBracket  BSlash
     Capslock A      S    D  F  G     H  J  K     L   SColon Quote    No        Enter
     LShift   Z      X    C  V  B     N  M  Comma Dot Slash  No       No        RShift
-    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     BT_T      LED_T
+    LCtrl    LMeta  LAlt No No Space No No No    No  RAlt   FN_M     LED_T     RCtrl
 ];
 
 pub const FN: Layout = layout![
   Grave F1   F2   F3    F4        F5     F6    F7    F8   F9         F10    F11    F12 __
   __    __   Up   __    LedToggle LedNAS LedNB LedNT Up   Scrolllock Pause  Home   End PScreen
   __    Left Down Right __        __     __    Left  Down Right      PgUp   PgDown No  __
-  __    __   __   __    __        __     __    __    __   Insert     Delete No     No  __
+  __    __   __   __    __        BT_ON  __    __    __   Insert     Delete No     No  __
   __    __   __   No    No        __     No    No    No   No         __     __     __  __
 ];
 
@@ -59,9 +60,9 @@ pub const LED: Layout = layout![
 ];
 
 pub const BT: Layout = layout![
-    BtOff BtOn BtConnectHost(0) BtConnectHost(1) BtConnectHost(2) BtConnectHost(3) __ __ __ __ __ __ __ __
-    BtBroadcast BtSaveHost(0) BtSaveHost(1) BtSaveHost(2) BtSaveHost(3) __ __ __ __ __ __ __ __ __
-    BtCompatibilityMode(true) BtDeleteHost(0) BtDeleteHost(1) BtDeleteHost(2) BtDeleteHost(3) __ __ __ __ __ __ __ No __
-    BtCompatibilityMode(false) __ __ __ __ __ __ __ __ __ __ __ __ __
-    LedNT BtHostListQuery __ No No __ No No No No __ __ __ __
+    LayerOff(LAYER_BT) BtConnectHost(0) BtConnectHost(1) BtConnectHost(2) BtConnectHost(3) __ __ __ __ BtCompatibilityMode(false) BtCompatibilityMode(true) BtOff BtBroadcast BtOn
+    __ BtSaveHost(0) BtSaveHost(1) BtSaveHost(2) BtSaveHost(3) __ __ __ __ __ __ __ __ __
+    __ BtDeleteHost(0) BtDeleteHost(1) BtDeleteHost(2) BtDeleteHost(3) __ __ __ __ __ __ __ No __
+    __ __ __ __ __ LayerOff(LAYER_BT) __ __ __ __ __ __ __ __
+    BtHostListQuery __ __ No No __ No No No No __ __ __ __
 ];
