@@ -53,13 +53,13 @@ where
     }
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {
-        if !self.state {
-            self.pc15.set_high();
+        let result = if !self.state {
+            self.theme_mode()
         } else {
-            self.pc15.set_low();
-        }
+            self.set_theme(0)
+        };
         self.state = !self.state;
-        Ok(())
+        result
     }
 
     // next_* cycles through themes/brightness/speed
@@ -104,8 +104,7 @@ where
     }
 
     pub fn theme_mode(&mut self) -> nb::Result<(), !> {
-        self.serial
-            .send(MsgType::Led, LedOp::ThemeMode as u8, &[])
+        self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[])
     }
 
     pub fn bluetooth_mode(&mut self, mode: BluetoothMode) -> nb::Result<(), !> {

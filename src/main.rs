@@ -153,7 +153,8 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, dma.3, dma.2, &mut d.RCC);
     let (led_send_buffer, led_receive_buffer) = r.LED_BUFFERS.split_at_mut(1);
     let led_serial = Serial::new(led_usart, &mut led_send_buffer[0]);
-    let led = Led::new(led_serial, &mut led_receive_buffer[0], gpioc.pc15);
+    let mut led = Led::new(led_serial, &mut led_receive_buffer[0], gpioc.pc15);
+    led.on().unwrap();
 
     let bluetooth_usart = BluetoothUsart::new(
         d.USART2,
