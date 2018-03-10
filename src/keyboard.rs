@@ -70,7 +70,7 @@ impl Keyboard {
             let bt_layer_current: bool = self.layers.current & (1 << LAYER_BT) != 0;
             let bt_layer_next: bool = self.layers.next & (1 << LAYER_BT) != 0;
             if bt_layer_next && !bt_layer_current {
-                led.bluetooth_mode().log_error();
+                bluetooth.update_led(led).log_error();
             } else if bt_layer_current && !bt_layer_next {
                 // TODO: go back to previous theme?
                 led.next_theme().log_error();

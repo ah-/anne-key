@@ -2,6 +2,7 @@ use super::keymatrix::{to_packed_bits, KeyState};
 use super::protocol::{LedOp, Message, MsgType};
 use super::serial::{Serial, Transfer};
 use super::serial::led_usart::LedUsart;
+use bluetooth::BluetoothMode;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
 use hal::gpio::{Input, Output};
@@ -102,7 +103,13 @@ where
             .send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
     }
 
-    pub fn bluetooth_mode(&mut self) -> nb::Result<(), !> {
+    pub fn bluetooth_mode(&mut self, mode: BluetoothMode) -> nb::Result<(), !> {
+        let mode_color = match mode {
+            BluetoothMode::Unknown => (0, 0, 0xff),
+            BluetoothMode::Ble => (0, 0xff, 0),
+            BluetoothMode::Legacy => (0xff, 0xff, 0),
+        };
+
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca, 0x0a,
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
@@ -112,8 +119,8 @@ where
             KeyIndex::N4 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
             KeyIndex::Equal as u8,  0x00, 0xff, 0x00, LedMode::On as u8,
             KeyIndex::B as u8,      0x00, 0xff, 0x00, LedMode::Flash as u8,
-            KeyIndex::Minus as u8,  0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::N0 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::Minus as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N0 as u8,  mode_color.0, mode_color.1, mode_color.2, LedMode::On as u8,
             KeyIndex::A as u8,      0x00, 0xff, 0x00, LedMode::On as u8,
         ];
 
@@ -131,6 +138,9 @@ where
                     LedOp::AckConfigCmd => {
                         // data: [theme id, brightness, animation speed]
                         //debug!("Led AckConfigCmd {:?}", message.data).ok();
+                    }
+                    LedOp::AckSetIndividualKeys => {
+                        // data: [202]
                     }
                     _ => {
                         debug!(

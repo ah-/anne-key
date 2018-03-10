@@ -10,9 +10,17 @@ use debug::UnwrapLog;
 use nb;
 use rtfm::Threshold;
 
+#[derive(Copy, Clone)]
+pub enum BluetoothMode {
+    Unknown,
+    Legacy,
+    Ble,
+}
+
 pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<BluetoothUsart, BUFFER>,
     pub rx_transfer: Option<Transfer<BUFFER>>,
+    mode: BluetoothMode,
 }
 
 impl<BUFFER> Bluetooth<BUFFER>
@@ -27,6 +35,7 @@ where
         Bluetooth {
             serial,
             rx_transfer: Some(rx_transfer),
+            mode: BluetoothMode::Unknown,
         }
     }
 
@@ -75,6 +84,10 @@ where
             KeyboardOp::KeyReport as u8,
             report.as_bytes(),
         )
+    }
+
+    pub fn update_led(&self, led: &mut Led<BUFFER>) -> nb::Result<(), !> {
+        led.bluetooth_mode(self.mode)
     }
 
     pub fn handle_message(&mut self, message: &Message, led: &mut Led<BUFFER>) {
@@ -163,6 +176,15 @@ where
                         debug!("bt disconnect").ok();
                     }
                     BleOp::AckHostListQuery => {
+                        if message.data.len() == 3 {
+                            self.mode = match message.data[2] {
+                                0 => BluetoothMode::Ble,
+                                1 => BluetoothMode::Legacy,
+                                _ => BluetoothMode::Unknown,
+                            }
+                        }
+
+                        self.update_led(led).log_error();
                         debug!("bt host list: {:?}", message.data).ok();
                     }
                     _ => {
