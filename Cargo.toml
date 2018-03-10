@@ -41,4 +41,4 @@ lto = true
 
 [profile.dev]
 debug = true
-lto = true
+lto = false
