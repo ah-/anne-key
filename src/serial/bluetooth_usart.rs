@@ -130,12 +130,12 @@ impl BluetoothUsart {
         });
 
         BluetoothUsart {
-            pa1: pa1,
+            pa1,
             _pa2: pa2,
             _pa3: pa3,
             _usart: usart,
-            dma_rx: dma_rx,
-            dma_tx: dma_tx,
+            dma_rx,
+            dma_tx,
             pending_tx: 0,
         }
     }

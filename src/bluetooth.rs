@@ -27,7 +27,7 @@ where
     ) -> Bluetooth<BUFFER> {
         let rx_transfer = serial.receive(rx_buffer);
         Bluetooth {
-            serial: serial,
+            serial,
             rx_transfer: Some(rx_transfer),
         }
     }

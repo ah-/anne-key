@@ -36,7 +36,7 @@ where
     ) -> Led<BUFFER> {
         let rx_transfer = serial.receive(rx_buffer);
         Led {
-            serial: serial,
+            serial,
             rx_transfer: Some(rx_transfer),
             pc15: pc15.into_output().pull_up(),
             state: true,

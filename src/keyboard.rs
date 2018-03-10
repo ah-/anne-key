@@ -108,12 +108,12 @@ impl Layers {
 impl EventProcessor for Layers {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed {
-            match (action, pressed) {
-                (&Action::LayerMomentary(layer), true) => self.next |= 1 << layer,
-                (&Action::LayerMomentary(layer), false) => self.next &= !(1 << layer),
-                (&Action::LayerToggle(layer), true) => self.next ^= 1 << layer,
-                (&Action::LayerOn(layer), true) => self.next |= 1 << layer,
-                (&Action::LayerOff(layer), true) => self.next &= !(1 << layer),
+            match (*action, pressed) {
+                (Action::LayerMomentary(layer), true) => self.next |= 1 << layer,
+                (Action::LayerMomentary(layer), false) => self.next &= !(1 << layer),
+                (Action::LayerToggle(layer), true) => self.next ^= 1 << layer,
+                (Action::LayerOn(layer), true) => self.next |= 1 << layer,
+                (Action::LayerOff(layer), true) => self.next &= !(1 << layer),
                 _ => {}
             }
         }
@@ -141,8 +141,8 @@ impl HidProcessor {
 impl EventProcessor for HidProcessor {
     fn process(&mut self, action: &Action, pressed: bool, _changed: bool) {
         if pressed {
-            match action {
-                &Action::Key(code) => {
+            match *action {
+                Action::Key(code) => {
                     if code.is_modifier() {
                         self.report.modifiers |= 1 << (code as u8 - KeyCode::LCtrl as u8);
                     } else if code.is_normal_key() && self.i < self.report.keys.len() {
@@ -162,14 +162,14 @@ where
 {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
-            let result = match action {
-                &Action::LedOn => self.on(),
-                &Action::LedOff => self.off(),
-                &Action::LedToggle => self.toggle(),
-                &Action::LedNextTheme => self.next_theme(),
-                &Action::LedNextBrightness => self.next_brightness(),
-                &Action::LedNextAnimationSpeed => self.next_animation_speed(),
-                &Action::LedTheme(theme_id) => self.set_theme(theme_id),
+            let result = match *action {
+                Action::LedOn => self.on(),
+                Action::LedOff => self.off(),
+                Action::LedToggle => self.toggle(),
+                Action::LedNextTheme => self.next_theme(),
+                Action::LedNextBrightness => self.next_brightness(),
+                Action::LedNextAnimationSpeed => self.next_animation_speed(),
+                Action::LedTheme(theme_id) => self.set_theme(theme_id),
                 _ => Ok(()),
             };
             result.log_error()
@@ -183,15 +183,15 @@ where
 {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
-            let result = match action {
-                &Action::BtOn => self.on(),
-                &Action::BtOff => self.off(),
-                &Action::BtSaveHost(host) => self.save_host(host),
-                &Action::BtConnectHost(host) => self.connect_host(host),
-                &Action::BtDeleteHost(host) => self.delete_host(host),
-                &Action::BtBroadcast => self.broadcast(),
-                &Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
-                &Action::BtHostListQuery => self.host_list_query(),
+            let result = match *action {
+                Action::BtOn => self.on(),
+                Action::BtOff => self.off(),
+                Action::BtSaveHost(host) => self.save_host(host),
+                Action::BtConnectHost(host) => self.connect_host(host),
+                Action::BtDeleteHost(host) => self.delete_host(host),
+                Action::BtBroadcast => self.broadcast(),
+                Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
+                Action::BtHostListQuery => self.host_list_query(),
                 _ => Ok(()),
             };
             result.log_error()

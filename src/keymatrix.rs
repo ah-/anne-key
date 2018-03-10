@@ -41,7 +41,7 @@ pub fn to_packed_bits(state: &KeyState) -> PackedKeyState {
         let byte = key / 8;
         let bit = key % 8;
         if *pressed {
-            packed[byte] = packed[byte] | (1 << bit);
+            packed[byte] |= 1 << bit;
         }
     }
 
@@ -59,8 +59,8 @@ impl KeyMatrix {
     pub fn new(row_pins: RowPins, column_pins: ColumnPins) -> Self {
         Self {
             state: [false; ROWS * COLUMNS],
-            row_pins: row_pins,
-            column_pins: column_pins,
+            row_pins,
+            column_pins,
         }
     }
 

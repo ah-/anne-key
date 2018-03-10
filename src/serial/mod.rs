@@ -55,12 +55,12 @@ where
                         buffer.as_ptr() as u32 + u32::from(HEADER_SIZE),
                     );
 
-                    return Err(nb::Error::WouldBlock);
+                    Err(nb::Error::WouldBlock)
                 }
-                ReceiveStage::Body => return Ok(()),
+                ReceiveStage::Body => Ok(())
             }
         } else {
-            return Err(nb::Error::WouldBlock);
+            Err(nb::Error::WouldBlock)
         }
     }
 
@@ -76,8 +76,8 @@ where
 {
     pub fn new(usart: USART, send_buffer: &'static mut T) -> Serial<USART, T> {
         Serial {
-            usart: usart,
-            send_buffer: send_buffer,
+            usart,
+            send_buffer,
             send_buffer_pos: 0,
         }
     }
@@ -116,9 +116,9 @@ where
             self.usart
                 .send(send_buffer.as_ptr() as u32, self.send_buffer_pos);
 
-            return Ok(());
+            Ok(())
         } else {
-            return Err(nb::Error::WouldBlock);
+            Err(nb::Error::WouldBlock)
         }
     }
 

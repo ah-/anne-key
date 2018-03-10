@@ -110,8 +110,8 @@ impl LedUsart {
             _pb10: pb10,
             _pb11: pb11,
             _usart: usart,
-            dma_rx: dma_rx,
-            dma_tx: dma_tx,
+            dma_rx,
+            dma_tx,
         }
     }
 }
