@@ -5,7 +5,7 @@ use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::LAYERS;
-use led::{Led, LedMode};
+use led::Led;
 use core::marker::Unsize;
 use layout::LAYER_BT;
 

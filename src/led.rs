@@ -13,7 +13,7 @@ use super::keymatrix::{KeyState, to_packed_bits};
 use keycodes::KeyIndex;
 
 pub enum LedMode {
-    Off,
+    _Off,
     On,
     Flash
 }
@@ -49,13 +49,13 @@ impl<BUFFER> Led<BUFFER>
     }
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {
-        if(!self.state){
+        if !self.state {
             self.pc15.set_high();
-	} else {
-	    self.pc15.set_low();
+        } else {
+            self.pc15.set_low();
         }
-	self.state = !self.state;
-	Ok(())
+        self.state = !self.state;
+        Ok(())
     }
 
     // next_* cycles through themes/brightness/speed
@@ -137,7 +137,6 @@ impl<BUFFER> Led<BUFFER>
         let result = self.rx_transfer.as_mut().unwrap().poll(&mut self.serial.usart);
         match result {
             Err(nb::Error::WouldBlock) => {},
-            Err(_) => panic!("led rx error"),
             Ok(()) => {
                 let buffer = self.rx_transfer.take().unwrap().finish();
 

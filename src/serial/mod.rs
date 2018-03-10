@@ -3,7 +3,6 @@ pub mod led_usart;
 
 use nb;
 use super::protocol::MsgType;
-use core::marker::PhantomData;
 use core::marker::Unsize;
 
 
