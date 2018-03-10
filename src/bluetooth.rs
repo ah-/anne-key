@@ -2,7 +2,7 @@
 
 use super::hidreport::HidReport;
 use super::led::Led;
-use super::protocol::{BleOp, KeyboardOp, LedOp, Message, MsgType, SystemOp};
+use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
 use super::serial::{DmaUsart, Serial, Transfer};
 use super::serial::bluetooth_usart::BluetoothUsart;
 use core::marker::Unsize;
@@ -112,6 +112,16 @@ where
                             .send(MsgType::System, SystemOp::AckGetId as u8, &data2)
                             .log_error();
                     }
+                    SystemOp::IsSyncCode => {
+                        self.serial
+                            .send(MsgType::System, SystemOp::AckIsSyncCode as u8, &[1])
+                            .log_error();
+                    }
+                    SystemOp::SetSyncCode => {
+                        self.serial
+                            .send(MsgType::System, SystemOp::AckIsSyncCode as u8, &[])
+                            .log_error();
+                    }
                     _ => {
                         debug!("msg: System {} {:?}", message.operation, message.data).ok();
                     }
@@ -164,8 +174,32 @@ where
                 LedOp::ThemeMode => {
                     led.set_theme(message.data[0]).log_error();
                 }
+                LedOp::GetUserStaticTheme => {
+                    debug!("TODO: Theme Sync").ok();
+                    // [data_length, num_blocks, block_i]
+                    //let data = [2 + 4, 1, 0, 1, 2, 3, 4];
+                    //self.serial
+                    //.send(MsgType::Led, LedOp::AckGetUserStaticTheme as u8, &data)
+                    //.log_error();
+                }
                 _ => {
                     debug!("msg: Led {} {:?}", message.operation, message.data).ok();
+                }
+            },
+            MsgType::Keyboard => match KeyboardOp::from(message.operation) {
+                KeyboardOp::UpUserLayout => {
+                    debug!("TODO: Keyboard Sync").ok();
+                }
+                _ => {
+                    debug!("msg: Keyboard {} {:?}", message.operation, message.data).ok();
+                }
+            },
+            MsgType::Macro => match MacroOp::from(message.operation) {
+                MacroOp::SyncMacro => {
+                    debug!("TODO: Macro Sync").ok();
+                }
+                _ => {
+                    debug!("msg: macro {} {:?}", message.operation, message.data).ok();
                 }
             },
             _ => {

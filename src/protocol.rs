@@ -149,9 +149,28 @@ pub enum SystemOp {
     SetSyncCode = 9,
     AckReserved = 128,
     AckGetId = 129,
+    AckIsSyncCode = 136,
+    AckSetSyncCode = 137,
 }
 
 impl From<u8> for SystemOp {
+    #[inline]
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
+}
+
+#[repr(u8)]
+#[non_exhaustive]
+#[derive(Debug, Copy, Clone)]
+pub enum MacroOp {
+    Reserved = 0,
+    SyncMacro = 5,
+    AckReserved = 128,
+    AckSyncMacro = 133,
+}
+
+impl From<u8> for MacroOp {
     #[inline]
     fn from(b: u8) -> Self {
         unsafe { transmute(b) }
