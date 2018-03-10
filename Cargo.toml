@@ -42,3 +42,4 @@ lto = true
 [profile.dev]
 debug = true
 lto = false
+opt-level = 3
