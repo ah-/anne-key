@@ -105,7 +105,7 @@ where
     }
 
     pub fn bluetooth_mode(&mut self) -> nb::Result<(), !> {
-        #[rustfmt_skip]
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca, 0x0a,
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             KeyIndex::N1 as u8,     0xff, 0x00, 0x00, LedMode::Flash as u8,
