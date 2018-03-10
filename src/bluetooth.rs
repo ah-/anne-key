@@ -10,6 +10,7 @@ use super::led::Led;
 use super::protocol::{BleOp, KeyboardOp, LedOp, Message, MsgType, SystemOp};
 use super::serial::{DmaUsart, Serial, Transfer};
 use super::serial::bluetooth_usart::BluetoothUsart;
+use debug::UnwrapLog;
 
 pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<BluetoothUsart, BUFFER>,
@@ -160,7 +161,7 @@ impl<BUFFER> Bluetooth<BUFFER>
             }
             MsgType::Led => match LedOp::from(message.operation) {
                 LedOp::ThemeMode => {
-                    led.set_theme(message.data[0]);
+                    led.set_theme(message.data[0]).log_error();
                 }
                 _ => {
                     debug!("msg: Led {} {:?}", message.operation, message.data).ok();

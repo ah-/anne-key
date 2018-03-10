@@ -10,7 +10,13 @@ use super::protocol::{Message, MsgType, LedOp};
 use super::serial::{Serial, Transfer};
 use super::serial::led_usart::LedUsart;
 use super::keymatrix::{KeyState, to_packed_bits};
+use keycodes::KeyIndex;
 
+pub enum LedMode {
+    Off,
+    On,
+    Flash
+}
 
 pub struct Led<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<LedUsart, BUFFER>,
@@ -83,21 +89,25 @@ impl<BUFFER> Led<BUFFER>
         self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[])
     }
 
+    pub fn set_keys(&mut self, payload: &[u8]) -> nb::Result<(), !> {
+        self.serial.send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
+    }
+
     pub fn bluetooth_mode(&mut self) -> nb::Result<(), !> {
-        let payload = [0xca, 0x0a,
-            0x00, 0xff, 0xff, 0x00, 0x01, //key:Esc color:Y
-            0x01, 0x00, 0xff, 0x00, 0x02, //key:1   color:G mode:flash
-            0x02, 0xff, 0x00, 0x00, 0x01, //key:2   color:R
-            0x03, 0xff, 0x00, 0x00, 0x01, //key:3   color:R
-            0x04, 0xff, 0x00, 0x00, 0x01, //key:4   color:R
-            0x0c, 0x00, 0xff, 0x00, 0x01, //key:+   color:G
-            0x2f, 0x00, 0xff, 0x00, 0x02, //key:B   color:G mode:flash
-            0x0b, 0xff, 0x00, 0x00, 0x01, //key:-   color:R
-            0x0a, 0x00, 0xff, 0x00, 0x01, //key:0   color:G
-            0x1d, 0x00, 0xff, 0x00, 0x01, //key:A   color:G
+        let payload = &[0xca, 0x0a,
+            KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N1 as u8,     0xff, 0x00, 0x00, LedMode::Flash as u8,
+            KeyIndex::N2 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::N3 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::N4 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::Equal as u8,  0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::B as u8,      0x00, 0xff, 0x00, LedMode::Flash as u8,
+            KeyIndex::Minus as u8,  0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::N0 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::A as u8,      0x00, 0xff, 0x00, LedMode::On as u8,
         ];
 
-        self.serial.send(MsgType::Led, LedOp::SetIndividualKeys as u8, &payload)
+        self.set_keys(payload)
     }
 
     pub fn handle_message(&mut self, message: &Message) {

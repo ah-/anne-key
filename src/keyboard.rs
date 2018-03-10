@@ -5,8 +5,9 @@ use hidreport::HidReport;
 use keycodes::KeyCode;
 use keymatrix::KeyState;
 use layout::LAYERS;
-use led::Led;
+use led::{Led, LedMode};
 use core::marker::Unsize;
+use layout::LAYER_BT;
 
 pub struct Keyboard {
     layers: Layers,
@@ -62,9 +63,19 @@ impl Keyboard {
                 }
             }
 
+            let bt_layer_current: bool = self.layers.current & (1 << LAYER_BT) != 0;
+            let bt_layer_next: bool = self.layers.next & (1 << LAYER_BT) != 0;
+            if bt_layer_next && !bt_layer_current {
+                led.bluetooth_mode().log_error();
+            } else if bt_layer_current && !bt_layer_next {
+                // TODO: go back to previous theme?
+                led.next_theme().log_error();
+            }
+
+            self.layers.finish();
+
             bluetooth.send_report(&hid.report).log_error();
             led.send_keys(state).log_error();
-            self.layers.finish();
 
             self.previous_state = *state;
         }
@@ -149,9 +160,9 @@ impl<BUFFER> EventProcessor for Led<BUFFER>
             let result = match action {
                 &Action::LedOn => self.on(),
                 &Action::LedOff => self.off(),
-		&Action::LedToggle => self.toggle(),
+                &Action::LedToggle => self.toggle(),
                 &Action::LedNextTheme => self.next_theme(),
-                &Action::LedNextBrightness => self.bluetooth_mode(),
+                &Action::LedNextBrightness => self.next_brightness(),
                 &Action::LedNextAnimationSpeed => self.next_animation_speed(),
                 &Action::LedTheme(theme_id) => self.set_theme(theme_id),
                 _ => Ok(())

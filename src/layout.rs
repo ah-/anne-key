@@ -20,10 +20,14 @@ pub type Layout = [Action; 70];
 
 pub const LAYERS: [Layout; 4] = [BASE, FN, LED, BT];
 
+pub const LAYER_FN: u8 = 1;
+pub const LAYER_LED: u8 = 2;
+pub const LAYER_BT: u8 = 3;
+
 // activate by indexing into LAYERS
-const FN_M: Action = LayerMomentary(1);
-const LED_T: Action = LayerToggle(2);
-const BT_T: Action = LayerToggle(3);
+const FN_M: Action = LayerMomentary(LAYER_FN);
+const LED_T: Action = LayerToggle(LAYER_LED);
+const BT_T: Action = LayerToggle(LAYER_BT);
 const __: Action = Transparent;
 const LedNT: Action = LedNextTheme;
 const LedNB: Action = LedNextBrightness;
