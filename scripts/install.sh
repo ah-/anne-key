@@ -22,7 +22,7 @@ main() {
             rustup component add rust-src
 
         rustup component list | grep 'rustfmt.*installed' || \
-            rustup component add rustfmt
+            rustup component add rustfmt-preview
     fi
 }
 
