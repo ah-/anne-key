@@ -49,6 +49,7 @@ LED chip
 Here are the themes defined in obins' LED firmware:
 
 | Index | Description                                                      |
+|-------|------------------------------------------------------------------|
 | 0     | All keys off                                                     |
 | 1     | All keys red                                                     |
 | 2     | All keys yellow                                                  |
@@ -62,7 +63,7 @@ Here are the themes defined in obins' LED firmware:
 | 10    | France's flag                                                    |
 | 11    | Italia's flag                                                    |
 | 12    | Argentina's flag                                                 |
-| 13    | Breathing cycle red -> yellow -> green -> cyan -> blue -> purple  |
+| 13    | Breathing cycle red -> yellow -> green -> cyan -> blue -> purple |
 | 14    | Rolling colors                                                   |
 | 15    | Pressed keys fading out                                          |
 | 16    | Pressed keys light up, cycle colors after each press             |
