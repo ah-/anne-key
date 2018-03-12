@@ -92,11 +92,19 @@ Documentation & Hacking
 You can find some documentation on hardware on [GitBooks](https://ahah.gitbooks.io/anne-pro-internals/).
 Many fellow projects provide insights into the obins firmware and app protocol:
 
+1. Reverse-engineering
 - [hi-a's disassembly of the firmware and bootloader](https://hi-a.github.io/annepro-key/) ([repo](https://github.com/hi-a/annepro-key))
-- qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 - [metr1xx's APK reverse engineering](https://github.com/metr1xx/anne-pro-community-app)
+
+2. Alternate control apps
+- [Blucky87's Python CLI](https://github.com/Blucky87/AnneProCLI)
+- fcoury's [Node.js library](https://github.com/fcoury/node-anne-pro) and [electron app](https://github.com/fcoury/electron-anne-pro)
 - [kprinssu's Windows app](https://github.com/kprinssu/anne-keyboard-windows)
-- [fcoury's Node.js library](https://github.com/fcoury/node-anne-pro)
+- [msvisser's Mac App](https://github.com/msvisser/AnnePro-mac)
+
+3. Alternate firmware
+- qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
+
 
 To build your own firmware, you need [xargo](https://github.com/japaric/xargo) with the following components:
 
