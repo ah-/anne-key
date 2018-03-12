@@ -115,7 +115,8 @@ where
         };
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
-        let payload = &[0xca, 0x0f,
+        let payload = &[0xca,
+                        0x0f, // the following data's length
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             // Select host
             KeyIndex::N1 as u8,     0xff, 0x00, 0x00, LedMode::Flash as u8,
