@@ -123,7 +123,7 @@ where
             KeyIndex::N4 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
             KeyIndex::Equal as u8,  0x00, 0xff, 0x00, LedMode::On as u8,
             KeyIndex::B as u8,      0x00, 0xff, 0x00, LedMode::Flash as u8,
-            KeyIndex::Minus as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::Minus as u8,  0xff, 0x00, 0x00, LedMode::On as u8,
             KeyIndex::N0 as u8,  mode_color.0, mode_color.1, mode_color.2, LedMode::On as u8,
             KeyIndex::A as u8,      0x00, 0xff, 0x00, LedMode::On as u8,
         ];
