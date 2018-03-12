@@ -109,7 +109,7 @@ where
 
     pub fn bluetooth_mode(&mut self, mode: BluetoothMode) -> nb::Result<(), !> {
         let mode_color = match mode {
-            BluetoothMode::Unknown => (0, 0, 0xff),
+            BluetoothMode::Unknown => (0xff, 0, 0),
             BluetoothMode::Ble => (0, 0xff, 0),
             BluetoothMode::Legacy => (0xff, 0xff, 0),
         };
