@@ -10,6 +10,7 @@ use hal::gpio::gpioc::PC15;
 use keycodes::KeyIndex;
 use nb;
 use rtfm::Threshold;
+use stm32l151::SYST;
 
 pub enum LedMode {
     _Off,
@@ -49,7 +50,18 @@ where
 
     pub fn off(&mut self) -> nb::Result<(), !> {
         self.pc15.set_low();
+        self.state = false;
         Ok(())
+    }
+
+    pub fn poke(&mut self, syst: &SYST) -> nb::Result<(), !> {
+        self.off()?;
+
+        // TODO: introduce proper delay()
+        let wait_until_tick = 0;
+        while syst.cvr.read() > wait_until_tick {}
+
+        self.on()
     }
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {

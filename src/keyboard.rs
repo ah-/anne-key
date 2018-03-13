@@ -162,8 +162,8 @@ where
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed && pressed {
             let result = match *action {
-                Action::LedOn => self.theme_mode(),
-                Action::LedOff => self.set_theme(0),
+                Action::LedOn => self.on(),
+                Action::LedOff => self.off(),
                 Action::LedToggle => self.toggle(),
                 Action::LedNextTheme => self.next_theme(),
                 Action::LedNextBrightness => self.next_brightness(),
