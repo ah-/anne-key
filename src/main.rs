@@ -154,6 +154,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let led_serial = Serial::new(led_usart, &mut led_send_buffer[0]);
     let mut led = Led::new(led_serial, &mut led_receive_buffer[0], gpioc.pc15);
     led.poke(&p.core.SYST).unwrap();
+    led.theme_mode().unwrap();
 
     let bluetooth_usart = BluetoothUsart::new(
         d.USART2,

@@ -96,7 +96,12 @@ where
         led.bluetooth_mode(self.mode)
     }
 
-    pub fn handle_message(&mut self, message: &Message, led: &mut Led<BUFFER>, keyboard: &Keyboard) {
+    pub fn handle_message(
+        &mut self,
+        message: &Message,
+        led: &mut Led<BUFFER>,
+        keyboard: &Keyboard,
+    ) {
         match message.msg_type {
             MsgType::System => {
                 match SystemOp::from(message.operation) {

@@ -61,7 +61,11 @@ where
         let wait_until_tick = 0;
         while syst.cvr.read() > wait_until_tick {}
 
-        self.on()
+        self.on()?;
+
+        while syst.cvr.read() > wait_until_tick {}
+
+        Ok(())
     }
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {
