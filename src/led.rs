@@ -69,12 +69,12 @@ where
     }
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {
-        let result = if !self.state {
+        self.state = !self.state;
+        let result = if self.state {
             self.theme_mode()
         } else {
             self.set_theme(0)
         };
-        self.state = !self.state;
         result
     }
 
@@ -120,6 +120,7 @@ where
     }
 
     pub fn theme_mode(&mut self) -> nb::Result<(), !> {
+        self.state = true;
         self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[])
     }
 
