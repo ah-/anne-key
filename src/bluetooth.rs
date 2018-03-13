@@ -1,6 +1,7 @@
 #![feature(const_fn)]
 
 use super::hidreport::HidReport;
+use super::keyboard::Keyboard;
 use super::led::Led;
 use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
 use super::serial::{DmaUsart, Serial, Transfer};
@@ -95,7 +96,7 @@ where
         led.bluetooth_mode(self.mode)
     }
 
-    pub fn handle_message(&mut self, message: &Message, led: &mut Led<BUFFER>) {
+    pub fn handle_message(&mut self, message: &Message, led: &mut Led<BUFFER>, keyboard: &Keyboard) {
         match message.msg_type {
             MsgType::System => {
                 match SystemOp::from(message.operation) {
@@ -189,7 +190,9 @@ where
                             }
                         }
 
-                        self.update_led(led).log_error();
+                        if keyboard.bluetooth_mode_enabled() {
+                            self.update_led(led).log_error();
+                        }
                         debug!("bt host list: {:?}", message.data).ok();
                     }
                     _ => {
@@ -238,7 +241,7 @@ where
         }
     }
 
-    pub fn poll(&mut self, led: &mut Led<BUFFER>) {
+    pub fn poll(&mut self, led: &mut Led<BUFFER>, keyboard: &Keyboard) {
         let result = self.rx_transfer
             .as_mut()
             .unwrap()
@@ -254,7 +257,7 @@ where
                         operation: buffer[2],
                         data: &buffer[3..3 + buffer[1] as usize - 1],
                     };
-                    self.handle_message(&message, led);
+                    self.handle_message(&message, led, keyboard);
 
                     match (message.msg_type, message.operation) {
                         (MsgType::Ble, 170) => {
@@ -273,7 +276,7 @@ where
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    r.BLUETOOTH.poll(&mut r.LED)
+    r.BLUETOOTH.poll(&mut r.LED, &r.KEYBOARD)
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {

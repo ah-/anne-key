@@ -83,6 +83,10 @@ impl Keyboard {
             self.previous_state = *state;
         }
     }
+
+    pub fn bluetooth_mode_enabled(&self) -> bool {
+        self.layers.current & (1 << LAYER_BT) != 0
+    }
 }
 
 trait EventProcessor {

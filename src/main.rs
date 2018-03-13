@@ -48,7 +48,6 @@ app! {
     resources: {
         static KEYBOARD: Keyboard = Keyboard::new();
         static KEY_MATRIX: KeyMatrix;
-        //static BLUETOOTH_BUFFERS: [[u8; 0x100]; 2] = [[0; 0x100]; 2];
         static BLUETOOTH_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
         static BLUETOOTH: Bluetooth<[u8; 0x80]>;
         static LED_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
@@ -72,11 +71,11 @@ app! {
         },
         DMA1_CHANNEL3: {
             path: led::rx,
-            resources: [LED],
+            resources: [LED, KEYBOARD],
         },
         DMA1_CHANNEL6: {
             path: bluetooth::rx,
-            resources: [BLUETOOTH, KEY_MATRIX, LED],
+            resources: [BLUETOOTH, KEY_MATRIX, LED, KEYBOARD],
         },
         DMA1_CHANNEL7: {
             path: bluetooth::tx,
