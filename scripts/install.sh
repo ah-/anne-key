@@ -3,7 +3,6 @@
 set -eux
 
 main() {
-    if [ $TARGET = thumbv7m-none-eabi ]; then
         # This fetches latest stable release of Xargo
         local tag=$(git ls-remote --tags --refs --exit-code https://github.com/japaric/xargo \
                         | cut -d/ -f3 \
@@ -25,7 +24,6 @@ main() {
             rustup component add rustfmt-preview
 
         which cargo-bloat || cargo install cargo-bloat
-    fi
 }
 
 main
