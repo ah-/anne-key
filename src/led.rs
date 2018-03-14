@@ -148,12 +148,12 @@ where
         let mut cu = 0x00;
 
         match connected_host {
-            1 => { c1 = 0xFF },
-            2 => { c2 = 0xFF },
-            3 => { c3 = 0xFF },
-            4 => { c4 = 0xFF },
-            12 => { cu = 0xFF },
-            _ => {},
+            1 => c1 = 0xFF,
+            2 => c2 = 0xFF,
+            3 => c3 = 0xFF,
+            4 => c4 = 0xFF,
+            12 => cu = 0xFF,
+            _ => {}
         }
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
