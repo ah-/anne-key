@@ -124,27 +124,42 @@ where
         self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[])
     }
 
-    pub fn bluetooth_mode(&mut self, mode: BluetoothMode) -> nb::Result<(), !> {
+    pub fn bluetooth_mode(
+        &mut self,
+        saved_hosts: u8,
+        connected_host: u8,
+        mode: BluetoothMode,
+    ) -> nb::Result<(), !> {
         let mode_color = match mode {
             BluetoothMode::Unknown => (0xff, 0, 0),
             BluetoothMode::Ble => (0, 0xff, 0),
             BluetoothMode::Legacy => (0xff, 0xff, 0),
         };
 
+        let s1 = if (saved_hosts & 1) != 0 { 0xFF } else { 0x00 };
+        let s2 = if (saved_hosts & 2) != 0 { 0xFF } else { 0x00 };
+        let s3 = if (saved_hosts & 4) != 0 { 0xFF } else { 0x00 };
+        let s4 = if (saved_hosts & 8) != 0 { 0xFF } else { 0x00 };
+
+        let c1 = if (connected_host & 1) != 0 { 0xFF } else { 0x00 };
+        let c2 = if (connected_host & 2) != 0 { 0xFF } else { 0x00 };
+        let c3 = if (connected_host & 4) != 0 { 0xFF } else { 0x00 };
+        let c4 = if (connected_host & 8) != 0 { 0xFF } else { 0x00 };
+
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca,
                         0x13, // the following data's length
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             // Select host
-            KeyIndex::N1 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
-            KeyIndex::N2 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
-            KeyIndex::N3 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
-            KeyIndex::N4 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N1 as u8,     0x00, 0xff, c1, LedMode::On as u8,
+            KeyIndex::N2 as u8,     0x00, 0xff, c2, LedMode::On as u8,
+            KeyIndex::N3 as u8,     0x00, 0xff, c3, LedMode::On as u8,
+            KeyIndex::N4 as u8,     0x00, 0xff, c4, LedMode::On as u8,
             // Save host
-            KeyIndex::Q as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
-            KeyIndex::W as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
-            KeyIndex::E as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
-            KeyIndex::R as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
+            KeyIndex::Q as u8,      0x00, s1, 0xff, LedMode::On as u8,
+            KeyIndex::W as u8,      0x00, s2, 0xff, LedMode::On as u8,
+            KeyIndex::E as u8,      0x00, s3, 0xff, LedMode::On as u8,
+            KeyIndex::R as u8,      0x00, s4, 0xff, LedMode::On as u8,
             // Delete host
             KeyIndex::A as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
             KeyIndex::S as u8,      0xff, 0x00, 0x00, LedMode::On as u8,

@@ -22,6 +22,8 @@ pub struct Bluetooth<BUFFER: 'static + Unsize<[u8]>> {
     pub serial: Serial<BluetoothUsart, BUFFER>,
     pub rx_transfer: Option<Transfer<BUFFER>>,
     mode: BluetoothMode,
+    saved_hosts: u8,
+    connected_host: u8,
 }
 
 impl<BUFFER> Bluetooth<BUFFER>
@@ -37,6 +39,8 @@ where
             serial,
             rx_transfer: Some(rx_transfer),
             mode: BluetoothMode::Unknown,
+            saved_hosts: 0,
+            connected_host: 0,
         }
     }
 
@@ -93,7 +97,7 @@ where
     }
 
     pub fn update_led(&self, led: &mut Led<BUFFER>) -> nb::Result<(), !> {
-        led.bluetooth_mode(self.mode)
+        led.bluetooth_mode(self.saved_hosts, self.connected_host, self.mode)
     }
 
     pub fn handle_message(
@@ -188,17 +192,19 @@ where
                     }
                     BleOp::AckHostListQuery => {
                         if message.data.len() == 3 {
+                            self.saved_hosts = message.data[0];
+                            self.connected_host = message.data[1];
                             self.mode = match message.data[2] {
                                 0 => BluetoothMode::Ble,
                                 1 => BluetoothMode::Legacy,
                                 _ => BluetoothMode::Unknown,
-                            }
+                            };
                         }
 
                         if keyboard.bluetooth_mode_enabled() {
                             self.update_led(led).log_error();
                         }
-                        debug!("bt host list: {:?}", message.data).ok();
+                        //debug!("bt host list: {:?}", message.data).ok();
                     }
                     _ => {
                         debug!("msg: Ble {} {:?}", message.operation, message.data).ok();
