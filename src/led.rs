@@ -141,10 +141,26 @@ where
         let s3 = if (saved_hosts & 4) != 0 { 0xFF } else { 0x00 };
         let s4 = if (saved_hosts & 8) != 0 { 0xFF } else { 0x00 };
 
-        let c1 = if (connected_host & 1) != 0 { 0xFF } else { 0x00 };
-        let c2 = if (connected_host & 2) != 0 { 0xFF } else { 0x00 };
-        let c3 = if (connected_host & 4) != 0 { 0xFF } else { 0x00 };
-        let c4 = if (connected_host & 8) != 0 { 0xFF } else { 0x00 };
+        let c1 = if (connected_host & 1) != 0 {
+            0xFF
+        } else {
+            0x00
+        };
+        let c2 = if (connected_host & 2) != 0 {
+            0xFF
+        } else {
+            0x00
+        };
+        let c3 = if (connected_host & 4) != 0 {
+            0xFF
+        } else {
+            0x00
+        };
+        let c4 = if (connected_host & 8) != 0 {
+            0xFF
+        } else {
+            0x00
+        };
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca,
