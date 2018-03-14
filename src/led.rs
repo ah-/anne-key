@@ -141,36 +141,30 @@ where
         let s3 = if (saved_hosts & 4) != 0 { 0xFF } else { 0x00 };
         let s4 = if (saved_hosts & 8) != 0 { 0xFF } else { 0x00 };
 
-        let c1 = if (connected_host & 1) != 0 {
-            0xFF
-        } else {
-            0x00
-        };
-        let c2 = if (connected_host & 2) != 0 {
-            0xFF
-        } else {
-            0x00
-        };
-        let c3 = if (connected_host & 4) != 0 {
-            0xFF
-        } else {
-            0x00
-        };
-        let c4 = if (connected_host & 8) != 0 {
-            0xFF
-        } else {
-            0x00
-        };
+        let mut c1 = 0x00;
+        let mut c2 = 0x00;
+        let mut c3 = 0x00;
+        let mut c4 = 0x00;
+        let mut cu = 0x00;
+
+        match connected_host {
+            1 => { c1 = 0xFF },
+            2 => { c2 = 0xFF },
+            3 => { c3 = 0xFF },
+            4 => { c4 = 0xFF },
+            12 => { cu = 0xFF },
+            _ => {},
+        }
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca,
                         0x13, // the following data's length
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             // Select host
-            KeyIndex::N1 as u8,     0x00, 0xff, c1, LedMode::On as u8,
-            KeyIndex::N2 as u8,     0x00, 0xff, c2, LedMode::On as u8,
-            KeyIndex::N3 as u8,     0x00, 0xff, c3, LedMode::On as u8,
-            KeyIndex::N4 as u8,     0x00, 0xff, c4, LedMode::On as u8,
+            KeyIndex::N1 as u8,     cu, 0xff, c1, LedMode::On as u8,
+            KeyIndex::N2 as u8,     cu, 0xff, c2, LedMode::On as u8,
+            KeyIndex::N3 as u8,     cu, 0xff, c3, LedMode::On as u8,
+            KeyIndex::N4 as u8,     cu, 0xff, c4, LedMode::On as u8,
             // Save host
             KeyIndex::Q as u8,      0x00, s1, 0xff, LedMode::On as u8,
             KeyIndex::W as u8,      0x00, s2, 0xff, LedMode::On as u8,

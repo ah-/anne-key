@@ -192,7 +192,13 @@ where
                     }
                     BleOp::AckHostListQuery => {
                         if message.data.len() == 3 {
+                            // bitfield, with (four?) bits, each indicating if we've saved a
+                            // connection in that slot
                             self.saved_hosts = message.data[0];
+                            // number of the connected host slot
+                            // 0 = not connected
+                            // 1-4 = connected to host 1-4
+                            // 12? = connected, but not to a saved host
                             self.connected_host = message.data[1];
                             self.mode = match message.data[2] {
                                 0 => BluetoothMode::Ble,
