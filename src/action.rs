@@ -4,6 +4,7 @@ use keycodes::KeyCode;
 #[derive(Copy, Clone, PartialEq)]
 pub enum Action {
     Nop,
+    Reset,
     Transparent,
 
     Key(KeyCode), // = 0x10

@@ -52,6 +52,7 @@ app! {
         static BLUETOOTH: Bluetooth<[u8; 0x80]>;
         static LED_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
         static LED: Led<[u8; 0x80]>;
+        static SCB: stm32l151::SCB;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
     },
@@ -63,7 +64,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, KEY_MATRIX, SYST, KEYBOARD],
+            resources: [BLUETOOTH, LED, KEY_MATRIX, SCB, SYST, KEYBOARD],
         },
         DMA1_CHANNEL2: {
             path: led::tx,
@@ -173,6 +174,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         BLUETOOTH: bluetooth,
         KEY_MATRIX: key_matrix,
         LED: led,
+        SCB: p.core.SCB,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
     }
@@ -186,8 +188,13 @@ fn idle() -> ! {
 
 fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     r.KEY_MATRIX.sample(&r.SYST);
-    r.KEYBOARD
-        .process(&r.KEY_MATRIX.state, &mut r.BLUETOOTH, &mut r.LED);
+    r.KEYBOARD.process(
+        &r.KEY_MATRIX.state,
+        &mut r.BLUETOOTH,
+        &mut r.LED,
+        &mut r.SCB,
+        &r.SYST,
+    );
 }
 
 fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {
