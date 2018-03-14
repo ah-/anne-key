@@ -133,24 +133,30 @@ where
 
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let payload = &[0xca,
-                        0x0f, // the following data's length
+                        0x13, // the following data's length
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
             // Select host
-            KeyIndex::N1 as u8,     0xff, 0x00, 0x00, LedMode::Flash as u8,
-            KeyIndex::N2 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::N3 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::N4 as u8,     0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::N1 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N2 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N3 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N4 as u8,     0x00, 0xff, 0x00, LedMode::On as u8,
             // Save host
             KeyIndex::Q as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
             KeyIndex::W as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
             KeyIndex::E as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
             KeyIndex::R as u8,      0x00, 0x00, 0xff, LedMode::On as u8,
+            // Delete host
+            KeyIndex::A as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::S as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::D as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::F as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
+            // Query host list
+            KeyIndex::LCtrl as u8,  0xff, 0xff, 0xff, LedMode::On as u8,
             KeyIndex::Equal as u8,  0x00, 0xff, 0x00, LedMode::On as u8,
             KeyIndex::BSpace as u8, 0x00, 0x00, 0xff, LedMode::On as u8,
             KeyIndex::B as u8,      0x00, 0xff, 0x00, LedMode::Flash as u8,
             KeyIndex::Minus as u8,  0xff, 0x00, 0x00, LedMode::On as u8,
             KeyIndex::N0 as u8,  mode_color.0, mode_color.1, mode_color.2, LedMode::On as u8,
-            KeyIndex::A as u8,      0x00, 0xff, 0x00, LedMode::On as u8,
         ];
 
         self.set_keys(payload)
