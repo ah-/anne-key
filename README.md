@@ -1,3 +1,9 @@
+This branch does not yet work
+=============================
+
+Do not use, USB support is still under development.
+
+
 Firmware for Anne Pro Keyboard written in Rust
 ==============================================
 
