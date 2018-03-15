@@ -187,6 +187,26 @@ where
         self.set_keys(payload)
     }
 
+    pub fn bluetooth_pin_mode(&mut self) -> nb::Result<(), !> {
+        #[cfg_attr(rustfmt, rustfmt_skip)]
+        let payload = &[0xca,
+                        11, // the following data's length
+            KeyIndex::N1 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N2 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N3 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N4 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N5 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N6 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N7 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N8 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N9 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::N0 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
+            KeyIndex::Enter as u8, 0x00, 0x00, 0xff, LedMode::On as u8,
+        ];
+
+        self.set_keys(payload)
+    }
+
     pub fn handle_message(&mut self, message: &Message) {
         match message.msg_type {
             MsgType::Led => {

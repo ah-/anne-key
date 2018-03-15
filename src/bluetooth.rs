@@ -104,7 +104,7 @@ where
         &mut self,
         message: &Message,
         led: &mut Led<BUFFER>,
-        keyboard: &Keyboard,
+        keyboard: &mut Keyboard,
     ) {
         match message.msg_type {
             MsgType::System => {
@@ -180,11 +180,8 @@ where
                     }
                     BleOp::Pair => {
                         debug!("bt pair").ok();
-                        /*
-                        self.serial.send(MsgType::System,
-                                         SystemOp::IsSyncCode as u8,
-                                         &[1]);
-                                         */
+                        keyboard.disable_bluetooth_mode();
+                        led.bluetooth_pin_mode().log_error();
                     }
                     BleOp::Disconnect => {
                         // check this? sent after off, 14
@@ -210,7 +207,6 @@ where
                         if keyboard.bluetooth_mode_enabled() {
                             self.update_led(led).log_error();
                         }
-                        //debug!("bt host list: {:?}", message.data).ok();
                     }
                     _ => {
                         debug!("msg: Ble {} {:?}", message.operation, message.data).ok();
@@ -258,7 +254,7 @@ where
         }
     }
 
-    pub fn poll(&mut self, led: &mut Led<BUFFER>, keyboard: &Keyboard) {
+    pub fn poll(&mut self, led: &mut Led<BUFFER>, keyboard: &mut Keyboard) {
         let result = self.rx_transfer
             .as_mut()
             .unwrap()
@@ -293,7 +289,7 @@ where
 }
 
 pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    r.BLUETOOTH.poll(&mut r.LED, &r.KEYBOARD)
+    r.BLUETOOTH.poll(&mut r.LED, &mut r.KEYBOARD)
 }
 
 pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {

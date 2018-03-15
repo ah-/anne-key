@@ -87,6 +87,10 @@ impl Keyboard {
     pub fn bluetooth_mode_enabled(&self) -> bool {
         self.layers.current & (1 << LAYER_BT) != 0
     }
+
+    pub fn disable_bluetooth_mode(&mut self) {
+        self.layers.current &= !(1 << LAYER_BT);
+    }
 }
 
 trait EventProcessor {
