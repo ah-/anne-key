@@ -1,8 +1,8 @@
 use stm32l151::USB;
 
 pub trait UsbExt {
-    fn toggle_ep_out(&self);
-    fn toggle_ep_0(&self);
+    fn toggle_ep0_out(&self);
+    fn toggle_ep0_0(&self);
     fn toggle_ep0(&self, mask: u32, val: u32, flags: u32);
 
     fn clear_tx_ep_ctr(&self);
@@ -74,11 +74,11 @@ STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, desc_left ? 0 : EP_STATUS_OUT)
 STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, EP_STATUS_OUT /*null OUT transaction */);
 STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, 0);
 */
-    fn toggle_ep_out(&self) {
+    fn toggle_ep0_out(&self) {
         self.toggle_ep0(EP_TX_RX_MASK, EP_TX_RX_VALID, EP_STATUS_OUT)
     }
 
-    fn toggle_ep_0(&self) {
+    fn toggle_ep0_0(&self) {
         self.toggle_ep0(EP_TX_RX_MASK, EP_TX_RX_VALID, 0)
     }
 

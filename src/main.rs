@@ -74,6 +74,7 @@ app! {
         },
         USB_LP: {
             path: usb::usb_lp,
+            priority: 1,
             resources: [USB],
         },
         DMA1_CHANNEL2: {

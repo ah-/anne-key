@@ -62,6 +62,10 @@ impl Usb {
     pub fn interrupt(&mut self) {
         //debug!("\n{:x}\n", self.usb.istr.read().bits()).ok();
 
+        if self.usb.istr.read().reset().bit_is_set() {
+            self.reset();
+        }
+
         while self.usb.istr.read().ctr().bit_is_set() {
             let endpoint = self.usb.istr.read().ep_id().bits();
             match endpoint {
@@ -79,9 +83,7 @@ impl Usb {
             }
         }
 
-        if self.usb.istr.read().reset().bit_is_set() {
-            self.reset();
-        }
+        // TODO: clear ISTR register as in usb.c 647?
 
         // TODO: clear other interrupt bits in ifs?
         //r.USB.istr.modify(|_, w|
@@ -162,12 +164,14 @@ impl Usb {
                         u16,
                 );
 
+                // TODO: parse out USB_RECIP_MASK, check device/iface/endpoint
+                // parse USB_DIR_IN
                 let request = UsbRequest::from(((request16 & 0xff00) >> 8) as u8);
                 let request_type = (request16 & 0xff) as u8;
                 match (request_type, request) {
                     (0, UsbRequest::SetAddress) => {
                         self.pending_daddr = value as u8;
-                        self.usb.set_ep_tx_status_valid();
+                        self.usb.toggle_ep0_0();
                     }
                     (0, UsbRequest::GetStatus) => {
                         (*pma).pma_area.set_u16(0x40, 0);
@@ -177,8 +181,7 @@ impl Usb {
                     (0, UsbRequest::SetConfiguration) => {
                         // TODO: check value?
                         (*pma).pma_area.set_u16(2, 0);
-                        //self.usb.set_ep_tx_status_valid_dtog();
-                        self.usb.set_ep_tx_status_valid();
+                        self.usb.toggle_ep0_0();
                     }
                     (0x80, UsbRequest::GetDescriptor) => {
                         let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
@@ -193,7 +196,7 @@ impl Usb {
                                         descriptors::DEV_DESC.len() as u16,
                                     ),
                                 );
-                                self.usb.set_ep_tx_status_valid();
+                                self.usb.toggle_ep0_out();
                             }
                             UsbDescriptorType::Configuration => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::CONF_DESC);
@@ -204,7 +207,7 @@ impl Usb {
                                         descriptors::CONF_DESC.len() as u16,
                                     ),
                                 );
-                                self.usb.set_ep_tx_status_valid_dtog();
+                                self.usb.toggle_ep0_out();
                             }
                             UsbDescriptorType::StringDesc => {
                                 let string = match descriptor_index {
@@ -218,7 +221,7 @@ impl Usb {
                                 };
                                 (*pma).write_buffer_u8(0x40, string);
                                 (*pma).pma_area.set_u16(2, min(length, string.len() as u16));
-                                self.usb.set_ep_tx_status_valid_dtog();
+                                self.usb.toggle_ep0_out();
                             }
                             UsbDescriptorType::DeviceQualifier => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::DEVICE_QUALIFIER);
@@ -229,7 +232,7 @@ impl Usb {
                                         descriptors::DEVICE_QUALIFIER.len() as u16,
                                     ),
                                 );
-                                self.usb.set_ep_tx_status_valid_dtog();
+                                self.usb.toggle_ep0_out();
                             }
                             _ => panic!(),
                         }
@@ -258,7 +261,7 @@ impl Usb {
                         (*pma).pma_area.set_u16(2, 0);
                         self.usb.set_ep_tx_status_valid_dtog();
                     }
-                    (33, UsbRequest::SetInterface) => {
+                    (0x21, UsbRequest::SetInterface) => {
                         // ???
                         (*pma).pma_area.set_u16(2, 0);
                         self.usb.set_ep_tx_status_valid_dtog();
