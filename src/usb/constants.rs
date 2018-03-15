@@ -4,7 +4,7 @@ use core::mem::transmute;
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum UsbRequest {
     GetStatus = 0x00,
     ClearFeature = 0x01,
@@ -21,12 +21,14 @@ pub enum UsbRequest {
 
 impl From<u8> for UsbRequest {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum UsbDescriptorType {
     Device = 1,
     Configuration = 2,
@@ -41,5 +43,7 @@ pub enum UsbDescriptorType {
 
 impl From<u8> for UsbDescriptorType {
     #[inline]
-    fn from(b: u8) -> Self { unsafe { transmute(b) } }
+    fn from(b: u8) -> Self {
+        unsafe { transmute(b) }
+    }
 }

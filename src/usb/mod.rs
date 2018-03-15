@@ -12,9 +12,9 @@ use rtfm::Threshold;
 
 use stm32l151;
 
-use self::usb_ext::UsbExt;
+use self::constants::{UsbDescriptorType, UsbRequest};
 use self::pma::PMA;
-use self::constants::{UsbRequest, UsbDescriptorType};
+use self::usb_ext::UsbExt;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -26,7 +26,12 @@ pub struct Usb {
 }
 
 impl Usb {
-    pub fn new(usb: stm32l151::USB, rcc: &mut stm32l151::RCC, syscfg: &mut stm32l151::SYSCFG, log: &'static mut self::log::Log) -> Usb {
+    pub fn new(
+        usb: stm32l151::USB,
+        rcc: &mut stm32l151::RCC,
+        syscfg: &mut stm32l151::SYSCFG,
+        log: &'static mut self::log::Log,
+    ) -> Usb {
         unsafe { (*(PMA.get())).zero() };
 
         rcc.apb1enr.modify(|_, w| w.usben().set_bit());
@@ -52,8 +57,8 @@ impl Usb {
         syscfg.pmc.modify(|_, w| w.usb_pu().set_bit());
 
         Usb {
-            usb: usb,
-            log: log,
+            usb,
+            log,
             nreset: 0,
             pending_daddr: 0,
         }
@@ -101,11 +106,9 @@ impl Usb {
             (*pma).pma_area.set_u16(0, 0x40);
             (*pma).pma_area.set_u16(2, 0x0);
             (*pma).pma_area.set_u16(4, 0x20);
-            (*pma).pma_area.set_u16(
-                6,
-                (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as
-                    u16,
-            );
+            (*pma)
+                .pma_area
+                .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
             (*pma).pma_area.set_u16(8, 0x100);
             (*pma).pma_area.set_u16(10, 0x0);
 
@@ -114,16 +117,23 @@ impl Usb {
         }
 
         self.usb.usb_ep0r.modify(|_, w| unsafe {
-            w.ep_type().bits(0b01)
-             .stat_tx().bits(0b10)
-             .stat_rx().bits(0b11)
+            w.ep_type()
+                .bits(0b01)
+                .stat_tx()
+                .bits(0b10)
+                .stat_rx()
+                .bits(0b11)
         });
 
         self.usb.usb_ep1r.modify(|_, w| unsafe {
-            w.ep_type().bits(0b11)
-             .stat_tx().bits(0b11)
-             .stat_rx().bits(0b10)
-             .ea().bits(0b1)
+            w.ep_type()
+                .bits(0b11)
+                .stat_tx()
+                .bits(0b11)
+                .stat_rx()
+                .bits(0b10)
+                .ea()
+                .bits(0b1)
         });
 
         self.usb.daddr.modify(|_, w| w.ef().set_bit());
@@ -140,7 +150,9 @@ impl Usb {
             self.usb.clear_tx_ep_ctr();
             unsafe {
                 if self.pending_daddr != 0 {
-                    self.usb.daddr.modify(|_, w| w.add().bits(self.pending_daddr));
+                    self.usb
+                        .daddr
+                        .modify(|_, w| w.add().bits(self.pending_daddr));
                     self.pending_daddr = 0;
                     self.usb.set_ep_rx_status_valid();
                 } else {
@@ -158,11 +170,9 @@ impl Usb {
                 //let index = (*pma).pma_area.get_u16(0x24);
                 let length = (*pma).pma_area.get_u16(0x26);
 
-                (*pma).pma_area.set_u16(
-                    6,
-                    (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as
-                        u16,
-                );
+                (*pma)
+                    .pma_area
+                    .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
 
                 // TODO: parse out USB_RECIP_MASK, check device/iface/endpoint
                 // parse USB_DIR_IN
@@ -189,24 +199,16 @@ impl Usb {
                         match descriptor_type {
                             UsbDescriptorType::Device => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::DEV_DESC);
-                                (*pma).pma_area.set_u16(
-                                    2,
-                                    min(
-                                        length,
-                                        descriptors::DEV_DESC.len() as u16,
-                                    ),
-                                );
+                                (*pma)
+                                    .pma_area
+                                    .set_u16(2, min(length, descriptors::DEV_DESC.len() as u16));
                                 self.usb.toggle_ep0_out();
                             }
                             UsbDescriptorType::Configuration => {
                                 (*pma).write_buffer_u8(0x40, &descriptors::CONF_DESC);
-                                (*pma).pma_area.set_u16(
-                                    2,
-                                    min(
-                                        length,
-                                        descriptors::CONF_DESC.len() as u16,
-                                    ),
-                                );
+                                (*pma)
+                                    .pma_area
+                                    .set_u16(2, min(length, descriptors::CONF_DESC.len() as u16));
                                 self.usb.toggle_ep0_out();
                             }
                             UsbDescriptorType::StringDesc => {
@@ -227,10 +229,7 @@ impl Usb {
                                 (*pma).write_buffer_u8(0x40, &descriptors::DEVICE_QUALIFIER);
                                 (*pma).pma_area.set_u16(
                                     2,
-                                    min(
-                                        length,
-                                        descriptors::DEVICE_QUALIFIER.len() as u16,
-                                    ),
+                                    min(length, descriptors::DEVICE_QUALIFIER.len() as u16),
                                 );
                                 self.usb.toggle_ep0_out();
                             }
@@ -245,10 +244,7 @@ impl Usb {
                                 (*pma).write_buffer_u8(0x40, &descriptors::HID_REPORT_DESC);
                                 (*pma).pma_area.set_u16(
                                     2,
-                                    min(
-                                        length,
-                                        descriptors::HID_REPORT_DESC.len() as u16,
-                                    ),
+                                    min(length, descriptors::HID_REPORT_DESC.len() as u16),
                                 );
                                 // TODO: ep1?
                                 self.usb.set_ep1_tx_status_valid_dtog();
