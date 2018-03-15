@@ -6,8 +6,8 @@ pub const DEV_DESC: [u8; 18] = [
     0x00,        // bDeviceSubClass
     0x00,        // bDeviceProtocol
     0x40,        // bMaxPacketSize0 64
-    0xFF, 0x00,  // idVendor 0xFFFF
-    0xFF, 0x00,  // idProduct 0xFFFF
+    0xFF, 0xFF,  // idVendor 0xFFFF
+    0xFF, 0xFF,  // idProduct 0xFFFF
     0x01, 0x00,  // bcdDevice 0.01
     0x01,        // iManufacturer (String Index)
     0x02,        // iProduct (String Index)

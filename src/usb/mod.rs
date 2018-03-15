@@ -6,8 +6,6 @@ pub mod hid;
 pub mod usb_ext;
 
 use core::cmp::min;
-use core::fmt::Write;
-use cortex_m_semihosting::hio;
 use rtfm::Threshold;
 
 use stm32l151;
