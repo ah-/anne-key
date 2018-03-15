@@ -176,7 +176,7 @@ impl Usb {
                     (0, UsbRequest::GetStatus) => {
                         (*pma).pma_area.set_u16(0x40, 0);
                         (*pma).pma_area.set_u16(2, 2);
-                        self.usb.set_ep_tx_status_valid_dtog();
+                        self.usb.toggle_ep0_out();
                     }
                     (0, UsbRequest::SetConfiguration) => {
                         // TODO: check value?
@@ -259,12 +259,12 @@ impl Usb {
                     (0x21, UsbRequest::GetInterface) => {
                         // USBHID SET_IDLE
                         (*pma).pma_area.set_u16(2, 0);
-                        self.usb.set_ep_tx_status_valid_dtog();
+                        self.usb.set_ep1_tx_status_valid_dtog();
                     }
                     (0x21, UsbRequest::SetInterface) => {
                         // ???
                         (*pma).pma_area.set_u16(2, 0);
-                        self.usb.set_ep_tx_status_valid_dtog();
+                        self.usb.set_ep1_tx_status_valid_dtog();
                     }
                     _ => panic!(),
                 }

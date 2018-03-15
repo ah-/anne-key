@@ -11,9 +11,6 @@ pub trait UsbExt {
     fn clear_tx_ep1_ctr(&self);
     fn clear_rx_ep1_ctr(&self);
 
-    fn set_ep_tx_status_valid(&self);
-    fn set_ep_tx_status_valid_dtog(&self);
-
     fn set_ep_rx_status_valid(&self);
     fn set_ep_rx_status_valid_dtog(&self);
 
@@ -69,11 +66,6 @@ impl UsbExt for USB {
             .write(|w| unsafe { w.bits((self.usb_ep1r.read().bits() & 0x7FFF) & USB_EPREG_MASK) });
     }
 
-    /*
-STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, desc_left ? 0 : EP_STATUS_OUT);
-STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, EP_STATUS_OUT /*null OUT transaction */);
-STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, 0);
-*/
     fn toggle_ep0_out(&self) {
         self.toggle_ep0(EP_TX_RX_MASK, EP_TX_RX_VALID, EP_STATUS_OUT)
     }
@@ -82,49 +74,9 @@ STM32_TOGGLE_EP(0, EP_TX_RX_MASK, EP_TX_RX_VALID, 0);
         self.toggle_ep0(EP_TX_RX_MASK, EP_TX_RX_VALID, 0)
     }
 
-    /*
-#define STM32_TOGGLE_EP(n, mask, val, flags) \
-	STM32_USB_EP(n) = (((STM32_USB_EP(n) & (EP_MASK | (mask))) ^ (val)) | (flags))
-*/
     fn toggle_ep0(&self, mask: u32, val: u32, flags: u32) {
         self.usb_ep0r
             .modify(|r, w| unsafe { w.bits(((r.bits() & (EP_MASK | mask)) ^ val) | flags) })
-    }
-
-    fn set_ep_tx_status_valid(&self) {
-        let mut bb = self.usb_ep0r.read().bits();
-        bb &= USB_EPTX_DTOGMASK;
-        if (bb & 0x10) == 0 {
-            bb |= 0x10
-        } else {
-            bb &= !0x10
-        }
-        if (bb & 0x20) == 0 {
-            bb |= 0x20
-        } else {
-            bb &= !0x20
-        }
-        self.usb_ep0r
-            .write(|w| unsafe { w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX) });
-    }
-
-    // TODO: dtog should probably be a parameter
-    fn set_ep_tx_status_valid_dtog(&self) {
-        let mut bb = self.usb_ep0r.read().bits();
-        bb &= USB_EPTX_DTOGMASK;
-        if (bb & 0x10) == 0 {
-            bb |= 0x10
-        } else {
-            bb &= !0x10
-        }
-        if (bb & 0x20) == 0 {
-            bb |= 0x20
-        } else {
-            bb &= !0x20
-        }
-        bb |= 0x1000;
-        self.usb_ep0r
-            .write(|w| unsafe { w.bits(bb | USB_EP_CTR_RX | USB_EP_CTR_TX) });
     }
 
     fn set_ep_rx_status_valid(&self) {
