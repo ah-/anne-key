@@ -46,7 +46,7 @@ pub const FN: Layout = layout![
   __    __   Up   __    LedToggle LED_NAS LED_NB LED_NT Up   Scrolllock Pause  Home   End PScreen
   __    Left Down Right __        __      __     Left   Down Right      PgUp   PgDown No  __
   __    __   __   __    __        BT_ON   __     __     __   Insert     Delete No     No  __
-  __    __   __   No    No        __      No     No     No   No         __     __     __  __
+  __    __   __   No    No        Reset      No     No     No   No         __     __     __  __
 ];
 
 pub const FN2: Layout = layout![

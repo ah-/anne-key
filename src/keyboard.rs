@@ -8,6 +8,8 @@ use keymatrix::KeyState;
 use layout::LAYERS;
 use layout::LAYER_BT;
 use led::Led;
+use stm32l151::SCB;
+use stm32l151::SYST;
 
 pub struct Keyboard {
     layers: Layers,
@@ -46,6 +48,8 @@ impl Keyboard {
         state: &KeyState,
         bluetooth: &mut Bluetooth<BUFFER>,
         led: &mut Led<BUFFER>,
+        scb: &mut SCB,
+        syst: &SYST,
     ) where
         BUFFER: Unsize<[u8]>,
     {
@@ -60,6 +64,17 @@ impl Keyboard {
                 // cut down on processing time.
                 if *pressed || changed {
                     let action = self.get_action(key);
+                    if let Action::Reset = action {
+                        unsafe {
+                            // write unlock: 0x05fa << 16
+                            // SYSRESETREQ: 0b100
+                            scb.aircr.write((0x05fa << 16) | 0b100);
+                            let current_tick = syst.cvr.read();
+                            let wait_until_tick = current_tick - 300;
+                            while syst.cvr.read() > wait_until_tick {}
+                            // Should be unreachable
+                        }
+                    }
                     hid.process(&action, *pressed, changed);
                     led.process(&action, *pressed, changed);
                     bluetooth.process(&action, *pressed, changed);
