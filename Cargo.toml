@@ -38,8 +38,9 @@ version = "0.1.0"
 [profile.release]
 debug = true
 lto = true
+opt-level = "z"
 
 [profile.dev]
 debug = true
 lto = false
-opt-level = 3
+opt-level = "z"
