@@ -29,6 +29,7 @@ mod layout;
 mod led;
 mod protocol;
 mod serial;
+mod usb;
 
 use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
@@ -41,6 +42,10 @@ use led::Led;
 use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
+use usb::Usb;
+use usb::log::Log;
+
+static mut USB_LOG: Log = Log::new();
 
 app! {
     device: stm32l151,
@@ -55,6 +60,7 @@ app! {
         static SCB: stm32l151::SCB;
         static SYST: stm32l151::SYST;
         static EXTI: stm32l151::EXTI;
+        static USB: Usb;
     },
 
     init: {
@@ -65,6 +71,10 @@ app! {
         SYS_TICK: {
             path: tick,
             resources: [BLUETOOTH, LED, KEY_MATRIX, SCB, SYST, KEYBOARD],
+        },
+        USB_LP: {
+            path: usb::usb_lp,
+            resources: [USB],
         },
         DMA1_CHANNEL2: {
             path: led::tx,
@@ -170,6 +180,8 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
     let bluetooth = Bluetooth::new(bluetooth_serial, &mut bt_receive_buffer[0]);
 
+    let usb = unsafe { Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG, &mut USB_LOG) };
+
     init::LateResources {
         BLUETOOTH: bluetooth,
         KEY_MATRIX: key_matrix,
@@ -177,6 +189,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
         SCB: p.core.SCB,
         SYST: p.core.SYST,
         EXTI: d.EXTI,
+        USB: usb,
     }
 }
 
