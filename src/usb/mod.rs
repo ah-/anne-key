@@ -76,7 +76,7 @@ impl Usb {
                     self.ctr();
                 }
                 1 => {
-                    hid::usb_hid_ctr(&mut self.usb);
+                    hid::usb_hid_ctr(&mut self.usb, &mut self.pma);
                 }
                 _ => panic!(),
             }
@@ -215,27 +215,23 @@ impl Usb {
                                 .pma_area
                                 .set_u16(2, min(length, descriptors::HID_REPORT_DESC.len() as u16));
                             self.usb.usb_ep0r.toggle_out();
-                            // TODO: ep1?
-                            //self.usb.set_ep1_tx_status_valid_dtog();
                         }
                         _ => panic!(),
                     }
                 }
-                (UsbDirection::In, UsbRecipient::Interface, UsbRequest::GetInterface) => {
+                /*(UsbDirection::In, UsbRecipient::Interface, UsbRequest::GetInterface) => {
                     // this doesn't really make sense
                     //(0x21, UsbRequest::GetInterface) => {
                     // USBHID SET_IDLE
                     self.pma.pma_area.set_u16(2, 0);
                     self.usb.usb_ep0r.toggle_out();
-                    //self.usb.set_ep1_tx_status_valid_dtog();
                 }
                 (UsbDirection::In, UsbRecipient::Interface, UsbRequest::SetInterface) => {
                     //(0x21, UsbRequest::SetInterface) => {
                     // ???
                     self.pma.pma_area.set_u16(2, 0);
                     self.usb.usb_ep0r.toggle_0();
-                    //self.usb.set_ep1_tx_status_valid_dtog();
-                }
+                }*/
                 _ => panic!(),
             }
         }

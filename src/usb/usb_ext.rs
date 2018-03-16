@@ -1,4 +1,4 @@
-use stm32l151::usb::USB_EP0R;
+use stm32l151::usb::{USB_EP0R, USB_EP1R};
 
 pub trait UsbEpExt {
     fn toggle_tx_out(&self);
@@ -21,6 +21,28 @@ const EP_TX_STALL: u32 = 0x0010;
 const EP_STATUS_OUT: u32 = 0x0100;
 
 impl UsbEpExt for USB_EP0R {
+    fn toggle_tx_stall(&self) {
+        self.toggle(EP_TX_RX_MASK, EP_RX_VALID | EP_TX_STALL, 0)
+    }
+
+    fn toggle_tx_out(&self) {
+        self.toggle(EP_TX_MASK, EP_TX_VALID, EP_STATUS_OUT)
+    }
+
+    fn toggle_out(&self) {
+        self.toggle(EP_TX_RX_MASK, EP_TX_RX_VALID, EP_STATUS_OUT)
+    }
+
+    fn toggle_0(&self) {
+        self.toggle(EP_TX_RX_MASK, EP_TX_RX_VALID, 0)
+    }
+
+    fn toggle(&self, mask: u32, val: u32, flags: u32) {
+        self.modify(|r, w| unsafe { w.bits(((r.bits() & (EP_MASK | mask)) ^ val) | flags) })
+    }
+}
+
+impl UsbEpExt for USB_EP1R {
     fn toggle_tx_stall(&self) {
         self.toggle(EP_TX_RX_MASK, EP_RX_VALID | EP_TX_STALL, 0)
     }
