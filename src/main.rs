@@ -43,9 +43,6 @@ use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
 use usb::Usb;
-use usb::log::Log;
-
-static mut USB_LOG: Log = Log::new();
 
 app! {
     device: stm32l151,
@@ -181,7 +178,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
     let bluetooth = Bluetooth::new(bluetooth_serial, &mut bt_receive_buffer[0]);
 
-    let usb = unsafe { Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG, &mut USB_LOG) };
+    let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
 
     init::LateResources {
         BLUETOOTH: bluetooth,

@@ -1,6 +1,5 @@
 pub mod constants;
 pub mod descriptors;
-pub mod log;
 pub mod pma;
 pub mod hid;
 pub mod usb_ext;
@@ -19,8 +18,6 @@ const MAX_PACKET_SIZE: u32 = 64;
 
 pub struct Usb {
     usb: stm32l151::USB,
-    log: &'static mut self::log::Log,
-    nreset: usize,
     pending_daddr: u8,
     pma: &'static mut PMA,
 }
@@ -30,7 +27,6 @@ impl Usb {
         usb: stm32l151::USB,
         rcc: &mut stm32l151::RCC,
         syscfg: &mut stm32l151::SYSCFG,
-        log: &'static mut self::log::Log,
     ) -> Usb {
         let pma = unsafe { &mut *PMA.get() };
         pma.zero();
@@ -59,8 +55,6 @@ impl Usb {
 
         Usb {
             usb,
-            log,
-            nreset: 0,
             pending_daddr: 0,
             pma,
         }
@@ -79,15 +73,10 @@ impl Usb {
             let endpoint = istr.ep_id().bits();
             match endpoint {
                 0 => {
-                    // TODO: turn logging off, need to read some register to reset it?
-                    self.log.save(&mut self.usb, 1);
                     self.ctr();
-                    self.log.save(&mut self.usb, 2);
                 }
                 1 => {
-                    self.log.save(&mut self.usb, 3);
                     hid::usb_hid_ctr(&mut self.usb);
-                    self.log.save(&mut self.usb, 4);
                 }
                 _ => panic!(),
             }
@@ -128,12 +117,6 @@ impl Usb {
         });
 
         self.usb.daddr.modify(|_, w| w.ef().set_bit());
-
-        self.log.reset();
-        if self.nreset > 1 {
-            debug!("r").unwrap();
-        }
-        self.nreset += 1;
     }
 
     fn ctr(&mut self) {
