@@ -48,7 +48,7 @@ impl UsbEpExt for USB_EP1R {
     }
 
     fn toggle_tx_out(&self) {
-        self.toggle(EP_TX_MASK, EP_TX_VALID, EP_STATUS_OUT)
+        self.toggle(EP_TX_MASK, EP_TX_VALID, 0)
     }
 
     fn toggle_out(&self) {

@@ -13,6 +13,7 @@ use self::constants::{split_request_type, UsbDescriptorType, UsbDirection, UsbRe
                       UsbRequest, UsbType};
 use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
+use usb::hid::UsbHid;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -20,6 +21,7 @@ pub struct Usb {
     usb: stm32l151::USB,
     pending_daddr: u8,
     pma: &'static mut PMA,
+    hid: UsbHid,
 }
 
 impl Usb {
@@ -53,10 +55,13 @@ impl Usb {
 
         syscfg.pmc.modify(|_, w| w.usb_pu().set_bit());
 
+        let hid = hid::UsbHid::new();
+
         Usb {
             usb,
             pending_daddr: 0,
             pma,
+            hid,
         }
     }
 
@@ -67,6 +72,8 @@ impl Usb {
             self.reset();
         }
 
+        self.usb.istr.modify(|_, w| w.susp().clear_bit().sof().clear_bit().esof().clear_bit());
+        let istr = self.usb.istr.read();
         if istr.ctr().bit_is_set() {
             self.usb.istr.modify(|_, w| w.ctr().clear_bit());
 
@@ -76,10 +83,19 @@ impl Usb {
                     self.ctr();
                 }
                 1 => {
-                    hid::usb_hid_ctr(&mut self.usb, &mut self.pma);
+                    debug!("hid!").ok();
+                    self.hid.ctr(&mut self.usb, &mut self.pma);
                 }
                 _ => panic!(),
             }
+        } else {
+            if istr.bits() != 0 {
+                debug!("nz {:x}", istr.bits());
+            }
+        }
+
+        if self.hid.up {
+            debug!("up!").ok();
         }
     }
 
@@ -93,7 +109,7 @@ impl Usb {
         self.pma.pma_area.set_u16(8, 0x100);
         self.pma.pma_area.set_u16(10, 0x0);
 
-        unsafe { self.pma.write_buffer_u8(0x100, &hid::HID_REPORT) };
+        self.pma.write_buffer_u8(0x100, &self.hid.report);
         self.pma.pma_area.set_u16(10, 5);
 
         self.usb.usb_ep0r.modify(|_, w| unsafe {
