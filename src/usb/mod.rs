@@ -10,9 +10,10 @@ use rtfm::Threshold;
 
 use stm32l151;
 
-use self::constants::{UsbDescriptorType, UsbRequest};
+use self::constants::{split_request_type, UsbDescriptorType, UsbDirection, UsbRecipient,
+                      UsbRequest, UsbType};
 use self::pma::PMA;
-use self::usb_ext::UsbExt;
+use self::usb_ext::UsbEpExt;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -21,6 +22,7 @@ pub struct Usb {
     log: &'static mut self::log::Log,
     nreset: usize,
     pending_daddr: u8,
+    pma: &'static mut PMA,
 }
 
 impl Usb {
@@ -30,7 +32,8 @@ impl Usb {
         syscfg: &mut stm32l151::SYSCFG,
         log: &'static mut self::log::Log,
     ) -> Usb {
-        unsafe { (*(PMA.get())).zero() };
+        let pma = unsafe { &mut *PMA.get() };
+        pma.zero();
 
         rcc.apb1enr.modify(|_, w| w.usben().set_bit());
         rcc.apb1rstr.modify(|_, w| w.usbrst().set_bit());
@@ -59,20 +62,24 @@ impl Usb {
             log,
             nreset: 0,
             pending_daddr: 0,
+            pma,
         }
     }
 
     pub fn interrupt(&mut self) {
-        //debug!("\n{:x}\n", self.usb.istr.read().bits()).ok();
-
-        if self.usb.istr.read().reset().bit_is_set() {
+        let istr = self.usb.istr.read();
+        if istr.reset().bit_is_set() {
+            self.usb.istr.modify(|_, w| w.reset().clear_bit());
             self.reset();
         }
 
-        if self.usb.istr.read().ctr().bit_is_set() {
-            let endpoint = self.usb.istr.read().ep_id().bits();
+        if istr.ctr().bit_is_set() {
+            self.usb.istr.modify(|_, w| w.ctr().clear_bit());
+
+            let endpoint = istr.ep_id().bits();
             match endpoint {
                 0 => {
+                    // TODO: turn logging off, need to read some register to reset it?
                     self.log.save(&mut self.usb, 1);
                     self.ctr();
                     self.log.save(&mut self.usb, 2);
@@ -85,34 +92,20 @@ impl Usb {
                 _ => panic!(),
             }
         }
-
-        // TODO: clear ISTR register as in usb.c 647?
-
-        // TODO: clear other interrupt bits in ifs?
-        //r.USB.istr.modify(|_, w|
-        //w.sof().clear_bit()
-        //.esof().clear_bit()
-        //.susp().clear_bit()
-        //);
     }
 
     fn reset(&mut self) {
-        self.usb.istr.modify(|_, w| w.reset().clear_bit());
+        self.pma.pma_area.set_u16(0, 0x40);
+        self.pma.pma_area.set_u16(2, 0x0);
+        self.pma.pma_area.set_u16(4, 0x20);
+        self.pma
+            .pma_area
+            .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
+        self.pma.pma_area.set_u16(8, 0x100);
+        self.pma.pma_area.set_u16(10, 0x0);
 
-        let pma = PMA.get();
-        unsafe {
-            (*pma).pma_area.set_u16(0, 0x40);
-            (*pma).pma_area.set_u16(2, 0x0);
-            (*pma).pma_area.set_u16(4, 0x20);
-            (*pma)
-                .pma_area
-                .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
-            (*pma).pma_area.set_u16(8, 0x100);
-            (*pma).pma_area.set_u16(10, 0x0);
-
-            (*pma).write_buffer_u8(0x100, &hid::HID_REPORT);
-            (*pma).pma_area.set_u16(10, 5);
-        }
+        unsafe { self.pma.write_buffer_u8(0x100, &hid::HID_REPORT) };
+        self.pma.pma_area.set_u16(10, 5);
 
         self.usb.usb_ep0r.modify(|_, w| unsafe {
             w.ep_type()
@@ -144,128 +137,123 @@ impl Usb {
     }
 
     fn ctr(&mut self) {
-        if !self.usb.istr.read().dir().bit_is_set() {
-            unsafe {
-                if self.pending_daddr != 0 {
-                    self.usb
-                        .daddr
-                        .modify(|_, w| w.add().bits(self.pending_daddr));
-                    self.pending_daddr = 0;
-                    self.usb.toggle_ep0_tx_out();
-                } else {
-                    let pma = PMA.get();
-                    (*pma).pma_area.set_u16(6, 0);
-                    self.usb.toggle_ep0_tx_out();
-                }
-            }
+        if self.usb.istr.read().dir().bit_is_set() {
+            self.rx()
         } else {
-            let pma = PMA.get();
-            unsafe {
-                let request16 = (*pma).pma_area.get_u16(0x20);
-                let value = (*pma).pma_area.get_u16(0x22);
-                //let index = (*pma).pma_area.get_u16(0x24);
-                let length = (*pma).pma_area.get_u16(0x26);
+            self.tx()
+        }
+    }
 
-                (*pma)
+    fn tx(&mut self) {
+        if self.pending_daddr != 0 {
+            self.usb
+                .daddr
+                .modify(|_, w| unsafe { w.add().bits(self.pending_daddr) });
+        } else {
+            self.pma.pma_area.set_u16(6, 0);
+        }
+
+        self.usb.usb_ep0r.toggle_tx_out();
+    }
+
+    fn get_device_descriptor(&mut self, value: u16, length: u16) {
+        let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
+        let index = (value & 0xff) as u8;
+        let descriptor: Option<&[u8]> = match descriptor_type {
+            UsbDescriptorType::Configuration => Some(&descriptors::CONF_DESC),
+            UsbDescriptorType::Device => Some(&descriptors::DEV_DESC),
+            UsbDescriptorType::DeviceQualifier => Some(&descriptors::DEVICE_QUALIFIER),
+            UsbDescriptorType::StringDesc => match index {
+                0 => Some(&descriptors::LANG_STR),
+                1 => Some(&descriptors::MANUFACTURER_STR),
+                2 => Some(&descriptors::PRODUCT_STR),
+                3 => Some(&descriptors::SERIAL_NUMBER_STR),
+                4 => Some(&descriptors::CONF_STR),
+                _ => None,
+            },
+            UsbDescriptorType::Debug => None,
+            _ => {
+                debug!("get descriptor {:x}", value).ok();
+                None
+            }
+        };
+        match descriptor {
+            Some(bytes) => {
+                self.pma.write_buffer_u8(0x40, bytes);
+                self.pma
                     .pma_area
-                    .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
+                    .set_u16(2, min(length, bytes.len() as u16));
+                self.usb.usb_ep0r.toggle_out();
+            }
+            None => self.usb.usb_ep0r.toggle_tx_stall(),
+        }
+    }
 
-                // TODO: parse out USB_RECIP_MASK, check device/iface/endpoint
-                // parse USB_DIR_IN
-                let request = UsbRequest::from(((request16 & 0xff00) >> 8) as u8);
-                let request_type = (request16 & 0xff) as u8;
-                match (request_type, request) {
-                    (0, UsbRequest::SetAddress) => {
-                        self.pending_daddr = value as u8;
-                        self.usb.toggle_ep0_0();
-                    }
-                    (0, UsbRequest::GetStatus) => {
-                        (*pma).pma_area.set_u16(0x40, 0);
-                        (*pma).pma_area.set_u16(2, 2);
-                        self.usb.toggle_ep0_out();
-                    }
-                    (0, UsbRequest::SetConfiguration) => {
-                        // TODO: check value?
-                        (*pma).pma_area.set_u16(2, 0);
-                        self.usb.toggle_ep0_0();
-                    }
-                    (0x80, UsbRequest::GetDescriptor) => {
-                        let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
-                        let descriptor_index = (value & 0xff) as u8;
-                        match descriptor_type {
-                            UsbDescriptorType::Device => {
-                                (*pma).write_buffer_u8(0x40, &descriptors::DEV_DESC);
-                                (*pma)
-                                    .pma_area
-                                    .set_u16(2, min(length, descriptors::DEV_DESC.len() as u16));
-                                self.usb.toggle_ep0_out();
-                            }
-                            UsbDescriptorType::Configuration => {
-                                (*pma).write_buffer_u8(0x40, &descriptors::CONF_DESC);
-                                (*pma)
-                                    .pma_area
-                                    .set_u16(2, min(length, descriptors::CONF_DESC.len() as u16));
-                                self.usb.toggle_ep0_out();
-                            }
-                            UsbDescriptorType::StringDesc => {
-                                let string = match descriptor_index {
-                                    0 => &descriptors::LANG_STR[..],
-                                    1 => &descriptors::MANUFACTURER_STR[..],
-                                    2 => &descriptors::PRODUCT_STR[..],
-                                    3 => &descriptors::SERIAL_NUMBER_STR[..],
-                                    4 => &descriptors::CONF_STR[..],
-                                    _ => &descriptors::PRODUCT_STR[..],
-                                    // last one should stall?
-                                };
-                                (*pma).write_buffer_u8(0x40, string);
-                                (*pma).pma_area.set_u16(2, min(length, string.len() as u16));
-                                self.usb.toggle_ep0_out();
-                            }
-                            UsbDescriptorType::DeviceQualifier => {
-                                (*pma).write_buffer_u8(0x40, &descriptors::DEVICE_QUALIFIER);
-                                (*pma).pma_area.set_u16(
-                                    2,
-                                    min(length, descriptors::DEVICE_QUALIFIER.len() as u16),
-                                );
-                                self.usb.toggle_ep0_out();
-                            }
-                            UsbDescriptorType::Debug => {
-                                self.usb.toggle_ep0_tx_stall();
-                            }
-                            _ => {
-                                debug!("get descriptor {:x}", value);
-                                panic!()
-                            }
-                        }
-                    }
-                    (0x81, UsbRequest::GetDescriptor) => {
-                        let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
-                        let descriptor_index = (value & 0xff) as u8;
-                        match (descriptor_type, descriptor_index) {
-                            (UsbDescriptorType::HidReport, _) => {
-                                (*pma).write_buffer_u8(0x40, &descriptors::HID_REPORT_DESC);
-                                (*pma).pma_area.set_u16(
-                                    2,
-                                    min(length, descriptors::HID_REPORT_DESC.len() as u16),
-                                );
-                                // TODO: ep1?
-                                self.usb.set_ep1_tx_status_valid_dtog();
-                            }
-                            _ => panic!(),
-                        }
-                    }
-                    (0x21, UsbRequest::GetInterface) => {
-                        // USBHID SET_IDLE
-                        (*pma).pma_area.set_u16(2, 0);
-                        self.usb.set_ep1_tx_status_valid_dtog();
-                    }
-                    (0x21, UsbRequest::SetInterface) => {
-                        // ???
-                        (*pma).pma_area.set_u16(2, 0);
-                        self.usb.set_ep1_tx_status_valid_dtog();
-                    }
-                    _ => panic!(),
+    fn rx(&mut self) {
+        let request16 = self.pma.pma_area.get_u16(0x20);
+        let value = self.pma.pma_area.get_u16(0x22);
+        //let index = self.pma.pma_area.get_u16(0x24);
+        let length = self.pma.pma_area.get_u16(0x26);
+
+        self.pma
+            .pma_area
+            .set_u16(6, (0x8000 | ((MAX_PACKET_SIZE / 32) - 1) << 10) as u16);
+
+        // TODO: parse out USB_RECIP_MASK, check device/iface/endpoint
+        // parse USB_DIR_IN
+        let request = UsbRequest::from(((request16 & 0xff00) >> 8) as u8);
+        let (direction, typ, recipient) = split_request_type((request16 & 0xff) as u8);
+        if typ == UsbType::Standard {
+            match (direction, recipient, request) {
+                (UsbDirection::Out, UsbRecipient::Device, UsbRequest::SetAddress) => {
+                    self.pending_daddr = value as u8;
+                    self.usb.usb_ep0r.toggle_0();
                 }
+                (UsbDirection::Out, UsbRecipient::Device, UsbRequest::SetConfiguration) => {
+                    // TODO: check value?
+                    self.pma.pma_area.set_u16(2, 0);
+                    self.usb.usb_ep0r.toggle_0();
+                }
+                (UsbDirection::Out, UsbRecipient::Device, UsbRequest::GetStatus) => {
+                    self.pma.pma_area.set_u16(0x40, 0);
+                    self.pma.pma_area.set_u16(2, 2);
+                    self.usb.usb_ep0r.toggle_out();
+                }
+                (UsbDirection::In, UsbRecipient::Device, UsbRequest::GetDescriptor) => {
+                    self.get_device_descriptor(value, length);
+                }
+                (UsbDirection::In, UsbRecipient::Interface, UsbRequest::GetDescriptor) => {
+                    let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
+                    match descriptor_type {
+                        UsbDescriptorType::HidReport => {
+                            self.pma
+                                .write_buffer_u8(0x40, &descriptors::HID_REPORT_DESC);
+                            self.pma
+                                .pma_area
+                                .set_u16(2, min(length, descriptors::HID_REPORT_DESC.len() as u16));
+                            self.usb.usb_ep0r.toggle_out();
+                            // TODO: ep1?
+                            //self.usb.set_ep1_tx_status_valid_dtog();
+                        }
+                        _ => panic!(),
+                    }
+                }
+                (UsbDirection::In, UsbRecipient::Interface, UsbRequest::GetInterface) => {
+                    // this doesn't really make sense
+                    //(0x21, UsbRequest::GetInterface) => {
+                    // USBHID SET_IDLE
+                    self.pma.pma_area.set_u16(2, 0);
+                    self.usb.usb_ep0r.toggle_out();
+                    //self.usb.set_ep1_tx_status_valid_dtog();
+                }
+                (UsbDirection::In, UsbRecipient::Interface, UsbRequest::SetInterface) => {
+                    //(0x21, UsbRequest::SetInterface) => {
+                    // ???
+                    self.pma.pma_area.set_u16(2, 0);
+                    self.usb.usb_ep0r.toggle_0();
+                    //self.usb.set_ep1_tx_status_valid_dtog();
+                }
+                _ => panic!(),
             }
         }
     }
