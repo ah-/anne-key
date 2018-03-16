@@ -69,7 +69,7 @@ impl Usb {
             self.reset();
         }
 
-        while self.usb.istr.read().ctr().bit_is_set() {
+        if self.usb.istr.read().ctr().bit_is_set() {
             let endpoint = self.usb.istr.read().ep_id().bits();
             match endpoint {
                 0 => {
@@ -152,11 +152,11 @@ impl Usb {
                         .daddr
                         .modify(|_, w| w.add().bits(self.pending_daddr));
                     self.pending_daddr = 0;
-                    self.usb.set_ep_rx_status_valid();
+                    self.usb.toggle_ep0_tx_out();
                 } else {
                     let pma = PMA.get();
                     (*pma).pma_area.set_u16(6, 0);
-                    self.usb.set_ep_rx_status_valid_dtog();
+                    self.usb.toggle_ep0_tx_out();
                 }
             }
         } else {
@@ -231,7 +231,13 @@ impl Usb {
                                 );
                                 self.usb.toggle_ep0_out();
                             }
-                            _ => panic!(),
+                            UsbDescriptorType::Debug => {
+                                self.usb.toggle_ep0_tx_stall();
+                            }
+                            _ => {
+                                debug!("get descriptor {:x}", value);
+                                panic!()
+                            }
                         }
                     }
                     (0x81, UsbRequest::GetDescriptor) => {

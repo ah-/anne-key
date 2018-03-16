@@ -37,6 +37,7 @@ pub enum UsbDescriptorType {
     Endpoint = 5,
     DeviceQualifier = 6,
     OtherSpeedConfiguration = 7,
+    Debug = 0x0A,
     Bos = 0x0F,
     HidReport = 0x22,
 }
