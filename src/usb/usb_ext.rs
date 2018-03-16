@@ -7,12 +7,6 @@ pub trait UsbExt {
     fn toggle_ep0_0(&self);
     fn toggle_ep0(&self, mask: u32, val: u32, flags: u32);
 
-    fn clear_tx_ep_ctr(&self);
-    fn clear_rx_ep_ctr(&self);
-
-    fn clear_tx_ep1_ctr(&self);
-    fn clear_rx_ep1_ctr(&self);
-
     fn set_ep1_tx_status_valid_dtog(&self);
 }
 
@@ -38,29 +32,6 @@ const EP_TX_STALL: u32 = 0x0010;
 const EP_STATUS_OUT: u32 = 0x0100;
 
 impl UsbExt for USB {
-    // TODO: pass explicit endpoint nr?
-    fn clear_tx_ep_ctr(&self) {
-        // TODO: modify? with |r, w| instead of read()?
-        // everywhere here really
-        self.usb_ep0r
-            .write(|w| unsafe { w.bits((self.usb_ep0r.read().bits() & 0xFF7F) & USB_EPREG_MASK) });
-    }
-
-    fn clear_rx_ep_ctr(&self) {
-        self.usb_ep0r
-            .write(|w| unsafe { w.bits((self.usb_ep0r.read().bits() & 0x7FFF) & USB_EPREG_MASK) });
-    }
-
-    fn clear_tx_ep1_ctr(&self) {
-        self.usb_ep1r
-            .write(|w| unsafe { w.bits((self.usb_ep1r.read().bits() & 0xFF7F) & USB_EPREG_MASK) });
-    }
-
-    fn clear_rx_ep1_ctr(&self) {
-        self.usb_ep1r
-            .write(|w| unsafe { w.bits((self.usb_ep1r.read().bits() & 0x7FFF) & USB_EPREG_MASK) });
-    }
-
     fn toggle_ep0_tx_stall(&self) {
         self.toggle_ep0(EP_TX_RX_MASK, EP_RX_VALID | EP_TX_STALL, 0)
     }

@@ -145,7 +145,6 @@ impl Usb {
 
     fn ctr(&mut self) {
         if !self.usb.istr.read().dir().bit_is_set() {
-            self.usb.clear_tx_ep_ctr();
             unsafe {
                 if self.pending_daddr != 0 {
                     self.usb
@@ -160,7 +159,6 @@ impl Usb {
                 }
             }
         } else {
-            self.usb.clear_rx_ep_ctr();
             let pma = PMA.get();
             unsafe {
                 let request16 = (*pma).pma_area.get_u16(0x20);

@@ -5,7 +5,6 @@ pub static mut HID_REPORT: [u8; 5] = [0x01, 0x00, 0x04, 0x00, 0x00];
 
 pub fn usb_hid_ctr(usb: &mut USB) {
     if !usb.istr.read().dir().bit_is_set() {
-        usb.clear_tx_ep1_ctr();
         let pma = super::pma::PMA.get();
         unsafe {
             (*pma).write_buffer_u8(0x100, &HID_REPORT);
@@ -13,7 +12,6 @@ pub fn usb_hid_ctr(usb: &mut USB) {
         }
         usb.set_ep1_tx_status_valid_dtog();
     } else {
-        usb.clear_rx_ep1_ctr();
         panic!()
     }
 }
