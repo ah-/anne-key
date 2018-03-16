@@ -78,7 +78,7 @@ pub fn split_request_type(request_type: u8) -> (UsbDirection, UsbType, UsbRecipi
     } else {
         UsbDirection::Out
     };
-    let typ = match request_type & (0x03 << 5) >> 5 {
+    let typ = match (request_type & (0x03 << 5)) >> 5 {
         0 => UsbType::Standard,
         1 => UsbType::Class,
         2 => UsbType::Vendor,
