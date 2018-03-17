@@ -248,7 +248,7 @@ impl Usb {
                 self.usb.usb_ep0r.toggle_0();
             }
             _ => {
-                debug!("rt {:x} {:?}", request_type, request);
+                debug!("rt {:x} {:?}", request_type, request).ok();
                 panic!();
             }
         }
