@@ -9,11 +9,11 @@ use rtfm::Threshold;
 
 use stm32l151;
 
-use self::constants::{split_request_type, UsbDescriptorType, UsbDirection, UsbRecipient,
-                      UsbRequest, UsbType};
+use self::constants::{UsbDescriptorType, UsbRequest};
 use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
 use usb::hid::UsbHid;
+use hidreport::HidReport;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -63,6 +63,11 @@ impl Usb {
             pma,
             hid,
         }
+    }
+
+    pub fn update_report(&mut self, report: &HidReport) {
+        self.hid.report[..].clone_from_slice(report.as_bytes());
+        self.hid.report[0] = 0x01;
     }
 
     pub fn interrupt(&mut self) {

@@ -3,13 +3,13 @@ use super::pma::PMA;
 use usb::usb_ext::UsbEpExt;
 
 pub struct UsbHid {
-    pub report: [u8; 5],
+    pub report: [u8; 8],
 }
 
 impl UsbHid {
     pub fn new() -> UsbHid {
         UsbHid {
-            report: [0x01, 0x00, 0x00, 0x00, 0x00],
+            report: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
         }
     }
 

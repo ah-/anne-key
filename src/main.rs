@@ -67,7 +67,7 @@ app! {
     tasks: {
         SYS_TICK: {
             path: tick,
-            resources: [BLUETOOTH, LED, KEY_MATRIX, SCB, SYST, KEYBOARD],
+            resources: [BLUETOOTH, LED, KEY_MATRIX, SCB, SYST, KEYBOARD, USB],
         },
         USB_LP: {
             path: usb::usb_lp,
@@ -205,6 +205,7 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
         &mut r.LED,
         &mut r.SCB,
         &r.SYST,
+        &mut r.USB,
     );
 }
 

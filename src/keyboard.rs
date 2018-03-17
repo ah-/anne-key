@@ -10,6 +10,7 @@ use layout::LAYER_BT;
 use led::Led;
 use stm32l151::SCB;
 use stm32l151::SYST;
+use usb::Usb;
 
 pub struct Keyboard {
     layers: Layers,
@@ -50,6 +51,7 @@ impl Keyboard {
         led: &mut Led<BUFFER>,
         scb: &mut SCB,
         syst: &SYST,
+        usb: &mut Usb,
     ) where
         BUFFER: Unsize<[u8]>,
     {
@@ -94,6 +96,7 @@ impl Keyboard {
 
             bluetooth.send_report(&hid.report).log_error();
             led.send_keys(state).log_error();
+            usb.update_report(&hid.report);
 
             self.previous_state = *state;
         }
