@@ -67,7 +67,6 @@ impl Usb {
 
     pub fn update_report(&mut self, report: &HidReport) {
         self.hid.report[..].clone_from_slice(report.as_bytes());
-        self.hid.report[0] = 0x01;
     }
 
     pub fn interrupt(&mut self) {
@@ -240,6 +239,11 @@ impl Usb {
                 self.usb.usb_ep0r.toggle_out();
             }
             (0x21, UsbRequest::SetInterface) => {
+                self.pma.pma_area.set_u16(2, 0);
+                self.usb.usb_ep0r.toggle_0();
+            }
+            (0x21, UsbRequest::SetConfiguration) => {
+                // TODO: is this correct?
                 self.pma.pma_area.set_u16(2, 0);
                 self.usb.usb_ep0r.toggle_0();
             }
