@@ -12,6 +12,9 @@ dfu: build
 debug: build
 	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
 
+openocd:
+	openocd -f openocd.cfg
+
 bloat:
 	$(XARGO) bloat --target thumbv7m-none-eabi $(BLOAT_ARGS) -n 50
 
@@ -27,4 +30,4 @@ clean:
 	rm -f anne-key.dfu
 	rm -rf book/
 
-.PHONY: all build clean debug
+.PHONY: all build clean debug openocd bloat fmt clippy
