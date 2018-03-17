@@ -1,6 +1,6 @@
-/* fake larger flash so debug builds succeed
-   can't actually use these on the stm32, but they
-   allow cargo bloat and clippy to run cleanly */
+// Fake larger flash so debug builds succeed.
+// We can't actually fit these on the stm32, but they
+// allow cargo bloat and clippy to run.
 
 MEMORY
 {

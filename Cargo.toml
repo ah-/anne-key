@@ -1,11 +1,11 @@
 [package]
-authors = ["Andreas Heider <andreas@heider.io>"]
-categories = ["embedded", "no-std"]
-description = "Firmware for Anne Pro Keyboard"
-keywords = ["no-std", "arm", "cortex-m", "anne", "pro", "keyboard"]
-license = "Apache-2.0"
 name = "anne-key"
-repository = ""
+description = "Firmware for Anne Pro Keyboard"
+repository = "https://github.com/ah-/anne-key"
+keywords = ["no-std", "arm", "cortex-m", "anne", "pro", "keyboard"]
+categories = ["embedded", "no-std"]
+authors = ["Andreas Heider <andreas@heider.io>"]
+license = "Apache-2.0"
 version = "0.0.2"
 
 [dependencies]
