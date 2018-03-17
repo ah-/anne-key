@@ -12,8 +12,8 @@ use stm32l151;
 use self::constants::{UsbDescriptorType, UsbRequest};
 use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
-use usb::hid::UsbHid;
 use hidreport::HidReport;
+use usb::hid::UsbHid;
 
 const MAX_PACKET_SIZE: u32 = 64;
 

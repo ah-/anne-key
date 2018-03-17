@@ -1,5 +1,5 @@
-use stm32l151::USB;
 use super::pma::PMA;
+use stm32l151::USB;
 use usb::usb_ext::UsbEpExt;
 
 pub struct UsbHid {
