@@ -51,6 +51,16 @@ pub const CONF_DESC: [u8; 34] = [
     0x01,        // bInterval 1 (unit depends on device speed)
 ];
 
+pub const HID_DESC: [u8; 9] = [
+    0x09,        // bLength
+    0x21,        // bDescriptorType (HID)
+    0x11, 0x01,  // bcdHID 1.11
+    0x00,        // bCountryCode
+    0x01,        // bNumDescriptors
+    0x22,        // bDescriptorType[0] (HID)
+    0x3f, 0x00,  // wDescriptorLength[0] 63
+];
+
 pub const HID_REPORT_DESC: [u8; 63] = [
     0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
     0x09, 0x06,        // Usage (Keyboard)

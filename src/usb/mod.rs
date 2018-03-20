@@ -256,6 +256,14 @@ impl Usb {
             (0x81, UsbRequest::GetDescriptor) => {
                 let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
                 match descriptor_type {
+                    UsbDescriptorType::Hid => {
+                        self.pma
+                            .write_buffer_u8(0x40, &descriptors::HID_DESC);
+                        self.pma
+                            .pma_area
+                            .set_u16(2, min(length, descriptors::HID_DESC.len() as u16));
+                        self.usb.usb_ep0r.toggle_out();
+                    }
                     UsbDescriptorType::HidReport => {
                         self.pma
                             .write_buffer_u8(0x40, &descriptors::HID_REPORT_DESC);
@@ -264,7 +272,10 @@ impl Usb {
                             .set_u16(2, min(length, descriptors::HID_REPORT_DESC.len() as u16));
                         self.usb.usb_ep0r.toggle_out();
                     }
-                    _ => panic!(),
+                    _ => {
+                        debug!("{:x}", value).ok();
+                        panic!();
+                    }
                 }
             }
             (0x21, UsbRequest::GetInterface) => {
