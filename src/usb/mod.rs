@@ -257,8 +257,7 @@ impl Usb {
                 let descriptor_type = UsbDescriptorType::from((value >> 8) as u8);
                 match descriptor_type {
                     UsbDescriptorType::Hid => {
-                        self.pma
-                            .write_buffer_u8(0x40, &descriptors::HID_DESC);
+                        self.pma.write_buffer_u8(0x40, &descriptors::HID_DESC);
                         self.pma
                             .pma_area
                             .set_u16(2, min(length, descriptors::HID_DESC.len() as u16));
@@ -291,7 +290,16 @@ impl Usb {
                 self.pma.pma_area.set_u16(2, 0);
                 self.usb.usb_ep0r.toggle_0();
             }
+            (0xa1, UsbRequest::SetFeature) => {
+                self.usb.usb_ep0r.toggle_tx_stall();
+            }
+            (0xa1, UsbRequest::GetStatus) => {
+                self.pma.pma_area.set_u16(0x40, 0);
+                self.pma.pma_area.set_u16(2, 2);
+                self.usb.usb_ep0r.toggle_out();
+            }
             _ => {
+                // TODO get descriptor f00rt 82 GetStatus 82
                 debug!("rt {:x} {:?} {:x}", request_type, request, request16).ok();
                 panic!();
             }
