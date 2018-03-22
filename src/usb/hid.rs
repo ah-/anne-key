@@ -4,12 +4,14 @@ use usb::usb_ext::UsbEpExt;
 
 pub struct UsbHid {
     pub report: [u8; 8],
+    pub protocol: u8,
 }
 
 impl UsbHid {
     pub fn new() -> UsbHid {
         UsbHid {
             report: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+            protocol: 0,
         }
     }
 

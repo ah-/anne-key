@@ -282,7 +282,8 @@ impl Usb {
                 self.usb.usb_ep0r.toggle_out();
             }
             (0x21, UsbRequest::SetInterface) => {
-                self.pma.pma_area.set_u16(2, 0);
+                // actually hid set protocol 0xb
+                self.hid.protocol = value as u8;
                 self.usb.usb_ep0r.toggle_0();
             }
             (0x21, UsbRequest::SetConfiguration) => {
@@ -291,7 +292,11 @@ impl Usb {
                 self.usb.usb_ep0r.toggle_0();
             }
             (0xa1, UsbRequest::SetFeature) => {
-                self.usb.usb_ep0r.toggle_tx_stall();
+                // this is actually hid get_protocol (3)
+                // boot protocol
+                self.pma.pma_area.set_u16(0x40, self.hid.protocol.into());
+                self.pma.pma_area.set_u16(2, 1);
+                self.usb.usb_ep0r.toggle_out();
             }
             (0xa1, UsbRequest::GetStatus) => {
                 self.pma.pma_area.set_u16(0x40, 0);
