@@ -8,6 +8,7 @@ use core::mem::transmute;
 pub enum UsbRequest {
     GetStatus = 0x00,
     ClearFeature = 0x01,
+    Two = 0x2,
     SetFeature = 0x03,
     SetAddress = 0x05,
     GetDescriptor = 0x06,

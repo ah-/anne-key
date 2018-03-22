@@ -298,10 +298,11 @@ impl Usb {
                 self.pma.pma_area.set_u16(2, 1);
                 self.usb.usb_ep0r.toggle_out();
             }
-            (0xa1, UsbRequest::GetStatus) => {
-                self.pma.pma_area.set_u16(0x40, 0);
-                self.pma.pma_area.set_u16(2, 2);
-                self.usb.usb_ep0r.toggle_out();
+            (0xa1, UsbRequest::Two) => {
+                // actually set_idle
+                //self.pma.pma_area.set_u16(0x40, 0);
+                //self.pma.pma_area.set_u16(2, 2);
+                self.usb.usb_ep0r.toggle_tx_stall();
             }
             _ => {
                 // TODO get descriptor f00rt 82 GetStatus 82
