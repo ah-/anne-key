@@ -21,12 +21,10 @@ macro_rules! debug {
 #[cfg(not(feature = "use_semihosting"))]
 #[macro_export]
 macro_rules! debug {
-    ($($arg: tt)*) => {
-        {
-            let res: Result<(), ()> = Ok(());
-            res
-        }
-    }
+    ($($arg: tt)*) => {{
+        let res: Result<(), ()> = Ok(());
+        res
+    }};
 }
 
 pub trait UnwrapLog {
