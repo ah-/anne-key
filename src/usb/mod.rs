@@ -9,7 +9,7 @@ use rtfm::Threshold;
 
 use stm32l151;
 
-use self::constants::{UsbDescriptorType, UsbRequest};
+use self::constants::{UsbDescriptorType, UsbDeviceState, UsbRequest};
 use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
 use hidreport::HidReport;
@@ -22,6 +22,7 @@ pub struct Usb {
     pending_daddr: u8,
     pma: &'static mut PMA,
     hid: UsbHid,
+    device_state: UsbDeviceState,
 }
 
 impl Usb {
@@ -62,6 +63,7 @@ impl Usb {
             pending_daddr: 0,
             pma,
             hid,
+            device_state: UsbDeviceState::Disconnected,
         }
     }
 
@@ -130,6 +132,8 @@ impl Usb {
         });
 
         self.usb.daddr.write(|w| w.ef().set_bit());
+
+        self.device_state = UsbDeviceState::Default;
     }
 
     fn ctr(&mut self) {
@@ -145,6 +149,7 @@ impl Usb {
             self.usb
                 .daddr
                 .modify(|_, w| unsafe { w.add().bits(self.pending_daddr) });
+            self.device_state = UsbDeviceState::Addressed;
         } else {
             self.pma.pma_area.set_u16(6, 0);
         }
@@ -232,6 +237,7 @@ impl Usb {
                 self.pma.pma_area.set_u16(0x40, 0);
                 self.pma.pma_area.set_u16(2, 0);
                 self.usb.usb_ep0r.toggle_0();
+                self.device_state = UsbDeviceState::Configured;
             }
 
             (0x81, UsbRequest::GetStatus) => {

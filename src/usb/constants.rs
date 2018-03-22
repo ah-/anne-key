@@ -50,3 +50,13 @@ impl From<u8> for UsbDescriptorType {
         unsafe { transmute(b) }
     }
 }
+
+#[derive(Debug, Copy, Clone)]
+pub enum UsbDeviceState {
+    Disabled,
+    Disconnected,
+    Default,
+    Addressed,
+    Configured,
+    Suspended,
+}
