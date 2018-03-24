@@ -1,7 +1,7 @@
 pub mod constants;
 pub mod descriptors;
-pub mod pma;
 pub mod hid;
+pub mod pma;
 pub mod usb_ext;
 
 use core::cmp::min;

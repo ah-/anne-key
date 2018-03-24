@@ -1,12 +1,12 @@
 use super::keymatrix::{to_packed_bits, KeyState};
 use super::protocol::{LedOp, Message, MsgType};
-use super::serial::{Serial, Transfer};
 use super::serial::led_usart::LedUsart;
+use super::serial::{Serial, Transfer};
 use bluetooth::BluetoothMode;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
-use hal::gpio::{Input, Output};
 use hal::gpio::gpioc::PC15;
+use hal::gpio::{Input, Output};
 use keycodes::KeyIndex;
 use nb;
 use rtfm::Threshold;
