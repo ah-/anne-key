@@ -25,9 +25,9 @@ install:
   - bash ./scripts/install.sh
 
 script:
-  - cargo fmt --all -- --write-mode=diff
   - make bloat
   - make
+  - cargo fmt --all -- --write-mode=diff
 
 cache:
   cargo: true
