@@ -1,4 +1,5 @@
 use action::Action;
+use bit_field::BitArray;
 use bluetooth::Bluetooth;
 use core::marker::Unsize;
 use debug::UnwrapLog;
@@ -14,18 +15,14 @@ use usb::Usb;
 
 pub struct Keyboard {
     layers: Layers,
-    previous_state: KeyState, // TODO: use packed state here
-}
-
-fn eq(sa: &KeyState, sb: &KeyState) -> bool {
-    sa.iter().zip(sb.iter()).all(|(a, b)| a == b)
+    previous_state: KeyState,
 }
 
 impl Keyboard {
     pub const fn new() -> Keyboard {
         Keyboard {
             layers: Layers::new(),
-            previous_state: [false; 70],
+            previous_state: [0; 9],
         }
     }
 
@@ -56,15 +53,16 @@ impl Keyboard {
         BUFFER: Unsize<[u8]>,
     {
         // TODO: might not even need this check after switching to wakeup only handling?
-        if !eq(&self.previous_state, state) {
+        if &self.previous_state != state {
             let mut hid = HidProcessor::new();
 
-            for (key, pressed) in state.iter().enumerate() {
-                let changed = self.previous_state[key] != *pressed;
+            for key in 0..14 * 5 {
+                let pressed = state.get_bit(key);
+                let changed = self.previous_state.get_bit(key) != pressed;
 
                 // Only handle currently pressed and changed keys to
                 // cut down on processing time.
-                if *pressed || changed {
+                if pressed || changed {
                     let action = self.get_action(key);
                     if let Action::Reset = action {
                         unsafe {
@@ -77,10 +75,10 @@ impl Keyboard {
                             // Should be unreachable
                         }
                     }
-                    hid.process(&action, *pressed, changed);
-                    led.process(&action, *pressed, changed);
-                    bluetooth.process(&action, *pressed, changed);
-                    self.layers.process(&action, *pressed, changed);
+                    hid.process(&action, pressed, changed);
+                    led.process(&action, pressed, changed);
+                    bluetooth.process(&action, pressed, changed);
+                    self.layers.process(&action, pressed, changed);
                 }
             }
 
