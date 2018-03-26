@@ -1,4 +1,4 @@
-use super::keymatrix::{to_packed_bits, KeyState};
+use super::keymatrix::KeyState;
 use super::protocol::{LedOp, Message, MsgType};
 use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
@@ -100,9 +100,7 @@ where
     }
 
     pub fn send_keys(&mut self, state: &KeyState) -> nb::Result<(), !> {
-        let packed = to_packed_bits(state);
-        self.serial
-            .send(MsgType::Led, LedOp::Key as u8, &packed.bytes)
+        self.serial.send(MsgType::Led, LedOp::Key as u8, state)
     }
 
     pub fn send_music(&mut self, keys: &[u8]) -> nb::Result<(), !> {

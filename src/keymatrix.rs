@@ -1,5 +1,6 @@
 #![feature(const_fn)]
 
+use bit_field::BitArray;
 use embedded_hal::digital::{InputPin, OutputPin};
 use hal::gpio::gpioa::*;
 use hal::gpio::gpiob::*;
@@ -27,26 +28,17 @@ type ColumnPins = (
     PB5<Output>,
 );
 
-pub type KeyState = [bool; ROWS * COLUMNS];
-
-pub struct PackedKeyState {
-    // 5 * 14 = 70, upper(70 / 8) = 9 bytes
-    pub bytes: [u8; 9],
-}
-
-pub fn to_packed_bits(state: &KeyState) -> PackedKeyState {
-    let mut packed = [0; 9];
-
-    for (key, pressed) in state.iter().enumerate() {
-        let byte = key / 8;
-        let bit = key % 8;
-        if *pressed {
-            packed[byte] |= 1 << bit;
-        }
-    }
-
-    PackedKeyState { bytes: packed }
-}
+/// State of the keymatrix.
+///
+/// A 72-bit array where the most-significant 2 bits are unused.
+/// Each key's state is stored as 1 (pressed) or 0 (released) at
+/// the bit indexed by the corresponding [`keycodes::KeyIndex`],
+/// namely Escape is at bit 0 (least-significant bit), and RCtrl
+/// is at bit 69.
+///
+/// This packed format is used as-is when sending key-state to
+/// stock LED firmware.
+pub type KeyState = [u8; (ROWS * COLUMNS + 2) / 8]; // [u8; 9]
 
 pub struct KeyMatrix {
     /// Stores the currently pressed down keys from last sample.
@@ -58,7 +50,7 @@ pub struct KeyMatrix {
 impl KeyMatrix {
     pub fn new(row_pins: RowPins, column_pins: ColumnPins) -> Self {
         Self {
-            state: [false; ROWS * COLUMNS],
+            state: [0; 9],
             row_pins,
             column_pins,
         }
@@ -74,11 +66,15 @@ impl KeyMatrix {
             let wait_until_tick = current_tick - 100;
             while syst.cvr.read() > wait_until_tick {}
 
-            self.state[column] = self.row_pins.0.is_high();
-            self.state[column + COLUMNS] = self.row_pins.1.is_high();
-            self.state[column + 2 * COLUMNS] = self.row_pins.2.is_high();
-            self.state[column + 3 * COLUMNS] = self.row_pins.3.is_high();
-            self.state[column + 4 * COLUMNS] = self.row_pins.4.is_high();
+            self.state.set_bit(column, self.row_pins.0.is_high());
+            self.state
+                .set_bit(column + COLUMNS, self.row_pins.1.is_high());
+            self.state
+                .set_bit(column + 2 * COLUMNS, self.row_pins.2.is_high());
+            self.state
+                .set_bit(column + 3 * COLUMNS, self.row_pins.3.is_high());
+            self.state
+                .set_bit(column + 4 * COLUMNS, self.row_pins.4.is_high());
 
             self.disable_column(column);
         }

@@ -6,6 +6,7 @@
 #![no_std]
 
 extern crate bare_metal;
+extern crate bit_field;
 extern crate cortex_m;
 extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
