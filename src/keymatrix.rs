@@ -28,11 +28,11 @@ type ColumnPins = (
     PB5<Output>,
 );
 
-/// The currently pressed down keys
+/// State of the keymatrix.
 ///
 /// A 72-bit array where the most-significant 2 bits are unused.
 /// Each key's state is stored as 1 (pressed) or 0 (released) at
-/// the bit indexed by the corresponding `keycodes::KeyIndex`,
+/// the bit indexed by the corresponding [`keycodes::KeyIndex`],
 /// namely Escape is at bit 0 (least-significant bit), and RCtrl
 /// is at bit 69.
 ///
