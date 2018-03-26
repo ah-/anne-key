@@ -28,6 +28,16 @@ type ColumnPins = (
     PB5<Output>,
 );
 
+/// The currently pressed down keys
+///
+/// A 72-bit array where the most-significant 2 bits are unused.
+/// Each key's state is stored as 1 (pressed) or 0 (released) at
+/// the bit indexed by the corresponding `keycodes::KeyIndex`,
+/// namely Escape is at bit 0 (least-significant bit), and RCtrl
+/// is at bit 69.
+///
+/// This packed format is used as-is when sending key-state to
+/// stock LED firmware.
 pub type KeyState = [u8; (ROWS * COLUMNS + 2) / 8]; // [u8; 9]
 
 pub struct KeyMatrix {
