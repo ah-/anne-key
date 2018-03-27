@@ -10,7 +10,6 @@ use layout::LAYERS;
 use layout::LAYER_BT;
 use led::Led;
 use stm32l151::SCB;
-use stm32l151::SYST;
 use usb::Usb;
 
 pub struct Keyboard {
@@ -47,7 +46,6 @@ impl Keyboard {
         bluetooth: &mut Bluetooth<BUFFER>,
         led: &mut Led<BUFFER>,
         scb: &mut SCB,
-        syst: &SYST,
         usb: &mut Usb,
     ) where
         BUFFER: Unsize<[u8]>,
@@ -69,10 +67,6 @@ impl Keyboard {
                             // write unlock: 0x05fa << 16
                             // SYSRESETREQ: 0b100
                             scb.aircr.write((0x05fa << 16) | 0b100);
-                            let current_tick = syst.cvr.read();
-                            let wait_until_tick = current_tick - 300;
-                            while syst.cvr.read() > wait_until_tick {}
-                            // Should be unreachable
                         }
                     }
                     hid.process(&action, pressed, changed);
