@@ -205,7 +205,6 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
         &mut r.BLUETOOTH,
         &mut r.LED,
         &mut r.SCB,
-        &r.SYST,
         &mut r.USB,
     );
 }

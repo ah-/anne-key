@@ -80,6 +80,8 @@ done parsing DfuSe file
 
 And that's it. Press the reset button again to exit the bootloader and return to normal keyboard mode and you're done!
 
+If your keyboard is running our firmware, you can reboot to DFU mode by holding down `Fn+Space+Escape`.
+
 If you want to return to the original firmware you can flash the [original firmware](http://en.obins.net/firmware) with:
 
 ```
