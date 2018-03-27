@@ -4,6 +4,8 @@ use keycodes::KeyCode;
 #[derive(Copy, Clone, PartialEq)]
 pub enum Action {
     Nop,
+    /// Reset the key MCU. If Escape is also held down then it will
+    /// boot into DFU mode.
     Reset,
     Transparent,
 
