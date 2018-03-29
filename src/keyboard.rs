@@ -56,7 +56,7 @@ impl Keyboard {
     {
         // TODO: might not even need this check after switching to wakeup only handling?
         if &self.previous_state != state {
-            let mut hid = HidProcessor::new();
+            let mut hid = HidProcessor::default();
 
             for key in 0..COLUMNS * ROWS {
                 let pressed = state.get_bit(key);
@@ -150,19 +150,11 @@ impl EventProcessor for Layers {
     }
 }
 
+#[derive(Default)]
 struct HidProcessor {
     pub report: HidReport,
     /// Number of normal keys to be sent in `report`
     i: usize,
-}
-
-impl HidProcessor {
-    fn new() -> HidProcessor {
-        HidProcessor {
-            report: HidReport::new(),
-            i: 0,
-        }
-    }
 }
 
 impl EventProcessor for HidProcessor {

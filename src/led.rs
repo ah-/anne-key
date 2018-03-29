@@ -70,12 +70,11 @@ where
 
     pub fn toggle(&mut self) -> nb::Result<(), !> {
         self.state = !self.state;
-        let result = if self.state {
+        if self.state {
             self.theme_mode()
         } else {
             self.set_theme(0)
-        };
-        result
+        }
     }
 
     // next_* cycles through themes/brightness/speed
