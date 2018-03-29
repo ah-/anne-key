@@ -5,7 +5,7 @@ use core::marker::Unsize;
 use debug::UnwrapLog;
 use hidreport::HidReport;
 use keycodes::KeyCode;
-use keymatrix::KeyState;
+use keymatrix::{KeyState, COLUMNS, ROWS};
 use layout::LAYERS;
 use layout::LAYER_BT;
 use led::Led;
@@ -58,7 +58,7 @@ impl Keyboard {
         if &self.previous_state != state {
             let mut hid = HidProcessor::new();
 
-            for key in 0..14 * 5 {
+            for key in 0..COLUMNS * ROWS {
                 let pressed = state.get_bit(key);
                 let changed = self.previous_state.get_bit(key) != pressed;
 

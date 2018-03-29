@@ -7,8 +7,8 @@ use hal::gpio::gpiob::*;
 use hal::gpio::{Input, Output};
 use stm32l151::SYST;
 
-const ROWS: usize = 5;
-const COLUMNS: usize = 14;
+pub const ROWS: usize = 5;
+pub const COLUMNS: usize = 14;
 
 type RowPins = (PB9<Input>, PB8<Input>, PB7<Input>, PB6<Input>, PA0<Input>);
 type ColumnPins = (

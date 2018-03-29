@@ -1,6 +1,7 @@
 use action::Action;
 use action::Action::*;
 use keycodes::KeyCode::*;
+use keymatrix::{COLUMNS, ROWS};
 
 /*
   ,-----------------------------------------------------------------------------.
@@ -16,7 +17,7 @@ use keycodes::KeyCode::*;
   `-----------------------------------------------------------------------------'
 */
 
-pub type Layout = [Action; 70];
+pub type Layout = [Action; COLUMNS * ROWS];
 
 pub const LAYERS: [Layout; 4] = [BASE, FN, FN2, BT];
 
