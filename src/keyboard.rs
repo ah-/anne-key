@@ -25,6 +25,10 @@ impl Keyboard {
         }
     }
 
+    /// Get the action for `key`.
+
+    /// The top non-Transparent action at index `key` amongst the
+    /// currently active layers is returned.
     fn get_action(&self, key: usize) -> Action {
         let mut action = Action::Transparent;
 
@@ -108,8 +112,11 @@ trait EventProcessor {
     fn finish(&mut self) {}
 }
 
+/// Bit-field of the currently active layers, indexed by position in
+/// [`layout::LAYERS`].
 struct Layers {
     current: u8,
+    /// Active layers after action processing is finished
     next: u8,
 }
 
@@ -143,6 +150,7 @@ impl EventProcessor for Layers {
 
 struct HidProcessor {
     pub report: HidReport,
+    /// Number of normal keys to be sent in `report`
     i: usize,
 }
 

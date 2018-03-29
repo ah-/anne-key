@@ -127,7 +127,7 @@ impl KeyCode {
     }
 }
 
-// Index of each physical Key in the scan matrix
+/// Index of each physical key in the scan matrix
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub enum KeyIndex {
     Escape,   N1,    N2,   N3,  N4,  N5,    N6,  N7,  N8,    N9,   N0,     Minus,    Equal,    BSpace,
