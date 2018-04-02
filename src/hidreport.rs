@@ -1,6 +1,7 @@
 use core::slice;
 
 #[repr(packed)]
+#[derive(Default)]
 pub struct HidReport {
     pub modifiers: u8,
     _unused: u8,
@@ -8,14 +9,6 @@ pub struct HidReport {
 }
 
 impl HidReport {
-    pub fn new() -> HidReport {
-        HidReport {
-            modifiers: 0,
-            _unused: 0,
-            keys: [0; 6],
-        }
-    }
-
     pub fn as_bytes(&self) -> &[u8] {
         unsafe {
             let p: *const HidReport = self;

@@ -7,8 +7,8 @@ use hal::gpio::gpiob::*;
 use hal::gpio::{Input, Output};
 use stm32l151::SYST;
 
-const ROWS: usize = 5;
-const COLUMNS: usize = 14;
+pub const ROWS: usize = 5;
+pub const COLUMNS: usize = 14;
 
 type RowPins = (PB9<Input>, PB8<Input>, PB7<Input>, PB6<Input>, PA0<Input>);
 type ColumnPins = (
@@ -28,16 +28,16 @@ type ColumnPins = (
     PB5<Output>,
 );
 
-/// State of the keymatrix.
+/// State of the scan matrix
 ///
-/// A 72-bit array where the most-significant 2 bits are unused.
-/// Each key's state is stored as 1 (pressed) or 0 (released) at
-/// the bit indexed by the corresponding [`keycodes::KeyIndex`],
-/// namely Escape is at bit 0 (least-significant bit), and RCtrl
-/// is at bit 69.
+/// A 72-bit array whose most-significant 2 bits are unused.  Each
+/// key's state is stored as 1 (pressed) or 0 (released) at the bit
+/// indexed by the corresponding [`keycodes::KeyIndex`], namely
+/// `Escape` is at bit 0 (least-significant bit), and `RCtrl` is at
+/// bit 69.
 ///
-/// This packed format is used as-is when sending key-state to
-/// stock LED firmware.
+/// This packed format is sent as-is to stock LED firmware for theme
+/// activation.
 pub type KeyState = [u8; (ROWS * COLUMNS + 2) / 8]; // [u8; 9]
 
 pub struct KeyMatrix {

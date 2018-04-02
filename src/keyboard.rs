@@ -1,11 +1,11 @@
 use action::Action;
-use bit_field::BitArray;
+use bit_field::{BitArray, BitField};
 use bluetooth::Bluetooth;
 use core::marker::Unsize;
 use debug::UnwrapLog;
 use hidreport::HidReport;
 use keycodes::KeyCode;
-use keymatrix::KeyState;
+use keymatrix::{KeyState, COLUMNS, ROWS};
 use layout::LAYERS;
 use layout::LAYER_BT;
 use led::Led;
@@ -25,11 +25,15 @@ impl Keyboard {
         }
     }
 
+    /// Get the action for `key`.
+
+    /// The top non-Transparent action at index `key` amongst the
+    /// currently active layers is returned.
     fn get_action(&self, key: usize) -> Action {
         let mut action = Action::Transparent;
 
         for i in (0..LAYERS.len()).rev() {
-            if self.layers.current & (1 << i) != 0 {
+            if self.layers.current.get_bit(i) {
                 action = LAYERS[i][key];
             }
             if action != Action::Transparent {
@@ -52,9 +56,9 @@ impl Keyboard {
     {
         // TODO: might not even need this check after switching to wakeup only handling?
         if &self.previous_state != state {
-            let mut hid = HidProcessor::new();
+            let mut hid = HidProcessor::default();
 
-            for key in 0..14 * 5 {
+            for key in 0..COLUMNS * ROWS {
                 let pressed = state.get_bit(key);
                 let changed = self.previous_state.get_bit(key) != pressed;
 
@@ -76,8 +80,8 @@ impl Keyboard {
                 }
             }
 
-            let bt_layer_current: bool = self.layers.current & (1 << LAYER_BT) != 0;
-            let bt_layer_next: bool = self.layers.next & (1 << LAYER_BT) != 0;
+            let bt_layer_current: bool = self.bluetooth_mode_enabled();
+            let bt_layer_next: bool = self.layers.next.get_bit(LAYER_BT as usize);
             if bt_layer_next && !bt_layer_current {
                 bluetooth.update_led(led).log_error();
             } else if bt_layer_current && !bt_layer_next {
@@ -95,11 +99,11 @@ impl Keyboard {
     }
 
     pub fn bluetooth_mode_enabled(&self) -> bool {
-        self.layers.current & (1 << LAYER_BT) != 0
+        self.layers.current.get_bit(LAYER_BT as usize)
     }
 
     pub fn disable_bluetooth_mode(&mut self) {
-        self.layers.current &= !(1 << LAYER_BT);
+        self.layers.current.set_bit(LAYER_BT as usize, false);
     }
 }
 
@@ -108,8 +112,11 @@ trait EventProcessor {
     fn finish(&mut self) {}
 }
 
+/// Bit-field of the currently active layers, indexed by position in
+/// [`layout::LAYERS`].
 struct Layers {
     current: u8,
+    /// Active layers after action processing is finished
     next: u8,
 }
 
@@ -126,13 +133,15 @@ impl EventProcessor for Layers {
     fn process(&mut self, action: &Action, pressed: bool, changed: bool) {
         if changed {
             match (*action, pressed) {
-                (Action::LayerMomentary(layer), true) => self.next |= 1 << layer,
-                (Action::LayerMomentary(layer), false) => self.next &= !(1 << layer),
-                (Action::LayerToggle(layer), true) => self.next ^= 1 << layer,
-                (Action::LayerOn(layer), true) => self.next |= 1 << layer,
-                (Action::LayerOff(layer), true) => self.next &= !(1 << layer),
-                _ => {}
-            }
+                (Action::LayerMomentary(layer), _) => self.next.set_bit(layer as usize, pressed),
+                (Action::LayerToggle(layer), true) => {
+                    let current = self.next.get_bit(layer as usize);
+                    self.next.set_bit(layer as usize, !current)
+                }
+                (Action::LayerOn(layer), true) => self.next.set_bit(layer as usize, true),
+                (Action::LayerOff(layer), true) => self.next.set_bit(layer as usize, false),
+                _ => &mut self.next,
+            };
         }
     }
 
@@ -141,33 +150,25 @@ impl EventProcessor for Layers {
     }
 }
 
+#[derive(Default)]
 struct HidProcessor {
     pub report: HidReport,
+    /// Number of normal keys to be sent in `report`
     i: usize,
-}
-
-impl HidProcessor {
-    fn new() -> HidProcessor {
-        HidProcessor {
-            report: HidReport::new(),
-            i: 0,
-        }
-    }
 }
 
 impl EventProcessor for HidProcessor {
     fn process(&mut self, action: &Action, pressed: bool, _changed: bool) {
         if pressed {
-            match *action {
-                Action::Key(code) => {
-                    if code.is_modifier() {
-                        self.report.modifiers |= 1 << (code as u8 - KeyCode::LCtrl as u8);
-                    } else if code.is_normal_key() && self.i < self.report.keys.len() {
-                        self.report.keys[self.i] = code as u8;
-                        self.i += 1;
-                    }
+            if let Action::Key(code) = *action {
+                if code.is_modifier() {
+                    self.report
+                        .modifiers
+                        .set_bit(code as usize - KeyCode::LCtrl as usize, true);
+                } else if code.is_normal_key() && self.i < self.report.keys.len() {
+                    self.report.keys[self.i] = code as u8;
+                    self.i += 1;
                 }
-                _ => {}
             }
         }
     }

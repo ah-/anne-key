@@ -21,7 +21,7 @@ macro_rules! debug {
 #[cfg(not(feature = "use_semihosting"))]
 #[macro_export]
 macro_rules! debug {
-    ($($arg: tt)*) => {{
+    ($($arg:tt)*) => {{
         let res: Result<(), ()> = Ok(());
         res
     }};
