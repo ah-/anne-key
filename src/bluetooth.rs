@@ -271,13 +271,11 @@ where
                     };
                     self.handle_message(&message, led, keyboard);
 
-                    match (message.msg_type, message.operation) {
-                        (MsgType::Ble, 170) => {
-                            // Wakeup acknowledged, send data
-                            self.serial.usart.ack_wakeup();
-                            self.serial.send_buffer_pos = 0;
-                        }
-                        _ => {}
+                    if let (MsgType::Ble, BleOp::AckWakeup) = (message.msg_type, message.operation.into())
+                    {
+                        // Wakeup acknowledged, send data
+                        self.serial.usart.ack_wakeup();
+                        self.serial.send_buffer_pos = 0;
                     }
                 }
 
