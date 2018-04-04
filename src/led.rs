@@ -168,10 +168,10 @@ where
             KeyIndex::E as u8,      0x00, s3, 0xff, LedMode::On as u8,
             KeyIndex::R as u8,      0x00, s4, 0xff, LedMode::On as u8,
             // Delete host
-            KeyIndex::A as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::S as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::D as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
-            KeyIndex::F as u8,      0xff, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::A as u8,      s1, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::S as u8,      s2, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::D as u8,      s3, 0x00, 0x00, LedMode::On as u8,
+            KeyIndex::F as u8,      s4, 0x00, 0x00, LedMode::On as u8,
             // Query host list
             KeyIndex::LCtrl as u8,  0xff, 0xff, 0xff, LedMode::On as u8,
             KeyIndex::Equal as u8,  0x00, 0xff, 0x00, LedMode::On as u8,
