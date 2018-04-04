@@ -76,15 +76,15 @@ where
         self.serial.send(MsgType::Ble, BleOp::Broadcast as u8, &[])
     }
 
-    pub fn enable_compatibility_mode(&mut self, enabled: bool) -> nb::Result<(), !> {
+    pub fn enable_legacy_mode(&mut self, enabled: bool) -> nb::Result<(), !> {
         let on = if enabled { 1 } else { 0 };
         self.serial
-            .send(MsgType::Ble, BleOp::CompatibilityMode as u8, &[on])
+            .send(MsgType::Ble, BleOp::LegacyMode as u8, &[on])
     }
 
-    pub fn toggle_compatibility_mode(&mut self) -> nb::Result<(), !> {
+    pub fn toggle_legacy_mode(&mut self) -> nb::Result<(), !> {
         let enabled: bool = self.mode == BluetoothMode::Ble;
-        self.enable_compatibility_mode(enabled)
+        self.enable_legacy_mode(enabled)
     }
 
     pub fn host_list_query(&mut self) -> nb::Result<(), !> {
@@ -174,9 +174,9 @@ where
                         // data = [0]
                         //debug!("bt ack off: {:?}", message.data).ok();
                     }
-                    BleOp::AckCompatibilityMode => {
+                    BleOp::AckLegacyMode => {
                         // data = [0]
-                        //debug!("bt ack compatibility mode: {:?}", message.data).ok();
+                        //debug!("bt ack legacy mode: {:?}", message.data).ok();
                     }
                     BleOp::AckDeleteHost => {
                         // data = [0]

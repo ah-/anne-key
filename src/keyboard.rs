@@ -208,8 +208,8 @@ where
                 Action::BtConnectHost(host) => self.connect_host(host),
                 Action::BtDeleteHost(host) => self.delete_host(host),
                 Action::BtBroadcast => self.broadcast(),
-                Action::BtCompatibilityMode(on) => self.enable_compatibility_mode(on),
-                Action::BtToggleCompatibilityMode => self.toggle_compatibility_mode(),
+                Action::BtLegacyMode(on) => self.enable_legacy_mode(on),
+                Action::BtToggleLegacyMode => self.toggle_legacy_mode(),
                 Action::BtHostListQuery => self.host_list_query(),
                 _ => Ok(()),
             };

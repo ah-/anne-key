@@ -31,8 +31,8 @@ pub enum Action {
     BtConnectHost(u8),
     BtDeleteHost(u8),
     BtBroadcast,
-    BtCompatibilityMode(bool),
-    BtToggleCompatibilityMode,
+    BtLegacyMode(bool),
+    BtToggleLegacyMode,
     BtHostListQuery, // TODO: remove? this shouldn't really be here
 }
 
