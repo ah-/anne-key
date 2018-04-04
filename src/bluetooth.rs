@@ -271,7 +271,8 @@ where
                     };
                     self.handle_message(&message, led, keyboard);
 
-                    if let (MsgType::Ble, BleOp::AckWakeup) = (message.msg_type, message.operation.into())
+                    if let (MsgType::Ble, BleOp::AckWakeup) =
+                        (message.msg_type, message.operation.into())
                     {
                         // Wakeup acknowledged, send data
                         self.serial.usart.ack_wakeup();
