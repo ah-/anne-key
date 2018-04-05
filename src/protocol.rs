@@ -50,7 +50,7 @@ pub enum BleOp {
     AckOk = 9,
     AckFail = 10,
     CurrentHostQuery = 11,
-    CompatibilityMode = 12,
+    LegacyMode = 12,
     Pair = 13,
     Disconnect = 14,
     AckReserved = 128,
@@ -65,7 +65,7 @@ pub enum BleOp {
     AckAckOk = 137,
     AckAckFaiL = 138,
     AckCurrentHostQuery = 139,
-    AckCompatibilityMode = 140,
+    AckLegacyMode = 140,
     AckWakeup = 170,
 }
 

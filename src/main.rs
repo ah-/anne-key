@@ -246,5 +246,5 @@ pub unsafe extern "C" fn rust_begin_unwind(
     _file: &'static str,
     _line: u32,
 ) -> ! {
-    loop {}
+    panic!()
 }
