@@ -1,10 +1,8 @@
-XARGO = xargo
-
 all:
 	$(MAKE) dfu
 
 build:
-	$(XARGO) build --release --target thumbv7m-none-eabi
+	cargo build --release
 
 dfu: build
 	./scripts/generate_dfu.sh
@@ -16,16 +14,16 @@ openocd:
 	openocd -f openocd.cfg
 
 bloat:
-	$(XARGO) bloat --target thumbv7m-none-eabi $(BLOAT_ARGS) -n 50
+	cargo bloat $(BLOAT_ARGS) -n 50
 
 fmt:
 	cargo fmt
 
 clippy:
-	$(XARGO) clippy --target thumbv7m-none-eabi
+	cargo clippy
 
 clean:
-	$(XARGO) clean
+	cargo clean
 	rm -f anne-key.bin
 	rm -f anne-key.dfu
 	rm -rf book/
