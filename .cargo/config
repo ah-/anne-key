@@ -6,3 +6,6 @@ rustflags = [
   "-Z", "linker-flavor=ld",
   "-Z", "thinlto=no",
 ]
+
+[build]
+target = "thumbv7m-none-eabi"

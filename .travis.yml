@@ -31,8 +31,6 @@ script:
 
 cache:
   cargo: true
-  directories:
-    - $HOME/.xargo
 
 before_cache:
   # Travis can't cache files that are not readable by "others"

@@ -108,11 +108,11 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
-To build your own firmware, you need [xargo](https://github.com/japaric/xargo) with the following components:
+To build your own firmware, you need the nightly rust toolchain with
+the following components:
 
 - nightly rust as default: `rustup default nightly`
-- rust-src: `rustup component add rust-src --toolchain nightly`
-- xargo itself: `cargo +nightly install xargo`
+- thumbv7m std: `rustup target add thumbv7m-none-eabi`
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
 
 Then, `make dfu` in the top directory will build your `anne-key.dfu`.
@@ -122,3 +122,8 @@ To analyze the firmware's code size, you need [cargo-bloat](https://github.com/R
 - `cargo install cargo-bloat`
 - `make bloat`
 - `make bloat BLOAT_ARGS="--crates" # passing arguments to cargo-bloat`
+
+Our CI requires consistent formatting, please run rustfmt before you submit PRs:
+
+- `rustup component add rustfmt-preview`
+- `make fmt`
