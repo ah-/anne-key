@@ -236,15 +236,3 @@ fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
     // maybe only clear set bits? or ones from 9-5?
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
-
-// Need this when building in debug mode without LTO, otherwise we get linker
-// errors. This isn't ever actually used.
-#[cfg(debug_assertions)]
-#[no_mangle]
-pub unsafe extern "C" fn rust_begin_unwind(
-    _args: ::core::fmt::Arguments,
-    _file: &'static str,
-    _line: u32,
-) -> ! {
-    panic!()
-}
