@@ -26,6 +26,6 @@ clean:
 	cargo clean
 	rm -f anne-key.bin
 	rm -f anne-key.dfu
-	rm -rf book/
+	rm -rf _book/
 
 .PHONY: all build clean debug openocd bloat fmt clippy
