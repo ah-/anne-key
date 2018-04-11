@@ -44,9 +44,9 @@ use bluetooth::Bluetooth;
 use keyboard::Keyboard;
 use keymatrix::KeyMatrix;
 use led::Led;
-use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
+use serial::Serial;
 use usb::Usb;
 
 app! {
@@ -171,13 +171,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     led.theme_mode().unwrap();
 
     let bluetooth_usart = BluetoothUsart::new(
-        d.USART2,
-        gpioa.pa1,
-        gpioa.pa2,
-        gpioa.pa3,
-        dma.6,
-        dma.7,
-        &mut d.RCC,
+        d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC,
     );
     let (bt_send_buffer, bt_receive_buffer) = r.BLUETOOTH_BUFFERS.split_at_mut(1);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
