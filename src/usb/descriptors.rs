@@ -1,3 +1,5 @@
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 pub const DEV_DESC: [u8; 18] = [
     0x12,        // bLength
     0x01,        // bDescriptorType (Device)

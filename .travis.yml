@@ -28,6 +28,7 @@ script:
   - make bloat
   - make
   - cargo fmt --all -- --write-mode=diff
+  - cargo build --features use_semihosting
 
 cache:
   cargo: true

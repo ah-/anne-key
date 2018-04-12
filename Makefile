@@ -6,6 +6,7 @@ build:
 
 dfu: build
 	./scripts/generate_dfu.sh
+	ls -l anne-key.dfu
 
 debug: build
 	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
@@ -26,6 +27,6 @@ clean:
 	cargo clean
 	rm -f anne-key.bin
 	rm -f anne-key.dfu
-	rm -rf book/
+	rm -rf _book/
 
 .PHONY: all build clean debug openocd bloat fmt clippy

@@ -12,6 +12,10 @@ extern crate cortex_m_rtfm as rtfm;
 extern crate cortex_m_semihosting;
 extern crate embedded_hal;
 extern crate nb;
+#[cfg(not(feature = "use_semihosting"))]
+extern crate panic_abort;
+#[cfg(feature = "use_semihosting")]
+extern crate panic_semihosting;
 extern crate stm32l151;
 extern crate stm32l151_hal as hal;
 
@@ -40,9 +44,9 @@ use bluetooth::Bluetooth;
 use keyboard::Keyboard;
 use keymatrix::KeyMatrix;
 use led::Led;
-use serial::Serial;
 use serial::bluetooth_usart::BluetoothUsart;
 use serial::led_usart::LedUsart;
+use serial::Serial;
 use usb::Usb;
 
 app! {
@@ -167,13 +171,7 @@ fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     led.theme_mode().unwrap();
 
     let bluetooth_usart = BluetoothUsart::new(
-        d.USART2,
-        gpioa.pa1,
-        gpioa.pa2,
-        gpioa.pa3,
-        dma.6,
-        dma.7,
-        &mut d.RCC,
+        d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC,
     );
     let (bt_send_buffer, bt_receive_buffer) = r.BLUETOOTH_BUFFERS.split_at_mut(1);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
@@ -235,16 +233,4 @@ fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
 
     // maybe only clear set bits? or ones from 9-5?
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
-}
-
-// Need this when building in debug mode without LTO, otherwise we get linker
-// errors. This isn't ever actually used.
-#[cfg(debug_assertions)]
-#[no_mangle]
-pub unsafe extern "C" fn rust_begin_unwind(
-    _args: ::core::fmt::Arguments,
-    _file: &'static str,
-    _line: u32,
-) -> ! {
-    panic!()
 }
