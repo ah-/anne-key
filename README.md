@@ -127,3 +127,22 @@ Our CI requires consistent formatting, please run rustfmt before you submit PRs:
 
 - `rustup component add rustfmt-preview`
 - `make fmt`
+
+Troubleshooting
+---------
+
+### error[E0463]: can't find crate for compiler_builtins
+
+Run the following command before running `make dfu`:
+
+```
+rustup target add thumbv7m-none-eabi
+```
+
+### error: linker arm-none-eabi-ld not found
+
+You need to install the ARM tools. If you're on macOS run the following:
+
+```
+brew install caskroom/cask/gcc-arm-embedded
+```
