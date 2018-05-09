@@ -26,12 +26,12 @@ use_semihosting = ["panic-semihosting"]
 features = ["unproven"]
 version = "0.1.0"
 
-[dependencies.stm32l151]
-features = ["rt"]
-version = "0.2.1"
+[dependencies.stm32l1]
+features = ["stm32l151", "rt"]
+version = "0.1.1"
 
 [dependencies.stm32l151-hal]
-version = "0.1.0"
+version = "0.2.0"
 
 [dependencies.panic-abort]
 version = "0.1.0"

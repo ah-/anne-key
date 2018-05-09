@@ -16,7 +16,8 @@ extern crate nb;
 extern crate panic_abort;
 #[cfg(feature = "use_semihosting")]
 extern crate panic_semihosting;
-extern crate stm32l151;
+extern crate stm32l1;
+use stm32l1::stm32l151;
 extern crate stm32l151_hal as hal;
 
 #[macro_use]
