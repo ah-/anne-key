@@ -44,6 +44,10 @@ optional = true
 version = "0.5.1"
 optional = true
 
+[dependencies.scroll]
+version = "0.9.2"
+default-features = false
+
 [features]
 default = ["panic-abort"]
 use_semihosting = ["panic-semihosting"]

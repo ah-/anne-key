@@ -10,6 +10,7 @@ use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
 use nb;
 use rtfm::Threshold;
+use scroll::Pread;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
@@ -253,7 +254,7 @@ where
                 {
                     let buffer: &mut [u8] = buffer;
                     let message = Message {
-                        msg_type: MsgType::from(buffer[0]),
+                        msg_type: buffer.pread(0).unwrap(),
                         operation: buffer[2],
                         data: &buffer[3..3 + buffer[1] as usize - 1],
                     };
