@@ -22,7 +22,7 @@ before_install:
       echo "Only docs were updated, stopping build process."
       exit
     fi
-- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew update; fi"
+- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew tap mbartling/gcc-arm-none-eabi; fi"
 - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew install gcc-arm-none-eabi; fi"
 
 install:
