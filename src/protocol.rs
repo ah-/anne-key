@@ -9,7 +9,7 @@ pub struct Message<'a> {
 }
 
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MsgType {
     Reserved,
     Error,
@@ -51,7 +51,7 @@ impl<'a> ctx::TryFromCtx<'a> for MsgType {
                 return Err(SError::BadInput {
                     size: unknown as usize,
                     msg: "MsgType",
-                })
+                });
             }
         };
         Ok((msg_type, 1))

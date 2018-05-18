@@ -61,3 +61,6 @@ opt-level = 3
 debug = true
 lto = false
 opt-level = 3
+
+[workspace]
+members = ["tests"]

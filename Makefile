@@ -28,6 +28,9 @@ fmt:
 	rustup component add rustfmt
 	cargo fmt
 
+test:
+	cd tests; cargo test --target $(shell rustup target list | grep default | cut -d ' ' -f 1)
+
 clippy:
 	rustup component add clippy
 	cargo clippy
@@ -38,4 +41,4 @@ clean:
 	rm -f anne-key.dfu
 	rm -rf _book/
 
-.PHONY: all build clean debug openocd bloat fmt clippy
+.PHONY: all build clean debug openocd bloat fmt clippy test
