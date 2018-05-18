@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use core::mem::transmute;
-use scroll::{ctx, Error as SError, Pread};
+use scroll::{ctx, Cwrite, Error as SError, Pread};
 
 pub struct Message<'a> {
     pub msg_type: MsgType,
@@ -55,6 +55,29 @@ impl<'a> ctx::TryFromCtx<'a> for MsgType {
             }
         };
         Ok((msg_type, 1))
+    }
+}
+
+impl ctx::IntoCtx for MsgType {
+    fn into_ctx(self, dst: &mut [u8], _ctx: ()) {
+        use self::MsgType::*;
+        let byte: u8 = match self {
+            Reserved => 0,
+            Error => 1,
+            System => 2,
+            Ack => 3,
+            Reboot => 4,
+            Macro => 5,
+            Ble => 6,
+            Keyboard => 7,
+            Keyup => 8,
+            Led => 9,
+            FwInfo => 10,
+            FwUp => 11,
+            CustomLed => 12,
+            CustomKey => 13,
+        };
+        dst.cwrite(byte, 0)
     }
 }
 

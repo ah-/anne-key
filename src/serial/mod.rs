@@ -4,6 +4,7 @@ pub mod led_usart;
 use super::protocol::MsgType;
 use core::marker::Unsize;
 use nb;
+use scroll::Cwrite;
 
 pub struct Serial<USART, T: 'static>
 where
@@ -106,7 +107,7 @@ where
             // TODO: put this into buffer, but then increase buffer offset
             // keep counter, use counter when calling send()
             let pos = self.send_buffer_pos as usize;
-            send_buffer[pos] = message_type as u8;
+            send_buffer.cwrite(message_type, pos);
             send_buffer[pos + 1] = 1 + data.len() as u8;
             send_buffer[pos + 2] = operation;
             send_buffer[pos + 3..pos + tx_len as usize].clone_from_slice(data);
