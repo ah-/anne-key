@@ -2,7 +2,7 @@ language: rust
 
 matrix:
   include:
-    - rust: nightly
+    - rust: nightly-2018-05-15
       addons:
         apt:
           sources:
