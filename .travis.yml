@@ -42,6 +42,7 @@ before_cache:
   - chmod -R a+r $HOME/.cargo
 
 before_deploy:
+  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then echo 'Will not tag release in macOS'; exit 1; fi"
   - git config --local user.name "Andreas Heider"
   - git config --local user.email "andreas@heider.io"
   - git tag "$(date +'%Y-%m-%d')-$TRAVIS_BUILD_NUMBER-${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}-$(git log --format=%h -1)"
