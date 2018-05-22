@@ -2,7 +2,9 @@ language: rust
 
 matrix:
   include:
-    - rust: nightly
+    - os: osx
+      rust: nightly-2018-05-15
+    - rust: nightly-2018-05-15
       addons:
         apt:
           sources:
@@ -20,6 +22,8 @@ before_install:
       echo "Only docs were updated, stopping build process."
       exit
     fi
+- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew tap mbartling/gcc-arm-none-eabi; fi"
+- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew install gcc-arm-none-eabi; fi"
 
 install:
   - bash ./scripts/install.sh
@@ -38,9 +42,14 @@ before_cache:
   - chmod -R a+r $HOME/.cargo
 
 before_deploy:
+  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then echo 'Will not tag release in macOS'; exit 1; fi"
   - git config --local user.name "Andreas Heider"
   - git config --local user.email "andreas@heider.io"
   - git tag "$(date +'%Y-%m-%d')-$TRAVIS_BUILD_NUMBER-${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}-$(git log --format=%h -1)"
+
+branches:
+  except:
+    - /^d+-d+-d+-.*/
 
 deploy:
   provider: releases
