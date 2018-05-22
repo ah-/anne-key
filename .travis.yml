@@ -49,7 +49,7 @@ before_deploy:
 
 branches:
   except:
-    - /^d+-d+-d+-.*/
+    - /^\d+-\d+-\d+-.*/
 
 deploy:
   provider: releases
