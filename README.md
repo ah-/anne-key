@@ -24,7 +24,7 @@ Working today:
 
 Not yet implemented:
 
-- USB
+- USB (sends keys concurrently with BT, hangs on connect/disconnect)
 - Media controls / special keys
 - Uploading custom lighting settings
 - Uploading custom keymaps
@@ -40,6 +40,8 @@ Flashing
 --------
 
 You can find the latest build on the [Releases page](https://github.com/ah-/anne-key/releases). Download `anne-key.dfu`.
+If LEDs aren't working with latest build, you can try [build 209](https://github.com/ah-/anne-key/releases/tag/2018-04-12-209-master-aee0f1b)
+, or the following procedure: reboot into DFU mode by holding down `Fn+Space+Esc`, then exit with `Esc`.
 
 Then you can either follow the [obins firmware update steps](http://en.obins.net/firmware) (click Update manual) or use `dfu-util`.
 
@@ -108,10 +110,10 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
-To build your own firmware, you need the nightly rust toolchain with
+To build your own firmware, you need the nightly-2018-05-15 rust toolchain with
 the following components:
 
-- nightly rust as default: `rustup default nightly`
+- nightly rust as default: `rustup override set nightly-2018-05-15` within your checkout
 - thumbv7m std: `rustup target add thumbv7m-none-eabi`
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
 
