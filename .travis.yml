@@ -29,7 +29,7 @@ install:
   - bash ./scripts/install.sh
 
 script:
-  - make bloat
+  # - make bloat
   - make
   - cargo fmt --all -- --write-mode=diff
   - cargo build --features use_semihosting
