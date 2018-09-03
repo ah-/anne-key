@@ -24,7 +24,7 @@ install:
   - export PATH="$PATH:$PWD/gcc/bin"
 
 script:
-  # - make bloat
+  - make bloat
   - make
   - cargo fmt --all -- --check
   - cargo build --features use_semihosting

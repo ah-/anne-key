@@ -15,7 +15,7 @@ openocd:
 	openocd -f openocd.cfg
 
 bloat:
-	cargo bloat $(BLOAT_ARGS) -n 50
+	cargo bloat $(BLOAT_ARGS) -n 50 --target thumbv7m-none-eabi
 
 fmt:
 	cargo fmt
