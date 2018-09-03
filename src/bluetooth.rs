@@ -1,5 +1,3 @@
-#![feature(const_fn)]
-
 use super::hidreport::HidReport;
 use super::keyboard::Keyboard;
 use super::led::Led;
@@ -253,7 +251,8 @@ where
     }
 
     pub fn poll(&mut self, led: &mut Led<BUFFER>, keyboard: &mut Keyboard) {
-        let result = self.rx_transfer
+        let result = self
+            .rx_transfer
             .as_mut()
             .unwrap()
             .poll(&mut self.serial.usart);

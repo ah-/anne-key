@@ -1,5 +1,3 @@
-#![feature(const_fn)]
-
 use bit_field::BitArray;
 use embedded_hal::digital::{InputPin, OutputPin};
 use hal::gpio::gpioa::*;

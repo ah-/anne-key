@@ -110,11 +110,11 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
-To build your own firmware, you need the nightly-2018-05-15 rust toolchain with
-the following components:
+To build your own firmware, you need the nightly-2018-08-24 rust
+toolchain with the following components:
 
-- nightly rust as default: `rustup override set nightly-2018-05-15` within your checkout
-- thumbv7m std: `rustup target add thumbv7m-none-eabi`
+- rustup: to make use of the `rust-toolchain` file
+- thumbv7m std: `rustup target add thumbv7m-none-eabi` within your checkout
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
 
 Then, `make dfu` in the top directory will build your `anne-key.dfu`.

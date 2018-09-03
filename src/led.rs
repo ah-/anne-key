@@ -237,7 +237,8 @@ where
     }
 
     pub fn poll(&mut self) {
-        let result = self.rx_transfer
+        let result = self
+            .rx_transfer
             .as_mut()
             .unwrap()
             .poll(&mut self.serial.usart);

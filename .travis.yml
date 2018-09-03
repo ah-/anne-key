@@ -3,14 +3,8 @@ language: rust
 matrix:
   include:
     - os: osx
-      rust: nightly-2018-05-15
-    - rust: nightly-2018-05-15
-      addons:
-        apt:
-          sources:
-            - debian-sid
-          packages:
-            - binutils-arm-none-eabi
+      rust: nightly-2018-08-24
+    - rust: nightly-2018-08-24
 
 before_install:
 - |
@@ -27,19 +21,23 @@ before_install:
 
 install:
   - bash ./scripts/install.sh
+  - export PATH="$PATH:$PWD/gcc/bin"
 
 script:
   - make bloat
   - make
-  - cargo fmt --all -- --write-mode=diff
+  - cargo fmt --all -- --check
   - cargo build --features use_semihosting
 
 cache:
   cargo: true
+  directories:
+    - ${HOME}/gcc
 
 before_cache:
   # Travis can't cache files that are not readable by "others"
-  - chmod -R a+r $HOME/.cargo
+  - chmod -R a+r ${HOME}/.cargo
+  - chmod -R a+r ${HOME}/gcc
 
 before_deploy:
   - git config --local user.name "Andreas Heider"
