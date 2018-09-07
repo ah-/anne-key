@@ -33,12 +33,11 @@ cache:
   cargo: true
   directories:
     - ${HOME}/binutils
-    - ${HOME}/gcc
 
 before_cache:
   # Travis can't cache files that are not readable by "others"
   - chmod -R a+r ${HOME}/.cargo
-  - chmod -R a+r ${HOME}/gcc
+  - chmod -R a+r ${HOME}/binutils
 
 before_deploy:
   - git config --local user.name "Andreas Heider"
