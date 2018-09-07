@@ -3,8 +3,8 @@ language: rust
 matrix:
   include:
     - os: osx
-      rust: nightly-2018-08-24
-    - rust: nightly-2018-08-24
+      rust: nightly-2018-09-06
+    - rust: nightly-2018-09-06
 
 before_install:
 - |
@@ -21,7 +21,7 @@ before_install:
 
 install:
   - bash ./scripts/install.sh
-  - export PATH="$PATH:$PWD/gcc/bin"
+  - export PATH="$PATH:$PWD/binutils/bin"
 
 script:
   - make bloat
@@ -32,12 +32,12 @@ script:
 cache:
   cargo: true
   directories:
-    - ${HOME}/gcc
+    - ${HOME}/binutils
 
 before_cache:
   # Travis can't cache files that are not readable by "others"
   - chmod -R a+r ${HOME}/.cargo
-  - chmod -R a+r ${HOME}/gcc
+  - chmod -R a+r ${HOME}/binutils
 
 before_deploy:
   - git config --local user.name "Andreas Heider"

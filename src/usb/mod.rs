@@ -39,6 +39,7 @@ impl Usb {
         rcc.apb1rstr.modify(|_, w| w.usbrst().clear_bit());
 
         usb.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         usb.usb_cntr.modify(|_, w| {
             w.ctrm().set_bit()
              .errm().set_bit()
@@ -111,24 +112,19 @@ impl Usb {
         self.pma.write_buffer_u8(0x100, &self.hid.report);
         self.pma.pma_area.set_u16(10, 5);
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         self.usb.usb_ep0r.modify(|_, w| unsafe {
-            w.ep_type()
-                .bits(0b01)
-                .stat_tx()
-                .bits(0b10)
-                .stat_rx()
-                .bits(0b11)
+            w.ep_type().bits(0b01)
+             .stat_tx().bits(0b10)
+             .stat_rx().bits(0b11)
         });
 
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         self.usb.usb_ep1r.modify(|_, w| unsafe {
-            w.ep_type()
-                .bits(0b11)
-                .stat_tx()
-                .bits(0b11)
-                .stat_rx()
-                .bits(0b10)
-                .ea()
-                .bits(0b1)
+            w.ep_type().bits(0b11)
+             .stat_tx().bits(0b11)
+             .stat_rx().bits(0b10)
+             .ea().bits(0b1)
         });
 
         self.usb.daddr.write(|w| w.ef().set_bit());
