@@ -110,7 +110,7 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
-To build your own firmware, you need the nightly-2018-08-24 rust
+To build your own firmware, you need the nightly-2018-09-06 rust
 toolchain with the following components:
 
 - rustup: to make use of the `rust-toolchain` file
