@@ -2,6 +2,7 @@ all:
 	$(MAKE) dfu
 
 build:
+	rustup target add thumbv7m-none-eabi
 	cargo build --release
 
 dfu: build
@@ -18,9 +19,11 @@ bloat:
 	cargo bloat $(BLOAT_ARGS) -n 50 --target thumbv7m-none-eabi
 
 fmt:
+	rustup component add rustfmt-preview
 	cargo fmt
 
 clippy:
+	rustup component add clippy-preview
 	cargo clippy
 
 clean:
