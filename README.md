@@ -110,8 +110,7 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
-To build your own firmware, you need the nightly-2018-08-24 rust
-toolchain with the following components:
+To build your own firmware, you need the following components:
 
 - rustup: to make use of the `rust-toolchain` file
 - ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
@@ -130,14 +129,6 @@ Our CI requires consistent formatting, please run rustfmt before you submit PRs:
 
 Troubleshooting
 ---------
-
-### error[E0463]: can't find crate for compiler_builtins
-
-Run the following command before running `make dfu`:
-
-```
-rustup target add thumbv7m-none-eabi
-```
 
 ### error: linker arm-none-eabi-ld not found
 
