@@ -14,8 +14,7 @@ main() {
         fi
 
         if [ ${TRAVIS_OS_NAME} = 'osx' ]; then
-            brew tap mbartling/gcc-arm-none-eabi
-            brew install gcc-arm-none-eabi
+            brew install caskroom/cask/gcc-arm-embedded
         fi
 }
 
