@@ -16,18 +16,16 @@ before_install:
       echo "Only docs were updated, stopping build process."
       exit
     fi
-- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew tap mbartling/gcc-arm-none-eabi; fi"
-- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew install gcc-arm-none-eabi; fi"
 
 install:
   - bash ./scripts/install.sh
   - export PATH="$PATH:$PWD/gcc/bin"
 
 script:
-  - make bloat
   - make
-  - cargo fmt --all -- --check
   - cargo build --features use_semihosting
+  - make bloat
+  - cargo fmt --all -- --check
 
 cache:
   cargo: true
