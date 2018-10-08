@@ -26,7 +26,6 @@ before_install:
 
 install:
   - bash ./scripts/install.sh
-  - export PATH="$PATH:$PWD/gcc/bin"
 
 script:
   - make
@@ -35,13 +34,10 @@ script:
 
 cache:
   cargo: true
-  directories:
-    - ${HOME}/gcc
 
 before_cache:
   # Travis can't cache files that are not readable by "others"
   - chmod -R a+r ${HOME}/.cargo
-  - chmod -R a+r ${HOME}/gcc
 
 before_deploy:
   - git config --local user.name "Andreas Heider"

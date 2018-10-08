@@ -2,6 +2,7 @@ all:
 	$(MAKE) dfu
 
 build:
+	rustup component add llvm-tools-preview
 	rustup target add thumbv7m-none-eabi
 	cargo build --release
 
