@@ -245,7 +245,8 @@ where
                 debug!(
                     "msg: {:?} {} {:?}",
                     message.msg_type, message.operation, message.data
-                ).ok();
+                )
+                .ok();
             }
         }
     }

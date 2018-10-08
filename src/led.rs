@@ -223,7 +223,8 @@ where
                         debug!(
                             "lmsg: {:?} {} {:?}",
                             message.msg_type, message.operation, message.data
-                        ).ok();
+                        )
+                        .ok();
                     }
                 }
             }
@@ -231,7 +232,8 @@ where
                 debug!(
                     "lmsg: {:?} {} {:?}",
                     message.msg_type, message.operation, message.data
-                ).ok();
+                )
+                .ok();
             }
         }
     }
