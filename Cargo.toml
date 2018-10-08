@@ -9,7 +9,7 @@ license = "Apache-2.0"
 version = "0.0.2"
 
 [dependencies]
-bare-metal = "0.1.1"
+bare-metal = { version = "0.2.3", features = ["const-fn"] }
 bit_field = "0.9.0"
 cortex-m = "0.4.3"
 cortex-m-rt = "0.4"
