@@ -223,7 +223,8 @@ where
                         debug!(
                             "lmsg: {:?} {} {:?}",
                             message.msg_type, message.operation, message.data
-                        ).ok();
+                        )
+                        .ok();
                     }
                 }
             }
@@ -231,7 +232,8 @@ where
                 debug!(
                     "lmsg: {:?} {} {:?}",
                     message.msg_type, message.operation, message.data
-                ).ok();
+                )
+                .ok();
             }
         }
     }
@@ -244,7 +246,7 @@ where
             .poll(&mut self.serial.usart);
         match result {
             Err(nb::Error::WouldBlock) => {}
-            Err(_) => panic!(),
+            Err(_) => unreachable!(),
             Ok(()) => {
                 let buffer = self.rx_transfer.take().unwrap().finish();
 

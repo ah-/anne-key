@@ -1,6 +1,7 @@
 #![feature(const_fn)]
 #![feature(never_type)]
 #![feature(non_exhaustive)]
+#![feature(tool_lints)]
 #![feature(unsize)]
 #![no_std]
 
@@ -122,6 +123,7 @@ app! {
     }
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
     // re-locate vector table to 0x80004000 because bootloader uses 0x80000000
     unsafe { p.core.SCB.vtor.write(0x4000) };
@@ -207,26 +209,32 @@ fn tick(_t: &mut Threshold, mut r: SYS_TICK::Resources) {
     );
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti1(_t: &mut Threshold, r: EXTI1::Resources) {
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti2(_t: &mut Threshold, r: EXTI2::Resources) {
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti3(_t: &mut Threshold, r: EXTI3::Resources) {
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti4(_t: &mut Threshold, r: EXTI4::Resources) {
     unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
+#[allow(clippy::needless_pass_by_value)]
 fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
     // this (plus other exti) are key presses,
     // maybe use them instead of timer based scanning?

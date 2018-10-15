@@ -118,12 +118,12 @@ pub enum KeyCode {
 }
 
 impl KeyCode {
-    pub fn is_modifier(&self) -> bool {
-        self >= &KeyCode::LCtrl && self <= &KeyCode::RMeta
+    pub fn is_modifier(self) -> bool {
+        self >= KeyCode::LCtrl && self <= KeyCode::RMeta
     }
 
-    pub fn is_normal_key(&self) -> bool {
-        self >= &KeyCode::A && self <= &KeyCode::Application
+    pub fn is_normal_key(self) -> bool {
+        self >= KeyCode::A && self <= KeyCode::Application
     }
 }
 

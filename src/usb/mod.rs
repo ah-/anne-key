@@ -40,6 +40,7 @@ impl Usb {
 
         usb.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
         usb.usb_cntr.modify(|_, w| {
+            #[cfg_attr(rustfmt, rustfmt_skip)]
             w.ctrm().set_bit()
              .errm().set_bit()
              .pmaovrm().set_bit()
