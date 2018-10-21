@@ -3,9 +3,6 @@
 set -eux
 
 main() {
-        rustup component list | grep 'rustfmt.*installed' || \
-            rustup component add rustfmt-preview
-
         which cargo-bloat || (cd /; cargo install cargo-bloat)
 
         if [ ${TRAVIS_OS_NAME} != 'osx' ]; then
