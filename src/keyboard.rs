@@ -67,11 +67,7 @@ impl Keyboard {
                 if pressed || changed {
                     let action = self.get_action(key);
                     if let Action::Reset = action {
-                        unsafe {
-                            // write unlock: 0x05fa << 16
-                            // SYSRESETREQ: 0b100
-                            scb.aircr.write((0x05fa << 16) | 0b100);
-                        }
+                        scb.system_reset()
                     }
                     hid.process(&action, pressed, changed);
                     led.process(&action, pressed, changed);
