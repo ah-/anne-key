@@ -58,7 +58,7 @@ pub const FN2: Layout = layout![
     __     __    __     No      No     __ No No No No __ __ __ __
 ];
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 pub const BT: Layout = layout![
     LayerOff(LAYER_BT) BtConnectHost(1) BtConnectHost(2) BtConnectHost(3) BtConnectHost(4) __ __ __ __ __ BtToggleLegacyMode BtOff BtBroadcast BtOn
     __ BtSaveHost(1) BtSaveHost(2) BtSaveHost(3) BtSaveHost(4) __ __ __ __ __ __ __ __ __

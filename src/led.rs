@@ -153,7 +153,7 @@ where
             _ => {}
         }
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
+        #[rustfmt::skip]
         let payload = &[0xca,
                         19, // the number of keys in this request
             KeyIndex::Escape as u8, 0xff, 0xff, 0x00, LedMode::On as u8,
@@ -185,7 +185,7 @@ where
     }
 
     pub fn bluetooth_pin_mode(&mut self) -> nb::Result<(), !> {
-        #[cfg_attr(rustfmt, rustfmt_skip)]
+        #[rustfmt::skip]
         let payload = &[0xca,
                         11, // the number of keys in this request
             KeyIndex::N1 as u8, 0x00, 0xff, 0x00, LedMode::On as u8,
