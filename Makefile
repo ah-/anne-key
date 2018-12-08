@@ -19,11 +19,11 @@ bloat:
 	cargo bloat $(BLOAT_ARGS) -n 50 --target thumbv7m-none-eabi
 
 fmt:
-	rustup component add rustfmt-preview
+	rustup component add rustfmt
 	cargo fmt
 
 clippy:
-	rustup component add clippy-preview
+	rustup component add clippy
 	cargo clippy
 
 clean:

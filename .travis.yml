@@ -1,5 +1,5 @@
 language: rust
-rust: nightly-2018-10-21
+rust: nightly-2018-12-06
 os:
   - linux
   - osx
@@ -9,7 +9,7 @@ matrix:
     - env: JOB=rustfmt
       os: linux
       install:
-        rustup component add rustfmt-preview
+        rustup component add rustfmt
       script:
         cargo fmt --all -- --check
 
