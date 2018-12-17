@@ -113,7 +113,7 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 To build your own firmware, you need the following components:
 
 - rustup: to make use of the `rust-toolchain` file
-- ARM linker: usually named `arm-none-eabi-ld`, please check with your OS
+- cargo-objcopy: you need to build it outside this directory `cd ~ ; cargo install cargo-binutils`
 
 Then, `make dfu` in the top directory will build your `anne-key.dfu`.
 
@@ -129,11 +129,3 @@ Our CI requires consistent formatting, please run rustfmt before you submit PRs:
 
 Troubleshooting
 ---------
-
-### error: linker arm-none-eabi-ld not found
-
-You need to install the ARM tools. If you're on macOS run the following:
-
-```
-brew install caskroom/cask/gcc-arm-embedded
-```
