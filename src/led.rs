@@ -3,13 +3,13 @@ use super::protocol::{LedOp, Message, MsgType};
 use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
 use crate::bluetooth::BluetoothMode;
-use crate::hal::gpio::gpioc::PC15;
-use crate::hal::gpio::{Input, Output};
 use crate::keycodes::KeyIndex;
-use crate::rtfm::Threshold;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
+use hal::gpio::gpioc::PC15;
+use hal::gpio::{Input, Output};
 use nb;
+use rtfm::Threshold;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {

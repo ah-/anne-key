@@ -4,8 +4,8 @@ pub mod hid;
 pub mod pma;
 pub mod usb_ext;
 
-use crate::rtfm::Threshold;
 use core::cmp::min;
+use rtfm::Threshold;
 
 use stm32l1::stm32l151;
 

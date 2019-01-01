@@ -5,14 +5,10 @@
 #![no_main]
 #![no_std]
 
-use cortex_m_rtfm as rtfm;
-
 #[cfg(not(feature = "use_semihosting"))]
 extern crate panic_abort;
 #[cfg(feature = "use_semihosting")]
 extern crate panic_semihosting;
-use stm32l1;
-use stm32l151_hal as hal;
 
 #[macro_use]
 mod debug;
@@ -31,9 +27,9 @@ mod protocol;
 mod serial;
 mod usb;
 
-use crate::hal::dma::DmaExt;
-use crate::hal::gpio::GpioExt;
-use crate::rtfm::{app, Threshold};
+use hal::dma::DmaExt;
+use hal::gpio::GpioExt;
+use rtfm::{app, Threshold};
 
 use crate::bluetooth::Bluetooth;
 use crate::keyboard::Keyboard;

@@ -1,8 +1,8 @@
-use crate::hal::gpio::gpioa::*;
-use crate::hal::gpio::gpiob::*;
-use crate::hal::gpio::{Input, Output};
 use bit_field::BitArray;
 use embedded_hal::digital::{InputPin, OutputPin};
+use hal::gpio::gpioa::*;
+use hal::gpio::gpiob::*;
+use hal::gpio::{Input, Output};
 use stm32l1::stm32l151::SYST;
 
 pub const ROWS: usize = 5;

@@ -1,7 +1,7 @@
-use crate::hal::dma::dma1::{C6, C7};
-use crate::hal::gpio::gpioa::{PA1, PA2, PA3};
-use crate::hal::gpio::{Alternate, Input, Output};
 use embedded_hal::digital::OutputPin;
+use hal::dma::dma1::{C6, C7};
+use hal::gpio::gpioa::{PA1, PA2, PA3};
+use hal::gpio::{Alternate, Input, Output};
 use stm32l1::stm32l151::{RCC, USART2};
 
 use super::DmaUsart;
