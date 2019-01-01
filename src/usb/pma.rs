@@ -1,4 +1,4 @@
-extern crate vcell;
+use vcell;
 
 use self::vcell::VolatileCell;
 use bare_metal::Peripheral;

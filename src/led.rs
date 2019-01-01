@@ -3,13 +3,13 @@ use super::protocol::{LedOp, Message, MsgType};
 use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
 use crate::bluetooth::BluetoothMode;
-use core::marker::Unsize;
-use embedded_hal::digital::OutputPin;
 use crate::hal::gpio::gpioc::PC15;
 use crate::hal::gpio::{Input, Output};
 use crate::keycodes::KeyIndex;
-use nb;
 use crate::rtfm::Threshold;
+use core::marker::Unsize;
+use embedded_hal::digital::OutputPin;
+use nb;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
@@ -204,7 +204,7 @@ where
         self.set_keys(payload)
     }
 
-    pub fn handle_message(&mut self, message: &Message) {
+    pub fn handle_message(&mut self, message: &Message<'_>) {
         match message.msg_type {
             MsgType::Led => {
                 match LedOp::from(message.operation) {

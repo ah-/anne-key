@@ -1,7 +1,5 @@
 use crate::action::Action;
-use bit_field::{BitArray, BitField};
 use crate::bluetooth::Bluetooth;
-use core::marker::Unsize;
 use crate::debug::UnwrapLog;
 use crate::hidreport::HidReport;
 use crate::keycodes::KeyCode;
@@ -9,8 +7,10 @@ use crate::keymatrix::{KeyState, COLUMNS, ROWS};
 use crate::layout::LAYERS;
 use crate::layout::LAYER_BT;
 use crate::led::Led;
-use stm32l1::stm32l151::SCB;
 use crate::usb::Usb;
+use bit_field::{BitArray, BitField};
+use core::marker::Unsize;
+use stm32l1::stm32l151::SCB;
 
 pub struct Keyboard {
     layers: Layers,

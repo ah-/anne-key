@@ -5,19 +5,14 @@
 #![no_main]
 #![no_std]
 
-extern crate bare_metal;
-extern crate bit_field;
-extern crate cortex_m;
-extern crate cortex_m_rtfm as rtfm;
-extern crate cortex_m_semihosting;
-extern crate embedded_hal;
-extern crate nb;
+use cortex_m_rtfm as rtfm;
+
 #[cfg(not(feature = "use_semihosting"))]
 extern crate panic_abort;
 #[cfg(feature = "use_semihosting")]
 extern crate panic_semihosting;
-extern crate stm32l1;
-extern crate stm32l151_hal as hal;
+use stm32l1;
+use stm32l151_hal as hal;
 
 #[macro_use]
 mod debug;
@@ -123,7 +118,7 @@ app! {
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
+fn init(mut p: init::Peripherals, r: init::Resources<'_>) -> init::LateResources {
     // re-locate vector table to 0x80004000 because bootloader uses 0x80000000
     unsafe { p.core.SCB.vtor.write(0x4000) };
 
