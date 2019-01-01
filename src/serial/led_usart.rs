@@ -1,8 +1,8 @@
 use super::DmaUsart;
-use hal::dma::dma1::{C2, C3};
-use hal::gpio::gpiob::{PB10, PB11};
-use hal::gpio::{Alternate, Input};
-use stm32l151::{RCC, USART3};
+use crate::hal::dma::dma1::{C2, C3};
+use crate::hal::gpio::gpiob::{PB10, PB11};
+use crate::hal::gpio::{Alternate, Input};
+use stm32l1::stm32l151::{RCC, USART3};
 
 pub struct LedUsart {
     _pb10: PB10<Alternate>,

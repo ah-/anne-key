@@ -2,15 +2,15 @@ use super::keymatrix::KeyState;
 use super::protocol::{LedOp, Message, MsgType};
 use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
-use bluetooth::BluetoothMode;
+use crate::bluetooth::BluetoothMode;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
-use hal::gpio::gpioc::PC15;
-use hal::gpio::{Input, Output};
-use keycodes::KeyIndex;
+use crate::hal::gpio::gpioc::PC15;
+use crate::hal::gpio::{Input, Output};
+use crate::keycodes::KeyIndex;
 use nb;
-use rtfm::Threshold;
-use stm32l151::SYST;
+use crate::rtfm::Threshold;
+use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
     _Off,

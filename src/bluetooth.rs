@@ -5,9 +5,9 @@ use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, Syste
 use super::serial::bluetooth_usart::BluetoothUsart;
 use super::serial::{DmaUsart, Serial, Transfer};
 use core::marker::Unsize;
-use debug::UnwrapLog;
+use crate::debug::UnwrapLog;
 use nb;
-use rtfm::Threshold;
+use crate::rtfm::Threshold;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum BluetoothMode {

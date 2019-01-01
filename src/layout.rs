@@ -1,7 +1,7 @@
-use action::Action;
-use action::Action::*;
-use keycodes::KeyCode::*;
-use keymatrix::{COLUMNS, ROWS};
+use crate::action::Action;
+use crate::action::Action::*;
+use crate::keycodes::KeyCode::*;
+use crate::keymatrix::{COLUMNS, ROWS};
 
 /*
   ,-----------------------------------------------------------------------------.

@@ -5,15 +5,15 @@ pub mod pma;
 pub mod usb_ext;
 
 use core::cmp::min;
-use rtfm::Threshold;
+use crate::rtfm::Threshold;
 
-use stm32l151;
+use stm32l1::stm32l151;
 
 use self::constants::{UsbDescriptorType, UsbDeviceState, UsbRequest};
 use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
-use hidreport::HidReport;
-use usb::hid::UsbHid;
+use crate::hidreport::HidReport;
+use crate::usb::hid::UsbHid;
 
 const MAX_PACKET_SIZE: u32 = 64;
 

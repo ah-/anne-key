@@ -1,5 +1,5 @@
 use cortex_m;
-use stm32l151;
+use stm32l1::stm32l151;
 
 pub fn init_clock(p: &stm32l151::Peripherals) {
     p.USB.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
