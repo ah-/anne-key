@@ -4,8 +4,8 @@ use super::led::Led;
 use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
 use super::serial::bluetooth_usart::BluetoothUsart;
 use super::serial::{DmaUsart, Serial, Transfer};
+use crate::debug::UnwrapLog;
 use core::marker::Unsize;
-use debug::UnwrapLog;
 use nb;
 use rtfm::Threshold;
 
@@ -104,7 +104,7 @@ where
 
     pub fn handle_message(
         &mut self,
-        message: &Message,
+        message: &Message<'_>,
         led: &mut Led<BUFFER>,
         keyboard: &mut Keyboard,
     ) {

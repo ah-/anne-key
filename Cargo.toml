@@ -1,4 +1,5 @@
 [package]
+edition = "2018"
 name = "anne-key"
 description = "Firmware for Anne Pro Keyboard"
 repository = "https://github.com/ah-/anne-key"
@@ -14,10 +15,17 @@ bit_field = "0.9.0"
 cortex-m = "0.5.8"
 cortex-m-rt = "0.6.5"
 cortex-m-semihosting = "0.3.1"
-cortex-m-rtfm = { git = "https://github.com/hdhoang/cortex-m-rtfm", branch = "v0.3-with-cortex-m-v0.5" }
 nb = "0.1.1"
 vcell = "0.1.0"
-stm32l151-hal = "0.5.0"
+
+[dependencies.rtfm]
+package = "cortex-m-rtfm"
+git = "https://github.com/hdhoang/cortex-m-rtfm"
+branch = "v0.3-with-cortex-m-v0.5"
+
+[dependencies.hal]
+package = "stm32l151-hal"
+version = "0.5.0"
 
 [dependencies.embedded-hal]
 features = ["unproven"]

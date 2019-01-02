@@ -3,7 +3,7 @@ use embedded_hal::digital::{InputPin, OutputPin};
 use hal::gpio::gpioa::*;
 use hal::gpio::gpiob::*;
 use hal::gpio::{Input, Output};
-use stm32l151::SYST;
+use stm32l1::stm32l151::SYST;
 
 pub const ROWS: usize = 5;
 pub const COLUMNS: usize = 14;

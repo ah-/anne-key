@@ -5,20 +5,10 @@
 #![no_main]
 #![no_std]
 
-extern crate bare_metal;
-extern crate bit_field;
-extern crate cortex_m;
-extern crate cortex_m_rtfm as rtfm;
-extern crate cortex_m_semihosting;
-extern crate embedded_hal;
-extern crate nb;
 #[cfg(not(feature = "use_semihosting"))]
 extern crate panic_abort;
 #[cfg(feature = "use_semihosting")]
 extern crate panic_semihosting;
-extern crate stm32l1;
-use stm32l1::stm32l151;
-extern crate stm32l151_hal as hal;
 
 #[macro_use]
 mod debug;
@@ -41,17 +31,17 @@ use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
 use rtfm::{app, Threshold};
 
-use bluetooth::Bluetooth;
-use keyboard::Keyboard;
-use keymatrix::KeyMatrix;
-use led::Led;
-use serial::bluetooth_usart::BluetoothUsart;
-use serial::led_usart::LedUsart;
-use serial::Serial;
-use usb::Usb;
+use crate::bluetooth::Bluetooth;
+use crate::keyboard::Keyboard;
+use crate::keymatrix::KeyMatrix;
+use crate::led::Led;
+use crate::serial::bluetooth_usart::BluetoothUsart;
+use crate::serial::led_usart::LedUsart;
+use crate::serial::Serial;
+use crate::usb::Usb;
 
 app! {
-    device: stm32l151,
+    device: stm32l1::stm32l151,
 
     resources: {
         static KEYBOARD: Keyboard = Keyboard::new();
@@ -60,9 +50,9 @@ app! {
         static BLUETOOTH: Bluetooth<[u8; 0x80]>;
         static LED_BUFFERS: [[u8; 0x80]; 2] = [[0; 0x80]; 2];
         static LED: Led<[u8; 0x80]>;
-        static SCB: stm32l151::SCB;
-        static SYST: stm32l151::SYST;
-        static EXTI: stm32l151::EXTI;
+        static SCB: stm32l1::stm32l151::SCB;
+        static SYST: stm32l1::stm32l151::SYST;
+        static EXTI: stm32l1::stm32l151::EXTI;
         static USB: Usb;
     },
 
@@ -124,7 +114,7 @@ app! {
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn init(mut p: init::Peripherals, r: init::Resources) -> init::LateResources {
+fn init(mut p: init::Peripherals, r: init::Resources<'_>) -> init::LateResources {
     // re-locate vector table to 0x80004000 because bootloader uses 0x80000000
     unsafe { p.core.SCB.vtor.write(0x4000) };
 

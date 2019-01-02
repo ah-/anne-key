@@ -1,6 +1,6 @@
 use super::pma::PMA;
-use stm32l151::USB;
-use usb::usb_ext::UsbEpExt;
+use crate::usb::usb_ext::UsbEpExt;
+use stm32l1::stm32l151::USB;
 
 pub struct UsbHid {
     pub report: [u8; 8],

@@ -2,15 +2,15 @@ use super::keymatrix::KeyState;
 use super::protocol::{LedOp, Message, MsgType};
 use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
-use bluetooth::BluetoothMode;
+use crate::bluetooth::BluetoothMode;
+use crate::keycodes::KeyIndex;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
 use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
-use keycodes::KeyIndex;
 use nb;
 use rtfm::Threshold;
-use stm32l151::SYST;
+use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
     _Off,
@@ -204,7 +204,7 @@ where
         self.set_keys(payload)
     }
 
-    pub fn handle_message(&mut self, message: &Message) {
+    pub fn handle_message(&mut self, message: &Message<'_>) {
         match message.msg_type {
             MsgType::Led => {
                 match LedOp::from(message.operation) {

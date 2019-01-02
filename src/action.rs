@@ -1,4 +1,4 @@
-use keycodes::KeyCode;
+use crate::keycodes::KeyCode;
 
 #[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq)]

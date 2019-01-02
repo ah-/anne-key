@@ -1,4 +1,4 @@
-use stm32l151::usb::{USB_EP0R, USB_EP1R};
+use stm32l1::stm32l151::usb::{USB_EP0R, USB_EP1R};
 
 pub trait UsbEpExt {
     fn toggle_tx_out(&self);
