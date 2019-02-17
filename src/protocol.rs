@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use core::mem::transmute;
+use scroll::{ctx, Cwrite, Error as SError, Pread};
 
 pub struct Message<'a> {
     pub msg_type: MsgType,
@@ -7,30 +8,76 @@ pub struct Message<'a> {
     pub data: &'a [u8],
 }
 
-#[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MsgType {
-    Reserved = 0,
-    Error = 1,
-    System = 2,
-    Ack = 3,
-    Reboot = 4,
-    Macro = 5,
-    Ble = 6,
-    Keyboard = 7,
-    Keyup = 8,
-    Led = 9,
-    FwInfo = 10,
-    FwUp = 11,
-    CustomLed = 12,
-    CustomKey = 13,
+    Reserved,
+    Error,
+    System,
+    Ack,
+    Reboot,
+    Macro,
+    Ble,
+    Keyboard,
+    Keyup,
+    Led,
+    FwInfo,
+    FwUp,
+    CustomLed,
+    CustomKey,
 }
 
-impl From<u8> for MsgType {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
+impl<'a> ctx::TryFromCtx<'a> for MsgType {
+    type Error = SError;
+    type Size = usize;
+    fn try_from_ctx(src: &'a [u8], _ctx: ()) -> Result<(Self, Self::Size), Self::Error> {
+        use self::MsgType::*;
+        let msg_type = match src.pread::<u8>(0)? {
+            0 => Reserved,
+            1 => Error,
+            2 => System,
+            3 => Ack,
+            4 => Reboot,
+            5 => Macro,
+            6 => Ble,
+            7 => Keyboard,
+            8 => Keyup,
+            9 => Led,
+            10 => FwInfo,
+            11 => FwUp,
+            12 => CustomLed,
+            13 => CustomKey,
+            unknown => {
+                return Err(SError::BadInput {
+                    size: unknown as usize,
+                    msg: "MsgType",
+                });
+            }
+        };
+        Ok((msg_type, 1))
+    }
+}
+
+impl ctx::IntoCtx for MsgType {
+    fn into_ctx(self, dst: &mut [u8], _ctx: ()) {
+        use self::MsgType::*;
+        let byte: u8 = match self {
+            Reserved => 0,
+            Error => 1,
+            System => 2,
+            Ack => 3,
+            Reboot => 4,
+            Macro => 5,
+            Ble => 6,
+            Keyboard => 7,
+            Keyup => 8,
+            Led => 9,
+            FwInfo => 10,
+            FwUp => 11,
+            CustomLed => 12,
+            CustomKey => 13,
+        };
+        dst.cwrite(byte, 0)
     }
 }
 
