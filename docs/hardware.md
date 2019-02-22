@@ -48,7 +48,17 @@ need to specify the precise ST-Link version in `openocd.cfg`.  Once
 your programmer is connected, start the gdbserver with `make openocd`.
 
 In another console, `make debug` will build a semihosting-enabled
-binary and run `arm-none-eabi-gdb` over the gdbserver connection.
+binary and run `arm-none-eabi-gdb` over the gdbserver connection. You
+can use another debugger by setting the `GDB` variable:
+
+```sh
+env GDB=gdb-multiarch make debug
+# or
+make debug -e GDB=gdb-multiarch
+```
+
+If you like [gdbgui](https://gdbgui.com/), use `make
+gui-debug`. However we haven't explored that tool much.
 
 DFU
 ---
