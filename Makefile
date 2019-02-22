@@ -6,11 +6,16 @@ build:
 	rustup target add thumbv7m-none-eabi
 	cargo build --release
 
+build-semihosting:
+	rustup component add llvm-tools-preview
+	rustup target add thumbv7m-none-eabi
+	cargo build --release --features use_semihosting
+
 dfu: build
 	./scripts/generate_dfu.sh
 	ls -l anne-key.dfu
 
-debug: build
+debug: build-semihosting
 	arm-none-eabi-gdb target/thumbv7m-none-eabi/release/anne-key
 
 openocd:

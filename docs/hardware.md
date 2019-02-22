@@ -22,18 +22,33 @@ The [STM32L151 Reference Manual](http://www.st.com/content/ccc/resource/technica
 Flashing and debugging
 ----------------------
 
-To develop it's best to directly flash via the debug pins instead of DFU, so you get full debugging support and even working stdout to your host machine.
+To develop it's best to directly flash via the debug pins instead of
+DFU, so you get full debugging support and even working semihosting
+printing to your host machine.
 
-Any ST-Link v2 programmer will do. You can find them cheap on ebay, or if you already have a STM32 Nucleo board you can use the programmer of that.
+Any ST-Link v2 or v2.1 programmer will do. You can find them cheap on
+ebay, or if you already have an STM32 Discovery/Nucleo board you can
+use the programmer built into that.
 
-All the debug pins are exposed and easily accessible. Just solder on some wires and connect to your programmer:
+All the debug pins are exposed and easily accessible, however standard
+jumpers are too high for the case. You can solder on some wires and connect to
+your programmer:
 
 ![PCB](images/stlink-solder.jpg)
+
+The LED chip is the one closer to the edge. The pins order is the same
+for both chips, counting from the BLE shield: SWDIO, SWCLK, GND, 3V3.
 
 OpenOCD
 -------
 
-Once your programmer is connected start `make openocd`.
+For the best experience, use a new opencd with a unified
+`interface/stlink.cfg` (0.11, not yet released). Otherwise you will
+need to specify the precise ST-Link version in `openocd.cfg`.  Once
+your programmer is connected, start the gdbserver with `make openocd`.
+
+In another console, `make debug` will build a semihosting-enabled
+binary and run `arm-none-eabi-gdb` over the gdbserver connection.
 
 DFU
 ---
@@ -88,4 +103,4 @@ digit. The OUI of the address can be TI, or unassigned.
 Case
 ----
 
-The PCB's screw positions are incompatible with most 60% case.
+The PCB's screw positions are incompatible with most 60% cases.
