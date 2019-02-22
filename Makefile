@@ -18,6 +18,9 @@ dfu: build
 debug: build-semihosting
 	arm-none-eabi-gdb -x openocd.gdb target/thumbv7m-none-eabi/release/anne-key
 
+gui-debug: build-semihosting
+	gdbgui --gdb arm-none-eabi-gdb --gdb-args "-x openocd.gdb" target/thumbv7m-none-eabi/release/anne-key
+
 openocd:
 	openocd -f openocd.cfg
 
