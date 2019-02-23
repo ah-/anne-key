@@ -153,7 +153,7 @@ where
                             .log_error();
                     }
                     _ => {
-                        debug!("msg: System {} {:?}", message.operation, message.data).ok();
+                        crate::heprintln!("msg: System {} {:?}", message.operation, message.data).ok();
                     }
                 }
             }
@@ -166,28 +166,28 @@ where
                     BleOp::AckOn => {
                         // data = [0]
                         // TODO: always getting a [0] too much?
-                        //debug!("bt ack on: {:?}", message.data).ok();
+                        //crate::heprintln!("bt ack on: {:?}", message.data).ok();
                     }
                     BleOp::AckOff => {
                         // data = [0]
-                        //debug!("bt ack off: {:?}", message.data).ok();
+                        //crate::heprintln!("bt ack off: {:?}", message.data).ok();
                     }
                     BleOp::AckLegacyMode => {
                         // data = [0]
-                        //debug!("bt ack legacy mode: {:?}", message.data).ok();
+                        //crate::heprintln!("bt ack legacy mode: {:?}", message.data).ok();
                     }
                     BleOp::AckDeleteHost => {
                         // data = [0]
-                        //debug!("bt ack delete host: {:?}", message.data).ok();
+                        //crate::heprintln!("bt ack delete host: {:?}", message.data).ok();
                     }
                     BleOp::Pair => {
-                        debug!("bt pair").ok();
+                        crate::heprintln!("bt pair").ok();
                         keyboard.disable_bluetooth_mode();
                         led.bluetooth_pin_mode().log_error();
                     }
                     BleOp::Disconnect => {
                         // check this? sent after off, 14
-                        debug!("bt disconnect").ok();
+                        crate::heprintln!("bt disconnect").ok();
                     }
                     BleOp::AckHostListQuery => {
                         if message.data.len() == 3 {
@@ -205,7 +205,7 @@ where
                         }
                     }
                     _ => {
-                        debug!("msg: Ble {} {:?}", message.operation, message.data).ok();
+                        crate::heprintln!("msg: Ble {} {:?}", message.operation, message.data).ok();
                     }
                 }
             }
@@ -214,7 +214,7 @@ where
                     led.set_theme(message.data[0]).log_error();
                 }
                 LedOp::GetUserStaticTheme => {
-                    debug!("TODO: Theme Sync").ok();
+                    crate::heprintln!("TODO: Theme Sync").ok();
                     // [data_length, num_blocks, block_i]
                     //let data = [2 + 4, 1, 0, 1, 2, 3, 4];
                     //self.serial
@@ -222,27 +222,27 @@ where
                     //.log_error();
                 }
                 _ => {
-                    debug!("msg: Led {} {:?}", message.operation, message.data).ok();
+                    crate::heprintln!("msg: Led {} {:?}", message.operation, message.data).ok();
                 }
             },
             MsgType::Keyboard => match KeyboardOp::from(message.operation) {
                 KeyboardOp::UpUserLayout => {
-                    debug!("TODO: Keyboard Sync").ok();
+                    crate::heprintln!("TODO: Keyboard Sync").ok();
                 }
                 _ => {
-                    debug!("msg: Keyboard {} {:?}", message.operation, message.data).ok();
+                    crate::heprintln!("msg: Keyboard {} {:?}", message.operation, message.data).ok();
                 }
             },
             MsgType::Macro => match MacroOp::from(message.operation) {
                 MacroOp::SyncMacro => {
-                    debug!("TODO: Macro Sync").ok();
+                    crate::heprintln!("TODO: Macro Sync").ok();
                 }
                 _ => {
-                    debug!("msg: macro {} {:?}", message.operation, message.data).ok();
+                    crate::heprintln!("msg: macro {} {:?}", message.operation, message.data).ok();
                 }
             },
             _ => {
-                debug!(
+                crate::heprintln!(
                     "msg: {:?} {} {:?}",
                     message.msg_type, message.operation, message.data
                 )

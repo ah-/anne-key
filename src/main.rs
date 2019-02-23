@@ -9,8 +9,9 @@
 extern crate panic_abort;
 #[cfg(feature = "use_semihosting")]
 extern crate panic_semihosting;
+#[cfg(feature = "use_semihosting")]
+use cortex_m_semihosting::heprintln;
 
-#[macro_use]
 mod debug;
 
 #[macro_use]

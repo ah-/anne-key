@@ -210,17 +210,17 @@ where
                 match LedOp::from(message.operation) {
                     LedOp::AckThemeMode => {
                         // data: [theme id]
-                        //debug!("Led AckThemeMode {:?}", message.data).ok();
+                        //crate::heprintln!("Led AckThemeMode {:?}", message.data).ok();
                     }
                     LedOp::AckConfigCmd => {
                         // data: [theme id, brightness, animation speed]
-                        //debug!("Led AckConfigCmd {:?}", message.data).ok();
+                        //crate::heprintln!("Led AckConfigCmd {:?}", message.data).ok();
                     }
                     LedOp::AckSetIndividualKeys => {
                         // data: [202]
                     }
                     _ => {
-                        debug!(
+                        crate::heprintln!(
                             "lmsg: {:?} {} {:?}",
                             message.msg_type, message.operation, message.data
                         )
@@ -229,7 +229,7 @@ where
                 }
             }
             _ => {
-                debug!(
+                crate::heprintln!(
                     "lmsg: {:?} {} {:?}",
                     message.msg_type, message.operation, message.data
                 )

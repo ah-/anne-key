@@ -47,9 +47,10 @@ For the best experience, use a new opencd with a unified
 need to specify the precise ST-Link version in `openocd.cfg`.  Once
 your programmer is connected, `make debug` will build a
 semihosting-enabled binary, then use `arm-none-eabi-gdb` and `openocd`
-to load it into the keyboard. The semihosting output is logged into
-`openocd.log`, but it will be cleared with each run. You can use
-another debugger by setting the `GDB` variable:
+to load it into the keyboard. The semihosting output is printed to
+gdb's console, and OpenOCD's messages are logged into
+`openocd.log`. You can use another debugger by setting the `GDB`
+variable:
 
 ```sh
 env GDB=gdb-multiarch make debug
