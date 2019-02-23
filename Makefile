@@ -23,9 +23,6 @@ debug: build-semihosting
 gui-debug: build-semihosting
 	gdbgui --gdb $(GDB) --gdb-args "-x openocd.gdb" target/thumbv7m-none-eabi/release/anne-key
 
-openocd:
-	openocd -f openocd.cfg
-
 bloat:
 	cargo bloat $(BLOAT_ARGS) -n 50 --target thumbv7m-none-eabi
 
