@@ -40,7 +40,7 @@ install:
 script:
   - make
   - make build-semihosting
-  - "[[ ${TRAVIS_OS_NAME} != 'windows' ]] && make bloat"
+  - "[[ ${TRAVIS_OS_NAME} != 'windows' ]] && make bloat || true"
 
 cache:
   cargo: true
