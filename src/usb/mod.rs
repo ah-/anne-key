@@ -176,7 +176,7 @@ impl Usb {
             },
             UsbDescriptorType::Debug => None,
             _ => {
-                debug!("get descriptor {:x}", value).ok();
+                crate::heprintln!("get descriptor {:x}", value).ok();
                 None
             }
         };
@@ -279,7 +279,7 @@ impl Usb {
                         self.usb.usb_ep0r.toggle_out();
                     }
                     _ => {
-                        debug!("{:x}", value).ok();
+                        crate::heprintln!("{:x}", value).ok();
                         panic!();
                     }
                 }
@@ -313,7 +313,7 @@ impl Usb {
             }
             _ => {
                 // TODO get descriptor f00rt 82 GetStatus 82
-                debug!("rt {:x} {:?} {:x}", request_type, request, request16).ok();
+                crate::heprintln!("rt {:x} {:?} {:x}", request_type, request, request16).ok();
                 panic!();
             }
         }

@@ -2,25 +2,9 @@
 // and just ignore bkpts if no debugger attached
 use core::fmt;
 
-#[cfg(feature = "use_semihosting")]
-#[macro_export]
-macro_rules! debug {
-    ($($arg: tt)*) => {
-        {
-            use core::fmt::Write;
-            use cortex_m_semihosting::hio;
-
-            match hio::hstdout() {
-                Ok(ref mut stdout) => write!(stdout, $($arg)*),
-                _ => Ok(())
-            }
-        }
-    }
-}
-
 #[cfg(not(feature = "use_semihosting"))]
 #[macro_export]
-macro_rules! debug {
+macro_rules! heprintln {
     ($($arg:tt)*) => {{
         let res: Result<(), ()> = Ok(());
         res
@@ -36,7 +20,7 @@ impl<E: fmt::Debug> UnwrapLog for Result<(), E> {
     #[cfg(feature = "use_semihosting")]
     fn log_error(self) {
         match self {
-            Err(e) => debug!("{:?}", e).unwrap(),
+            Err(e) => crate::heprintln!("{:?}", e).unwrap(),
             _ => {}
         }
     }
