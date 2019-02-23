@@ -25,7 +25,8 @@ branch = "v0.3-with-cortex-m-v0.5"
 
 [dependencies.hal]
 package = "stm32l151-hal"
-version = "0.5.0"
+git = "https://github.com/hdhoang/stm32l151-hal"
+branch = "stm32l1-0.5"
 
 [dependencies.embedded-hal]
 features = ["unproven"]
@@ -33,7 +34,7 @@ version = "0.2.2"
 
 [dependencies.stm32l1]
 features = ["stm32l151", "rt"]
-version = "0.3.2"
+version = "0.5"
 
 [dependencies.panic-abort]
 version = "0.3.1"
