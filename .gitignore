@@ -2,6 +2,7 @@
 *~
 *#
 .gdb_history
+openocd.log
 *.bin
 *.dfu
 target/
