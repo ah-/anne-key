@@ -73,7 +73,7 @@ where
         if self.state {
             self.theme_mode()
         } else {
-            self.set_theme(0)
+            self.set_theme(15)
         }
     }
 
