@@ -5,6 +5,6 @@ chips yet, please come to [#dev-chat](https://discord.gg/ygssH9x) and
 discuss reverse-engineering/debugging with us!
 
 @pantsman0 sent along some excellent [photos of the
-AP2's](https://github.com/ah-/anne-key/tree/master/docs/images/anne-pro-2)
+AP2's](https://github.com/ah-/anne-key/tree/master/docs/src/images/anne-pro-2)
 blue circuit board.
 
