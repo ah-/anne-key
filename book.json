@@ -11,7 +11,7 @@
     ],
     "pluginsConfig": {
       "edit-link": {
-        "base": "https://github.com/ah-/anne-key/edit/master/docs",
+        "base": "https://github.com/ah-/anne-key/edit/master/docs/src",
         "label": "Suggest an edit"
       },
       "forkmegithub": {
@@ -36,5 +36,5 @@
         ]
       }
     },
-    "root": "./docs/"
+    "root": "./docs/src/"
 }
