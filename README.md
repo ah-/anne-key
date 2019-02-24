@@ -123,7 +123,12 @@ To analyze the firmware's code size, you need [cargo-bloat](https://github.com/R
 - `make bloat`
 - `make bloat BLOAT_ARGS="--crates" # passing arguments to cargo-bloat`
 
-Our CI requires consistent formatting, please run rustfmt before you submit PRs:
+Our CI requires consistent formatting, please use our pre-commit hook
+to make sure:
+
+- `cp scripts/pre-commit .git/hooks/pre-commit`
+
+To fix formatting:
 
 - `make fmt`
 
