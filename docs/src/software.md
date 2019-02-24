@@ -83,6 +83,8 @@ The buffers for communication will be at most `1 (type) + 1 (length) + 1 (op) + 
 
 ## key-to-BT
 
+The BT chip also remembers BLE-mode for each saved host.
+
 | Operation        | Value | Data                                                                                                                                                                                                                                                        |
 |------------------|-------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | HostListQuery    | 6     | Ask the BT chip for host status                                                                                                                                                                                                                             |
