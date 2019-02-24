@@ -153,7 +153,8 @@ where
                             .log_error();
                     }
                     _ => {
-                        crate::heprintln!("msg: System {} {:?}", message.operation, message.data).ok();
+                        crate::heprintln!("msg: System {} {:?}", message.operation, message.data)
+                            .ok();
                     }
                 }
             }
@@ -230,7 +231,8 @@ where
                     crate::heprintln!("TODO: Keyboard Sync").ok();
                 }
                 _ => {
-                    crate::heprintln!("msg: Keyboard {} {:?}", message.operation, message.data).ok();
+                    crate::heprintln!("msg: Keyboard {} {:?}", message.operation, message.data)
+                        .ok();
                 }
             },
             MsgType::Macro => match MacroOp::from(message.operation) {
@@ -244,7 +246,9 @@ where
             _ => {
                 crate::heprintln!(
                     "msg: {:?} {} {:?}",
-                    message.msg_type, message.operation, message.data
+                    message.msg_type,
+                    message.operation,
+                    message.data
                 )
                 .ok();
             }

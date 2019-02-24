@@ -222,7 +222,9 @@ where
                     _ => {
                         crate::heprintln!(
                             "lmsg: {:?} {} {:?}",
-                            message.msg_type, message.operation, message.data
+                            message.msg_type,
+                            message.operation,
+                            message.data
                         )
                         .ok();
                     }
@@ -231,7 +233,9 @@ where
             _ => {
                 crate::heprintln!(
                     "lmsg: {:?} {} {:?}",
-                    message.msg_type, message.operation, message.data
+                    message.msg_type,
+                    message.operation,
+                    message.data
                 )
                 .ok();
             }
