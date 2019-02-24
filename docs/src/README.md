@@ -10,14 +10,20 @@ What is the Anne Pro and why should I care?
 
 It's a cheap (around $50 shipped on [AliExpress](https://www.aliexpress.com/item/Original-Techhunter-Anne-pro-Wireless-Bluetooth-Mechanical-Keyboard-with-RGB-Backlit-Gaming-Keyboard-61-Keys-Teclado/32821909053.html)) but good quality mechanical keyboard.
 
-It's also very hackable, being built on two STM32L151 microcontrollers and with all programming pins neatly exposed. Open source support for STM32 chips is very good, they work particularly well with [embedded Rust](http://blog.japaric.io/quickstart/).
+It's also very hackable, being built on two STM32L151 microcontrollers
+and with all programming pins neatly exposed. Open source support for
+STM32 chips is very good, they work particularly well with [embedded
+Rust](https://docs.rust-embedded.org/).
 
 Contributing to this documentation
 ----------------------------------
 
-Please help out documenting how the Anne Pro works to help others get started!
+Please help out documenting how the Anne Pro (both AP1 & AP2) works to
+help others get started!
 
-To do so edit [these Markdown files](https://github.com/ah-/anne-key/tree/master/docs) and send a Pull Request on GitHub.
+To do so edit [these Markdown
+files](https://github.com/ah-/anne-key/tree/master/docs/src) and send
+a Pull Request on GitHub.
 
 You can preview your changes locally by building the docs with
 [gitbook](https://github.com/GitbookIO/gitbook).  Run `gitbook
@@ -25,3 +31,7 @@ install` once to get dependencies, then `gitbook serve` in the root
 folder. Your edition will at
 [http://localhost:4000/](http://localhost:4000/) and reloaded after
 every save.
+
+As an alternative, you can use
+[mdBook](https://github.com/rust-lang-nursery/mdbook) with `mdbook
+serve --port 4000 docs`
