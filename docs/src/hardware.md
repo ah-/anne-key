@@ -74,9 +74,9 @@ We have found two revisions, visible under the spacebar. On the switch
 & case color sticker by Obins, the beginning of SN is approximately
 your keyboard's manufacturing date.
 
-0. V2.2: earlier revision, started at least 2016-12
+1. V2.2: earlier revision, started at least 2016-12
  - Two sets of [solder points](images/solder-point.jpg) under spacebar
-0. B31: possibly started 2017-06
+2. B31: possibly started 2017-06
  - No longer has those solder points
 
 /u/columna1 contributed excellent photos of the PCB and chips for
@@ -86,6 +86,13 @@ V2.2:
 - [Battery connector](images/Pucent.jpg)
 - [U4](images/U4.jpg)
 - [U5](images/U5.jpg)
+
+## Chip-to-Chip wiring
+
+LED is on Key's PC15(for power?), communicating over USART3 by sending
+via DMA1 Channel2 (PB10?), receiving via DMA1 Channel3 (PB11?). BT
+communicate with Key over USART2, sending via DMA1 Channel7 (PA1?),
+receiving via DMA1 Chanel6 (PA2?), using PA3 for (?).
 
 Keymatrix
 ---------
