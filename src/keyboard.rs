@@ -85,7 +85,7 @@ impl Keyboard {
             let bt_layer_current: bool = self.bluetooth_mode_enabled();
             let bt_layer_next: bool = self.layers.next.get_bit(LAYER_BT as usize);
             if bt_layer_next && !bt_layer_current {
-                bluetooth.update_led(led).log_error();
+                bluetooth.update_led(led, self.send_usb_report).log_error();
             } else if bt_layer_current && !bt_layer_next {
                 led.theme_mode().log_error();
             }

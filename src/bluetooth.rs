@@ -98,8 +98,17 @@ where
         )
     }
 
-    pub fn update_led(&self, led: &mut Led<BUFFER>) -> nb::Result<(), !> {
-        led.bluetooth_mode(self.saved_hosts, self.connected_host, self.mode)
+    pub fn update_led(
+        &self,
+        led: &mut Led<BUFFER>,
+        keyboard_send_usb_report: bool,
+    ) -> nb::Result<(), !> {
+        led.bluetooth_mode(
+            self.saved_hosts,
+            self.connected_host,
+            self.mode,
+            keyboard_send_usb_report,
+        )
     }
 
     pub fn handle_message(
@@ -202,7 +211,7 @@ where
                         }
 
                         if keyboard.bluetooth_mode_enabled() {
-                            self.update_led(led).log_error();
+                            self.update_led(led, keyboard.send_usb_report).log_error();
                         }
                     }
                     _ => {
