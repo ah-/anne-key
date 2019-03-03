@@ -24,7 +24,9 @@ Working today:
 
 Not yet implemented:
 
-- USB (sends keys concurrently with BT, hangs on connect/disconnect)
+- USB hangs on connect/disconnect
+- USB sends keys concurrently with BT (to toggle USB, use the `5` key
+  in BT layer)
 - Media controls / special keys
 - Uploading custom lighting settings
 - Uploading custom keymaps
