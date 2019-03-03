@@ -7,7 +7,10 @@ pub enum Action {
     /// Reset the key MCU. If Escape is also held down then it will
     /// boot into DFU mode.
     Reset,
+    /// Fall-through to the next layer underneath
     Transparent,
+    /// Toggle sending HID report over USB
+    UsbToggle,
 
     Key(KeyCode), // = 0x10
 

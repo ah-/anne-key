@@ -15,6 +15,7 @@ use stm32l1::stm32l151::SCB;
 pub struct Keyboard {
     layers: Layers,
     previous_state: KeyState,
+    pub send_usb_report: bool,
 }
 
 impl Keyboard {
@@ -22,6 +23,7 @@ impl Keyboard {
         Keyboard {
             layers: Layers::new(),
             previous_state: [0; 9],
+            send_usb_report: true,
         }
     }
 
@@ -69,6 +71,10 @@ impl Keyboard {
                     if let Action::Reset = action {
                         scb.system_reset()
                     }
+                    if pressed && Action::UsbToggle == action {
+                        self.send_usb_report = !self.send_usb_report;
+                        crate::heprintln!("send_usb_report: {:?}", self.send_usb_report).ok();
+                    }
                     hid.process(&action, pressed, changed);
                     led.process(&action, pressed, changed);
                     bluetooth.process(&action, pressed, changed);
@@ -88,7 +94,9 @@ impl Keyboard {
 
             bluetooth.send_report(&hid.report).log_error();
             led.send_keys(state).log_error();
-            usb.update_report(&hid.report);
+            if self.send_usb_report {
+                usb.update_report(&hid.report);
+            }
 
             self.previous_state = *state;
         }
