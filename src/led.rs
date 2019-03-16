@@ -4,12 +4,13 @@ use super::serial::led_usart::LedUsart;
 use super::serial::{Serial, Transfer};
 use crate::bluetooth::BluetoothMode;
 use crate::keycodes::KeyIndex;
+use crate::Threshold;
+
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
 use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
 use nb;
-use rtfm::Threshold;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
@@ -277,10 +278,10 @@ where
     }
 }
 
-pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL3::Resources) {
-    r.LED.poll();
+pub fn rx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL3::Resources) {
+    resources.LED.poll();
 }
 
-pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL2::Resources) {
-    r.LED.serial.tx_interrupt();
+pub fn tx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL2::Resources) {
+    resources.LED.serial.tx_interrupt();
 }
