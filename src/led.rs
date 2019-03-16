@@ -1,9 +1,9 @@
-use super::keymatrix::KeyState;
-use super::protocol::{LedOp, Message, MsgType};
-use super::serial::led_usart::LedUsart;
-use super::serial::{Serial, Transfer};
 use crate::bluetooth::BluetoothMode;
 use crate::keycodes::KeyIndex;
+use crate::keymatrix::KeyState;
+use crate::protocol::{LedOp, Message, MsgType};
+use crate::serial::led_usart::LedUsart;
+use crate::serial::{Serial, Transfer};
 use crate::Threshold;
 
 use core::marker::Unsize;

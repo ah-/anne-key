@@ -4,7 +4,7 @@ use hal::gpio::gpioa::{PA1, PA2, PA3};
 use hal::gpio::{Alternate, Input, Output};
 use stm32l1::stm32l151::{RCC, USART2};
 
-use super::DmaUsart;
+use crate::serial::DmaUsart;
 
 pub struct BluetoothUsart {
     pa1: PA1<Output>,

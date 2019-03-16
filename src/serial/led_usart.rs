@@ -1,4 +1,4 @@
-use super::DmaUsart;
+use crate::serial::DmaUsart;
 use hal::dma::dma1::{C2, C3};
 use hal::gpio::gpiob::{PB10, PB11};
 use hal::gpio::{Alternate, Input};

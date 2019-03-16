@@ -1,7 +1,7 @@
 pub mod bluetooth_usart;
 pub mod led_usart;
 
-use super::protocol::MsgType;
+use crate::protocol::MsgType;
 use core::marker::Unsize;
 use nb;
 

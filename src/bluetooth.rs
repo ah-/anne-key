@@ -1,10 +1,10 @@
-use super::hidreport::HidReport;
-use super::keyboard::Keyboard;
-use super::led::Led;
-use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
-use super::serial::bluetooth_usart::BluetoothUsart;
-use super::serial::{DmaUsart, Serial, Transfer};
 use crate::debug::UnwrapLog;
+use crate::hidreport::HidReport;
+use crate::keyboard::Keyboard;
+use crate::led::Led;
+use crate::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
+use crate::serial::bluetooth_usart::BluetoothUsart;
+use crate::serial::{DmaUsart, Serial, Transfer};
 use crate::Threshold;
 
 use core::marker::Unsize;
