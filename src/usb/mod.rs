@@ -13,7 +13,6 @@ use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
 use crate::hidreport::HidReport;
 use crate::usb::hid::UsbHid;
-use crate::Threshold;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -318,8 +317,4 @@ impl Usb {
             }
         }
     }
-}
-
-pub fn usb_lp(_t: &mut Threshold, mut resources: crate::USB_LP::Resources) {
-    resources.USB.interrupt()
 }

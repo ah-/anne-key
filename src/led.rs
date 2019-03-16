@@ -4,7 +4,6 @@ use crate::keymatrix::KeyState;
 use crate::protocol::{LedOp, Message, MsgType};
 use crate::serial::led_usart::LedUsart;
 use crate::serial::{Serial, Transfer};
-use crate::Threshold;
 
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
@@ -276,12 +275,4 @@ where
             }
         }
     }
-}
-
-pub fn rx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL3::Resources) {
-    resources.LED.poll();
-}
-
-pub fn tx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL2::Resources) {
-    resources.LED.serial.tx_interrupt();
 }
