@@ -1,4 +1,4 @@
-use super::pma::PMA;
+use crate::usb::pma::PMA;
 use crate::usb::usb_ext::UsbEpExt;
 use stm32l1::stm32l151::USB;
 
