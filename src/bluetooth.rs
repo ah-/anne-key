@@ -5,7 +5,6 @@ use crate::led::Led;
 use crate::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, SystemOp};
 use crate::serial::bluetooth_usart::BluetoothUsart;
 use crate::serial::{DmaUsart, Serial, Transfer};
-use crate::Threshold;
 
 use core::marker::Unsize;
 use nb;
@@ -298,14 +297,4 @@ where
             }
         }
     }
-}
-
-pub fn rx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL6::Resources) {
-    resources
-        .BLUETOOTH
-        .poll(&mut resources.LED, &mut resources.KEYBOARD)
-}
-
-pub fn tx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL7::Resources) {
-    resources.BLUETOOTH.serial.tx_interrupt();
 }

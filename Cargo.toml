@@ -20,8 +20,7 @@ vcell = "0.1.0"
 
 [dependencies.rtfm]
 package = "cortex-m-rtfm"
-git = "https://github.com/hdhoang/cortex-m-rtfm"
-branch = "v0.3-with-cortex-m-v0.5"
+version = "0.4.2"
 
 [dependencies.hal]
 package = "stm32l151-hal"
