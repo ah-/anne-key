@@ -30,7 +30,8 @@ mod usb;
 
 use hal::dma::DmaExt;
 use hal::gpio::GpioExt;
-use rtfm::{app, Threshold};
+use rtfm::app;
+use rtfm::Threshold;
 
 use crate::bluetooth::Bluetooth;
 use crate::keyboard::Keyboard;
@@ -115,18 +116,20 @@ app! {
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn init(mut p: init::Peripherals, r: init::Resources<'_>) -> init::LateResources {
+fn init(p: init::Peripherals, resources: init::Resources<'_>) -> init::LateResources {
+    let mut core = p.core;
+    let mut device = p.device;
+
     // re-locate vector table to 0x80004000 because bootloader uses 0x80000000
-    unsafe { p.core.SCB.vtor.write(0x4000) };
+    unsafe { core.SCB.vtor.write(0x4000) };
 
-    let mut d = p.device;
-    clock::init_clock(&d);
-    clock::enable_tick(&mut p.core.SYST, 100_000);
+    clock::init_clock(&device);
+    clock::enable_tick(&mut core.SYST, 100_000);
 
-    let dma = d.DMA1.split();
-    let gpioa = d.GPIOA.split();
-    let gpiob = d.GPIOB.split();
-    let gpioc = d.GPIOC.split();
+    let dma = device.DMA1.split();
+    let gpioa = device.GPIOA.split();
+    let gpiob = device.GPIOB.split();
+    let gpioc = device.GPIOC.split();
 
     let row_pins = (
         gpiob.pb9.pull_down(),
@@ -156,29 +159,42 @@ fn init(mut p: init::Peripherals, r: init::Resources<'_>) -> init::LateResources
 
     let key_matrix = KeyMatrix::new(row_pins, column_pins);
 
-    let led_usart = LedUsart::new(d.USART3, gpiob.pb10, gpiob.pb11, dma.3, dma.2, &mut d.RCC);
-    let (led_send_buffer, led_receive_buffer) = r.LED_BUFFERS.split_at_mut(1);
+    let led_usart = LedUsart::new(
+        device.USART3,
+        gpiob.pb10,
+        gpiob.pb11,
+        dma.3,
+        dma.2,
+        &mut device.RCC,
+    );
+    let (led_send_buffer, led_receive_buffer) = resources.LED_BUFFERS.split_at_mut(1);
     let led_serial = Serial::new(led_usart, &mut led_send_buffer[0]);
     let mut led = Led::new(led_serial, &mut led_receive_buffer[0], gpioc.pc15);
-    led.poke(&p.core.SYST).unwrap();
+    led.poke(&core.SYST).unwrap();
     led.theme_mode().unwrap();
 
     let bluetooth_usart = BluetoothUsart::new(
-        d.USART2, gpioa.pa1, gpioa.pa2, gpioa.pa3, dma.6, dma.7, &mut d.RCC,
+        device.USART2,
+        gpioa.pa1,
+        gpioa.pa2,
+        gpioa.pa3,
+        dma.6,
+        dma.7,
+        &mut device.RCC,
     );
-    let (bt_send_buffer, bt_receive_buffer) = r.BLUETOOTH_BUFFERS.split_at_mut(1);
+    let (bt_send_buffer, bt_receive_buffer) = resources.BLUETOOTH_BUFFERS.split_at_mut(1);
     let bluetooth_serial = Serial::new(bluetooth_usart, &mut bt_send_buffer[0]);
     let bluetooth = Bluetooth::new(bluetooth_serial, &mut bt_receive_buffer[0]);
 
-    let usb = Usb::new(d.USB, &mut d.RCC, &mut d.SYSCFG);
+    let usb = Usb::new(device.USB, &mut device.RCC, &mut device.SYSCFG);
 
     init::LateResources {
         BLUETOOTH: bluetooth,
         KEY_MATRIX: key_matrix,
         LED: led,
-        SCB: p.core.SCB,
-        SYST: p.core.SYST,
-        EXTI: d.EXTI,
+        SCB: core.SCB,
+        SYST: core.SYST,
+        EXTI: device.EXTI,
         USB: usb,
     }
 }
@@ -189,47 +205,47 @@ fn idle() -> ! {
     }
 }
 
-fn tick(_t: &mut Threshold, mut r: SysTick::Resources) {
-    r.KEY_MATRIX.sample(&r.SYST);
-    r.KEYBOARD.process(
-        &r.KEY_MATRIX.state,
-        &mut r.BLUETOOTH,
-        &mut r.LED,
-        &mut r.SCB,
-        &mut r.USB,
+fn tick(_t: &mut Threshold, mut resources: SysTick::Resources) {
+    resources.KEY_MATRIX.sample(&resources.SYST);
+    resources.KEYBOARD.process(
+        &resources.KEY_MATRIX.state,
+        &mut resources.BLUETOOTH,
+        &mut resources.LED,
+        &mut resources.SCB,
+        &mut resources.USB,
     );
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti0(_t: &mut Threshold, r: EXTI0::Resources) {
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+fn exti0(_t: &mut Threshold, resources: EXTI0::Resources) {
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti1(_t: &mut Threshold, r: EXTI1::Resources) {
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+fn exti1(_t: &mut Threshold, resources: EXTI1::Resources) {
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti2(_t: &mut Threshold, r: EXTI2::Resources) {
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+fn exti2(_t: &mut Threshold, resources: EXTI2::Resources) {
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti3(_t: &mut Threshold, r: EXTI3::Resources) {
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+fn exti3(_t: &mut Threshold, resources: EXTI3::Resources) {
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti4(_t: &mut Threshold, r: EXTI4::Resources) {
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+fn exti4(_t: &mut Threshold, resources: EXTI4::Resources) {
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn exti9_5(_t: &mut Threshold, r: EXTI9_5::Resources) {
+fn exti9_5(_t: &mut Threshold, resources: EXTI9_5::Resources) {
     // this (plus other exti) are key presses,
     // maybe use them instead of timer based scanning?
 
     // maybe only clear set bits? or ones from 9-5?
-    unsafe { r.EXTI.pr.write(|w| w.bits(0xffff)) };
+    unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
 }

@@ -5,7 +5,6 @@ pub mod pma;
 pub mod usb_ext;
 
 use core::cmp::min;
-use rtfm::Threshold;
 
 use stm32l1::stm32l151;
 
@@ -14,6 +13,7 @@ use self::pma::PMA;
 use self::usb_ext::UsbEpExt;
 use crate::hidreport::HidReport;
 use crate::usb::hid::UsbHid;
+use crate::Threshold;
 
 const MAX_PACKET_SIZE: u32 = 64;
 
@@ -320,6 +320,6 @@ impl Usb {
     }
 }
 
-pub fn usb_lp(_t: &mut Threshold, mut r: super::USB_LP::Resources) {
-    r.USB.interrupt()
+pub fn usb_lp(_t: &mut Threshold, mut resources: crate::USB_LP::Resources) {
+    resources.USB.interrupt()
 }

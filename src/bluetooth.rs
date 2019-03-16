@@ -5,9 +5,10 @@ use super::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, Syste
 use super::serial::bluetooth_usart::BluetoothUsart;
 use super::serial::{DmaUsart, Serial, Transfer};
 use crate::debug::UnwrapLog;
+use crate::Threshold;
+
 use core::marker::Unsize;
 use nb;
-use rtfm::Threshold;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum BluetoothMode {
@@ -299,10 +300,12 @@ where
     }
 }
 
-pub fn rx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL6::Resources) {
-    r.BLUETOOTH.poll(&mut r.LED, &mut r.KEYBOARD)
+pub fn rx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL6::Resources) {
+    resources
+        .BLUETOOTH
+        .poll(&mut resources.LED, &mut resources.KEYBOARD)
 }
 
-pub fn tx(_t: &mut Threshold, mut r: super::DMA1_CHANNEL7::Resources) {
-    r.BLUETOOTH.serial.tx_interrupt();
+pub fn tx(_t: &mut Threshold, mut resources: crate::DMA1_CHANNEL7::Resources) {
+    resources.BLUETOOTH.serial.tx_interrupt();
 }
