@@ -1,5 +1,5 @@
 language: rust
-rust: nightly-2019-02-22
+rust: nightly-2019-02-27
 os:
   - linux
   - osx
