@@ -137,8 +137,8 @@ const APP: () = {
         }
     }
 
-    #[exception(binds = SysTick, resources = [BLUETOOTH, LED, KEY_MATRIX, SYST, KEYBOARD, USB])]
-    fn tick() {
+    #[exception(resources = [BLUETOOTH, LED, KEY_MATRIX, SYST, KEYBOARD, USB])]
+    fn SysTick() {
         resources.KEY_MATRIX.sample(&resources.SYST);
         resources.KEYBOARD.process(
             &resources.KEY_MATRIX.state,
@@ -156,8 +156,8 @@ const APP: () = {
         }
     }
 
-    #[interrupt(priority = 1, binds = USB_LP, resources = [USB])]
-    fn usb_lp() {
+    #[interrupt(priority = 1, resources = [USB])]
+    fn USB_LP() {
         resources.USB.interrupt()
     }
 
@@ -181,5 +181,34 @@ const APP: () = {
     #[interrupt(binds = DMA1_CHANNEL7, resources = [BLUETOOTH])]
     fn bluetooth_tx() {
         resources.BLUETOOTH.serial.tx_interrupt()
+    }
+
+    #[interrupt(resources = [EXTI])]
+    fn EXTI9_5() {
+        // this (plus other exti) are key presses,
+        // maybe use them instead of timer based scanning?
+
+        // maybe only clear set bits? or ones from 9-5?
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
+    }
+    #[interrupt(resources = [EXTI])]
+    fn EXTI0() {
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
+    }
+    #[interrupt(resources = [EXTI])]
+    fn EXTI1() {
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
+    }
+    #[interrupt(resources = [EXTI])]
+    fn EXTI2() {
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
+    }
+    #[interrupt(resources = [EXTI])]
+    fn EXTI3() {
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
+    }
+    #[interrupt(resources = [EXTI])]
+    fn EXTI4() {
+        unsafe { resources.EXTI.pr.write(|w| w.bits(0xffff)) };
     }
 };
