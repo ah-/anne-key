@@ -1,6 +1,9 @@
 #![allow(dead_code)]
 use core::mem::transmute;
 
+/// Replies from support MCUs to key MCU have the high bit set
+const ACK_FOR: u8 = 0b1000_0000;
+
 pub struct Message<'a> {
     pub msg_type: MsgType,
     pub operation: u8,
@@ -39,33 +42,34 @@ impl From<u8> for MsgType {
 #[derive(Debug, Copy, Clone)]
 pub enum BleOp {
     Reserved = 0,
+    AckReserved = ACK_FOR | 0,
     On = 1,
+    AckOn = ACK_FOR | 1,
     Off = 2,
+    AckOff = ACK_FOR | 2,
     SaveHost = 3,
+    AckSaveHost = ACK_FOR | 3,
     ConnectHost = 4,
+    AckConnectHost = ACK_FOR | 4,
     DeleteHost = 5,
+    AckDeleteHost = ACK_FOR | 5,
     HostListQuery = 6,
+    AckHostListQuery = ACK_FOR | 6,
     Broadcast = 7,
+    AckBroadcast = ACK_FOR | 7,
     Battery = 8,
+    AckBattery = ACK_FOR | 8,
     AckOk = 9,
+    AckAckOk = ACK_FOR | 9,
     AckFail = 10,
+    AckAckFail = ACK_FOR | 10,
     CurrentHostQuery = 11,
+    AckCurrentHostQuery = ACK_FOR | 11,
     LegacyMode = 12,
+    AckLegacyMode = ACK_FOR | 12,
+
     Pair = 13,
     Disconnect = 14,
-    AckReserved = 128,
-    AckOn = 129,
-    AckOff = 130,
-    AckSaveHost = 131,
-    AckConnectHost = 132,
-    AckDeleteHost = 133,
-    AckHostListQuery = 134,
-    AckBroadcast = 135,
-    AckBattery = 136,
-    AckAckOk = 137,
-    AckAckFaiL = 138,
-    AckCurrentHostQuery = 139,
-    AckLegacyMode = 140,
     AckWakeup = 170,
 }
 
@@ -81,17 +85,17 @@ impl From<u8> for BleOp {
 #[derive(Debug, Copy, Clone)]
 pub enum KeyboardOp {
     Reserved = 0,
+    AckReserved = ACK_FOR | 0,
     KeyReport = 1,
+    AckKeyReport = ACK_FOR | 1,
     DownloadUserLayout = 2,
+    AckDownloadUserLayout = ACK_FOR | 2,
     SetLayoutId = 3,
+    AckSetLayoutId = ACK_FOR | 3,
     GetLayoutId = 4,
+    AckGetLayoutId = ACK_FOR | 4,
     UpUserLayout = 5,
-    AckReserved = 128,
-    AckKeyReport = 129,
-    AckDownloadUserLayout = 130,
-    AckSetLayoutId = 131,
-    AckGetLayoutId = 132,
-    AckUpUserLayout = 133,
+    AckUpUserLayout = ACK_FOR | 5,
 }
 
 impl From<u8> for KeyboardOp {
@@ -106,30 +110,31 @@ impl From<u8> for KeyboardOp {
 #[derive(Debug, Copy, Clone)]
 pub enum LedOp {
     Reserved = 0,
+    AckReserved = ACK_FOR | 0,
     ThemeMode = 1,
+    AckThemeMode = ACK_FOR | 1,
     ThemeSwitch = 2,
+    AckThemeSwitch = ACK_FOR | 2,
     UserStaticTheme = 3,
+    AckUserStaticTheme = ACK_FOR | 3,
     BleConfig = 4,
+    AckBleConfig = ACK_FOR | 4,
     ConfigCmd = 5,
+    AckConfigCmd = ACK_FOR | 5,
     Music = 6,
+    AckMusic = ACK_FOR | 6,
     Key = 7,
+    AckKey = ACK_FOR | 7,
     GetUsedThemeId = 8,
+    AckGetUsedThemeId = ACK_FOR | 8,
     GetUserStaticTheme = 9,
+    AckGetUserStaticTheme = ACK_FOR | 9,
     GetUserStaticCrcId = 10,
+    AckGetUserStaticCrcId = ACK_FOR | 10,
     SetIndividualKeys = 11,
+    AckSetIndividualKeys = ACK_FOR | 11,
+
     GetThemeId = 0xc,
-    AckReserved = 128,
-    AckThemeMode = 129,
-    AckThemeSwitch = 130,
-    AckUserStaticTheme = 131,
-    AckBleConfig = 132,
-    AckConfigCmd = 133,
-    AckMusic = 134,
-    AckKey = 135,
-    AckGetUsedThemeId = 136,
-    AckGetUserStaticTheme = 137,
-    AckGetUserStaticCrcId = 138,
-    AckSetIndividualKeys = 139,
 }
 
 impl From<u8> for LedOp {
@@ -144,13 +149,13 @@ impl From<u8> for LedOp {
 #[derive(Debug, Copy, Clone)]
 pub enum SystemOp {
     Reserved = 0,
+    AckReserved = ACK_FOR | 0,
     GetId = 1,
+    AckGetId = ACK_FOR | 1,
     IsSyncCode = 8,
+    AckIsSyncCode = ACK_FOR | 8,
     SetSyncCode = 9,
-    AckReserved = 128,
-    AckGetId = 129,
-    AckIsSyncCode = 136,
-    AckSetSyncCode = 137,
+    AckSetSyncCode = ACK_FOR | 9,
 }
 
 impl From<u8> for SystemOp {
@@ -165,9 +170,9 @@ impl From<u8> for SystemOp {
 #[derive(Debug, Copy, Clone)]
 pub enum MacroOp {
     Reserved = 0,
+    AckReserved = ACK_FOR | 0,
     SyncMacro = 5,
-    AckReserved = 128,
-    AckSyncMacro = 133,
+    AckSyncMacro = ACK_FOR | 5,
 }
 
 impl From<u8> for MacroOp {
