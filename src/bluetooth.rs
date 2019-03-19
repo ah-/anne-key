@@ -8,6 +8,7 @@ use crate::serial::{DmaUsart, Serial, Transfer};
 
 use core::marker::Unsize;
 use nb;
+use num_traits::FromPrimitive;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum BluetoothMode {
@@ -119,8 +120,8 @@ where
     ) {
         match message.msg_type {
             MsgType::System => {
-                match SystemOp::from(message.operation) {
-                    SystemOp::GetId => {
+                match SystemOp::from_u8(message.operation) {
+                    Some(SystemOp::GetId) => {
                         const DEVICE_TYPE_KEYBOARD: u8 = 1;
                         const DEVICE_MODEL_ANNE_PRO: u8 = 2;
                         //const DEVICE_ID = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -151,12 +152,12 @@ where
                             .send(MsgType::System, SystemOp::AckGetId as u8, &data2)
                             .log_error();
                     }
-                    SystemOp::IsSyncCode => {
+                    Some(SystemOp::IsSyncCode) => {
                         self.serial
                             .send(MsgType::System, SystemOp::AckIsSyncCode as u8, &[1])
                             .log_error();
                     }
-                    SystemOp::SetSyncCode => {
+                    Some(SystemOp::SetSyncCode) => {
                         self.serial
                             .send(MsgType::System, SystemOp::AckIsSyncCode as u8, &[])
                             .log_error();
@@ -168,38 +169,38 @@ where
                 }
             }
             MsgType::Ble => {
-                match BleOp::from(message.operation) {
-                    BleOp::AckWakeup => {
+                match BleOp::from_u8(message.operation) {
+                    Some(BleOp::AckWakeup) => {
                         // nothing to do here, this message only only lets us know
                         // that we can now safely send
                     }
-                    BleOp::AckOn => {
+                    Some(BleOp::AckOn) => {
                         // data = [0]
                         // TODO: always getting a [0] too much?
                         //crate::heprintln!("bt ack on: {:?}", message.data).ok();
                     }
-                    BleOp::AckOff => {
+                    Some(BleOp::AckOff) => {
                         // data = [0]
                         //crate::heprintln!("bt ack off: {:?}", message.data).ok();
                     }
-                    BleOp::AckLegacyMode => {
+                    Some(BleOp::AckLegacyMode) => {
                         // data = [0]
                         //crate::heprintln!("bt ack legacy mode: {:?}", message.data).ok();
                     }
-                    BleOp::AckDeleteHost => {
+                    Some(BleOp::AckDeleteHost) => {
                         // data = [0]
                         //crate::heprintln!("bt ack delete host: {:?}", message.data).ok();
                     }
-                    BleOp::Pair => {
+                    Some(BleOp::Pair) => {
                         crate::heprintln!("bt pair").ok();
                         keyboard.disable_bluetooth_mode();
                         led.bluetooth_pin_mode().log_error();
                     }
-                    BleOp::Disconnect => {
+                    Some(BleOp::Disconnect) => {
                         // check this? sent after off, 14
                         crate::heprintln!("bt disconnect").ok();
                     }
-                    BleOp::AckHostListQuery => {
+                    Some(BleOp::AckHostListQuery) => {
                         if message.data.len() == 3 {
                             self.saved_hosts = message.data[0];
                             self.connected_host = message.data[1];
@@ -219,11 +220,11 @@ where
                     }
                 }
             }
-            MsgType::Led => match LedOp::from(message.operation) {
-                LedOp::ThemeMode => {
+            MsgType::Led => match LedOp::from_u8(message.operation) {
+                Some(LedOp::ThemeMode) => {
                     led.set_theme(message.data[0]).log_error();
                 }
-                LedOp::GetUserStaticTheme => {
+                Some(LedOp::GetUserStaticTheme) => {
                     crate::heprintln!("TODO: Theme Sync").ok();
                     // [data_length, num_blocks, block_i]
                     //let data = [2 + 4, 1, 0, 1, 2, 3, 4];
@@ -235,8 +236,8 @@ where
                     crate::heprintln!("msg: Led {} {:?}", message.operation, message.data).ok();
                 }
             },
-            MsgType::Keyboard => match KeyboardOp::from(message.operation) {
-                KeyboardOp::UpUserLayout => {
+            MsgType::Keyboard => match KeyboardOp::from_u8(message.operation) {
+                Some(KeyboardOp::UpUserLayout) => {
                     crate::heprintln!("TODO: Keyboard Sync").ok();
                 }
                 _ => {
@@ -244,8 +245,8 @@ where
                         .ok();
                 }
             },
-            MsgType::Macro => match MacroOp::from(message.operation) {
-                MacroOp::SyncMacro => {
+            MsgType::Macro => match MacroOp::from_u8(message.operation) {
+                Some(MacroOp::SyncMacro) => {
                     crate::heprintln!("TODO: Macro Sync").ok();
                 }
                 _ => {
@@ -278,15 +279,16 @@ where
                 {
                     let buffer: &mut [u8] = buffer;
                     let message = Message {
-                        msg_type: MsgType::from(buffer[0]),
+                        msg_type: MsgType::from_u8(buffer[0]).expect("bad MsgType"),
                         operation: buffer[2],
                         data: &buffer[3..3 + buffer[1] as usize - 1],
                     };
                     self.handle_message(&message, led, keyboard);
 
-                    if let (MsgType::Ble, BleOp::AckWakeup) =
-                        (message.msg_type, message.operation.into())
-                    {
+                    if let (MsgType::Ble, BleOp::AckWakeup) = (
+                        message.msg_type,
+                        BleOp::from_u8(message.operation).expect("bad BleOp"),
+                    ) {
                         // Wakeup acknowledged, send data
                         self.serial.usart.ack_wakeup();
                         self.serial.send_buffer_pos = 0;

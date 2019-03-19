@@ -1,5 +1,4 @@
-#![allow(dead_code)]
-use core::mem::transmute;
+use num_derive::FromPrimitive;
 
 /// Replies from support MCUs to key MCU have the high bit set
 const ACK_FOR: u8 = 0b1000_0000;
@@ -12,7 +11,7 @@ pub struct Message<'a> {
 
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum MsgType {
     Reserved = 0,
     Error = 1,
@@ -30,16 +29,9 @@ pub enum MsgType {
     CustomKey = 13,
 }
 
-impl From<u8> for MsgType {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
-}
-
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum BleOp {
     Reserved = 0,
     AckReserved = ACK_FOR | 0,
@@ -73,16 +65,9 @@ pub enum BleOp {
     AckWakeup = 170,
 }
 
-impl From<u8> for BleOp {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
-}
-
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum KeyboardOp {
     Reserved = 0,
     AckReserved = ACK_FOR | 0,
@@ -98,16 +83,9 @@ pub enum KeyboardOp {
     AckUpUserLayout = ACK_FOR | 5,
 }
 
-impl From<u8> for KeyboardOp {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
-}
-
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum LedOp {
     Reserved = 0,
     AckReserved = ACK_FOR | 0,
@@ -137,16 +115,9 @@ pub enum LedOp {
     GetThemeId = 0xc,
 }
 
-impl From<u8> for LedOp {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
-}
-
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum SystemOp {
     Reserved = 0,
     AckReserved = ACK_FOR | 0,
@@ -158,26 +129,12 @@ pub enum SystemOp {
     AckSetSyncCode = ACK_FOR | 9,
 }
 
-impl From<u8> for SystemOp {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
-}
-
 #[repr(u8)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive)]
 pub enum MacroOp {
     Reserved = 0,
     AckReserved = ACK_FOR | 0,
     SyncMacro = 5,
     AckSyncMacro = ACK_FOR | 5,
-}
-
-impl From<u8> for MacroOp {
-    #[inline]
-    fn from(b: u8) -> Self {
-        unsafe { transmute(b) }
-    }
 }

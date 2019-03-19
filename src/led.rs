@@ -10,6 +10,7 @@ use embedded_hal::digital::OutputPin;
 use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
 use nb;
+use num_traits::FromPrimitive;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
@@ -214,16 +215,16 @@ where
     pub fn handle_message(&mut self, message: &Message<'_>) {
         match message.msg_type {
             MsgType::Led => {
-                match LedOp::from(message.operation) {
-                    LedOp::AckThemeMode => {
+                match LedOp::from_u8(message.operation) {
+                    Some(LedOp::AckThemeMode) => {
                         // data: [theme id]
                         //crate::heprintln!("Led AckThemeMode {:?}", message.data).ok();
                     }
-                    LedOp::AckConfigCmd => {
+                    Some(LedOp::AckConfigCmd) => {
                         // data: [theme id, brightness, animation speed]
                         //crate::heprintln!("Led AckConfigCmd {:?}", message.data).ok();
                     }
-                    LedOp::AckSetIndividualKeys => {
+                    Some(LedOp::AckSetIndividualKeys) => {
                         // data: [202]
                     }
                     _ => {
@@ -264,7 +265,7 @@ where
                 {
                     let buffer: &mut [u8] = buffer;
                     let message = Message {
-                        msg_type: MsgType::from(buffer[0]),
+                        msg_type: MsgType::from_u8(buffer[0]).expect("bad MsgType"),
                         operation: buffer[2],
                         data: &buffer[3..3 + buffer[1] as usize - 1],
                     };
