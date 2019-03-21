@@ -18,6 +18,11 @@ cortex-m-semihosting = "0.3.1"
 nb = "0.1.1"
 vcell = "0.1.0"
 
+[patch.crates-io.cortex-m]
+# for SCB::system_reset2
+git = "https://github.com/hdhoang/cortex-m"
+branch = "static-system_reset2"
+
 [dependencies.rtfm]
 package = "cortex-m-rtfm"
 version = "0.4.2"

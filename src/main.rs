@@ -51,7 +51,6 @@ const APP: () = {
     static mut BLUETOOTH: Bluetooth<[u8; 0x80]> = ();
     static mut LED: Led<[u8; 0x80]> = ();
     static mut KEY_MATRIX: KeyMatrix = ();
-    // static mut SCB: stm32l1::stm32l151::SCB = ();
     static mut SYST: stm32l1::stm32l151::SYST = ();
     static mut EXTI: stm32l1::stm32l151::EXTI = ();
     static mut USB: Usb = ();
@@ -130,7 +129,6 @@ const APP: () = {
             BLUETOOTH: bluetooth,
             KEY_MATRIX: key_matrix,
             LED: led,
-            // SCB: core.SCB.as_ref(),
             SYST: core.SYST,
             EXTI: device.EXTI,
             USB: usb,
@@ -144,7 +142,6 @@ const APP: () = {
             &resources.KEY_MATRIX.state,
             &mut resources.BLUETOOTH,
             &mut resources.LED,
-            // &mut resources.SCB,
             &mut resources.USB,
         );
     }
