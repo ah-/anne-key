@@ -10,7 +10,7 @@ use crate::led::Led;
 use crate::usb::Usb;
 use bit_field::{BitArray, BitField};
 use core::marker::Unsize;
-//use stm32l1::stm32l151::SCB;
+use stm32l1::stm32l151::SCB;
 
 pub struct Keyboard {
     layers: Layers,
@@ -51,7 +51,6 @@ impl Keyboard {
         state: &KeyState,
         bluetooth: &mut Bluetooth<BUFFER>,
         led: &mut Led<BUFFER>,
-        //        scb: &mut SCB,
         usb: &mut Usb,
     ) where
         BUFFER: Unsize<[u8]>,
@@ -69,11 +68,8 @@ impl Keyboard {
                 if pressed || changed {
                     let action = self.get_action(key);
                     if pressed && Action::Reset == action {
-                        crate::heprintln!(
-                            "figure out how to acquire SCB to call
-                        scb.system_reset()"
-                        )
-                        .ok();
+                        crate::heprintln!("system reset").ok();
+                        SCB::system_reset2()
                     }
                     if pressed && Action::UsbToggle == action {
                         self.send_usb_report = !self.send_usb_report;

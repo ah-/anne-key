@@ -11,7 +11,7 @@ version = "0.0.2"
 dependencies = [
  "bare-metal 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "bit_field 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
  "cortex-m-rt 0.6.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-rtfm 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-semihosting 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -45,7 +45,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "cortex-m"
 version = "0.5.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2#c36535dde320a4a5fb186a2753afca262814bd42"
 dependencies = [
  "aligned 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bare-metal 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -77,7 +77,7 @@ name = "cortex-m-rtfm"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
  "cortex-m-rt 0.6.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m-rtfm-macros 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "heapless 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -100,7 +100,7 @@ name = "cortex-m-semihosting"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
 ]
 
 [[package]]
@@ -172,7 +172,7 @@ name = "panic-semihosting"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
  "cortex-m-semihosting 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -250,7 +250,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bare-metal 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
  "cortex-m-rt 0.6.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "vcell 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -260,7 +260,7 @@ name = "stm32l151-hal"
 version = "0.6.0"
 source = "git+https://github.com/hdhoang/stm32l151-hal?branch=stm32l1-0.5#bf69676077d64c89d6f26c9af88765ad8a4023ae"
 dependencies = [
- "cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)",
  "embedded-hal 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "nb 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "stm32l1 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -309,7 +309,7 @@ dependencies = [
 "checksum bare-metal 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "a3caf393d93b2d453e80638d0674597020cef3382ada454faacd43d1a55a735a"
 "checksum bit_field 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ed8765909f9009617974ab6b7d332625b320b33c326b1e9321382ef1999b5d56"
 "checksum byteorder 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a019b10a2a7cdeb292db131fc8113e57ea2a908f6e7894b0c3c671893b65dbeb"
-"checksum cortex-m 0.5.8 (registry+https://github.com/rust-lang/crates.io-index)" = "dab2164a0fc216781a47fc343347365112ae6917421d3fa4bac6faf0fbaaaec7"
+"checksum cortex-m 0.5.8 (git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2)" = "<none>"
 "checksum cortex-m-rt 0.6.7 (registry+https://github.com/rust-lang/crates.io-index)" = "f69d2beca37acc3776c17201c9d1f8904fb9139fa3a4d2cf28c8436a07b21a88"
 "checksum cortex-m-rt-macros 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "d7ae692573e0acccb1579fef1abf5a5bf1d2f3f0149a22b16870ec9309aee25f"
 "checksum cortex-m-rtfm 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "12b165b9c6ab11aebd304fac4dd6ef10f69dbac2e9f6858e4c98da3588e70412"
