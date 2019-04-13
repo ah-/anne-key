@@ -69,7 +69,7 @@ impl Keyboard {
                     let action = self.get_action(key);
                     if pressed && Action::Reset == action {
                         crate::heprintln!("system reset").ok();
-                        SCB::system_reset2()
+                        SCB::sys_reset()
                     }
                     if pressed && Action::UsbToggle == action {
                         self.send_usb_report = !self.send_usb_report;
