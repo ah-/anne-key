@@ -30,7 +30,7 @@ before_install:
     rust_toolchain="$(cat rust-toolchain)"
     travis_yml="$(grep '^rust: ' .travis.yml | head -n 1 | sed -E 's/^rust: //')"
     if [[ $travis_yml != $rust_toolchain ]]; then
-      echo "error: the nightly version in $1 is different than the one in rust-toolchain!" 1>&2
+      echo "error: the rust version in travis is different from the one in rust-toolchain!" 1>&2
       exit 1
     fi
 
