@@ -109,7 +109,8 @@ Many fellow projects provide insights into the obins firmware and app protocol:
 - [msvisser's Mac App](https://github.com/msvisser/AnnePro-mac)
 
 3. Alternate firmware
-- qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
+- [Msvisser's qmk port](https://github.com/msvisser/qmk_firmware/tree/anne_pro/keyboards/anne_pro) receives great approvals from users
+- Older qmk ports: [josecostamartins'](https://github.com/josecostamartins/qmk_firmware/commits/anne_pro) and [dwhinham's](https://github.com/dwhinham/qmk_firmware/commits/anne_pro)
 
 
 To build your own firmware, you need the following components:
