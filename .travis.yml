@@ -1,5 +1,5 @@
 language: rust
-rust: nightly-2019-03-22
+rust: nightly-2020-03-21
 os:
   - linux
   - osx
@@ -41,13 +41,6 @@ script:
   - make
   - make build-semihosting
   - "[[ ${TRAVIS_OS_NAME} != 'windows' ]] && make bloat || true"
-
-cache:
-  cargo: true
-
-before_cache:
-  # Travis can't cache files that are not readable by "others"
-  - chmod -R a+r ${HOME}/.cargo
 
 before_deploy:
   - git config --local user.name "Andreas Heider"
