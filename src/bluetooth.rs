@@ -7,7 +7,6 @@ use crate::serial::bluetooth_usart::BluetoothUsart;
 use crate::serial::{DmaUsart, Serial, Transfer};
 
 use core::marker::Unsize;
-use nb;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum BluetoothMode {

@@ -9,7 +9,6 @@ use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
 use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
-use nb;
 use stm32l1::stm32l151::SYST;
 
 pub enum LedMode {
