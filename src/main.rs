@@ -1,6 +1,5 @@
 #![feature(const_fn)]
 #![feature(never_type)]
-#![feature(non_exhaustive)]
 #![feature(unsize)]
 #![no_main]
 #![no_std]
