@@ -3,7 +3,6 @@ pub mod led_usart;
 
 use crate::protocol::MsgType;
 use core::marker::Unsize;
-use nb;
 
 pub struct Serial<USART, T: 'static>
 where

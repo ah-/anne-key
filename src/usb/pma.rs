@@ -1,6 +1,4 @@
-use vcell;
-
-use self::vcell::VolatileCell;
+use vcell::VolatileCell;
 use bare_metal::Peripheral;
 use core::ops::Deref;
 

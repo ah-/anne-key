@@ -11,11 +11,11 @@ pub trait UsbEpExt {
 const EP_MASK: u32 = 0x0F0F;
 const EP_TX_MASK: u32 = 0x0030;
 const EP_RX_MASK: u32 = 0x3000;
-const EP_TX_RX_MASK: u32 = (EP_TX_MASK | EP_RX_MASK);
+const EP_TX_RX_MASK: u32 = EP_TX_MASK | EP_RX_MASK;
 
 const EP_TX_VALID: u32 = 0x0030;
 const EP_RX_VALID: u32 = 0x3000;
-const EP_TX_RX_VALID: u32 = (EP_TX_VALID | EP_RX_VALID);
+const EP_TX_RX_VALID: u32 = EP_TX_VALID | EP_RX_VALID;
 
 const EP_TX_STALL: u32 = 0x0010;
 const EP_STATUS_OUT: u32 = 0x0100;

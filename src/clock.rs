@@ -1,4 +1,3 @@
-use cortex_m;
 use stm32l1::stm32l151;
 
 pub fn init_clock(p: &stm32l151::Peripherals) {
