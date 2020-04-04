@@ -4,7 +4,7 @@ name: build
 
 jobs:
   check:
-    name: anne-key
+    name: cosmetics
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,19 +16,21 @@ jobs:
             default: true
             components: rustfmt, clippy, llvm-tools-preview
 
-      - name: Run cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
       - name: Run rustfmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
       - name: Run clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --release --features use_semihosting
+      - name: Run cargo build with semihosting
         uses: actions-rs/cargo@v1
         with:
-          command: clippy
+          command: build
+          args: --release --features use_semihosting
 
   build:
     name: anne-key
