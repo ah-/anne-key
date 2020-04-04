@@ -33,7 +33,7 @@ jobs:
           args: --release --features use_semihosting
 
   build:
-    name: anne-key
+    name: build DFU
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,13 +45,33 @@ jobs:
             default: true
             components: llvm-tools-preview
 
+      - name: Install cargo-bloat
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-bloat
+          version: latest
+          use-tool-cache: true
+      - name: Install cargo-binutils
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-binutils
+          version: latest
+          use-tool-cache: true
+
       - name: Run cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release
-      - name: Run cargo build with semihosting
+          args: --release --target thumbv7m-none-eabi
+      - name: Run cargo bloat
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --release --features use_semihosting
+          command: bloat
+          args: -n 50 --target thumbv7m-none-eabi
+
+      - name: Run cargo objcopy
+        uses: actions-rs/cargo@v1
+        with:
+          command: objcopy
+          args: -- -O binary target/thumbv7m-none-eabi/release/anne-key anne-key.bin
+      # TODO dfu-convert
