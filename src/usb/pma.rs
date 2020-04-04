@@ -1,6 +1,6 @@
-use vcell::VolatileCell;
 use bare_metal::Peripheral;
 use core::ops::Deref;
+use vcell::VolatileCell;
 
 // TODO: make this take-able? or at least move into the main usb part
 pub const PMA: Peripheral<PMA> = unsafe { Peripheral::new(0x4000_6000) };
