@@ -23,7 +23,8 @@ jobs:
       - name: Run rustfmt
         uses: actions-rs/cargo@v1
         with:
-          command: fmt --all -- --check
+          command: fmt
+          args: --all -- --check
       - name: Run clippy
         uses: actions-rs/cargo@v1
         with:
@@ -45,8 +46,10 @@ jobs:
       - name: Run cargo build
         uses: actions-rs/cargo@v1
         with:
-          command: build --release
+          command: build
+          args: --release
       - name: Run cargo build with semihosting
         uses: actions-rs/cargo@v1
         with:
-          command: build --release --features use_semihosting
+          command: build
+          args: --release --features use_semihosting
