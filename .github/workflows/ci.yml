@@ -1,0 +1,52 @@
+on: [push, pull_request]
+
+name: build
+
+jobs:
+  check:
+    name: anne-key
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install compiler
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly-2020-03-19
+            target: "thumbv7m-none-eabi"
+            override: true
+            components: rustfmt, clippy, llvm-tools-preview
+
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+      - name: Run rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt --all -- --check
+      - name: Run clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+
+  build:
+    name: anne-key
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install compiler
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly-2020-03-19
+            target: "thumbv7m-none-eabi"
+            override: true
+            components: llvm-tools-preview
+
+      - name: Run cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build --release
+      - name: Run cargo build with semihosting
+        uses: actions-rs/cargo@v1
+        with:
+          command: build --release --features use_semihosting
