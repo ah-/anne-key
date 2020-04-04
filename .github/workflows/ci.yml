@@ -13,7 +13,7 @@ jobs:
         with:
             profile: "minimal"
             target: "thumbv7m-none-eabi"
-            override: true
+            default: true
             components: rustfmt, clippy, llvm-tools-preview
 
       - name: Run cargo check
@@ -40,7 +40,7 @@ jobs:
         with:
             toolchain: nightly-2020-03-19
             target: "thumbv7m-none-eabi"
-            override: true
+            default: true
             components: llvm-tools-preview
 
       - name: Run cargo build
