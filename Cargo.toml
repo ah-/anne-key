@@ -11,12 +11,12 @@ version = "0.0.2"
 
 [dependencies]
 bare-metal = { version = "0.2.4", features = ["const-fn"] }
-bit_field = "0.9.0"
+bit_field = "0.10.0"
 cortex-m = "0.5.8"
-cortex-m-rt = "0.6.5"
-cortex-m-semihosting = "0.3.1"
-nb = "0.1.1"
-vcell = "0.1.0"
+cortex-m-rt = "0.6.12"
+cortex-m-semihosting = "0.3.5"
+nb = "0.1.2"
+vcell = "0.1.2"
 
 [patch.crates-io.cortex-m]
 # for SCB::system_reset2
@@ -27,6 +27,9 @@ branch = "static-system_reset2"
 package = "cortex-m-rtfm"
 version = "0.4.2"
 
+[dependencies.stm32l1]
+features = ["stm32l151", "rt"]
+version = "0.5"
 [dependencies.hal]
 package = "stm32l151-hal"
 git = "https://github.com/hdhoang/stm32l151-hal"
@@ -36,16 +39,12 @@ branch = "stm32l1-0.5"
 features = ["unproven"]
 version = "=0.2.2"
 
-[dependencies.stm32l1]
-features = ["stm32l151", "rt"]
-version = "0.5"
-
 [dependencies.panic-abort]
-version = "0.3.1"
+version = "0.3.2"
 optional = true
 
 [dependencies.panic-semihosting]
-version = "0.5.1"
+version = "0.5.3"
 optional = true
 
 [features]
