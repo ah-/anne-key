@@ -73,5 +73,5 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: objcopy
-          args: -- -O binary target/thumbv7m-none-eabi/release/anne-key anne-key.bin
+          args: --target thumbv7m-none-eabi --release --bin anne-key -- -O binary anne-key.bin
       # TODO dfu-convert
