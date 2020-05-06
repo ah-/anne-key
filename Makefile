@@ -3,17 +3,12 @@ GDB ?= arm-none-eabi-gdb
 all:
 	$(MAKE) dfu
 
-build:
-	rustup component add llvm-tools-preview
-	rustup target add thumbv7m-none-eabi
-	cargo build --release
-
 build-semihosting:
 	rustup component add llvm-tools-preview
 	rustup target add thumbv7m-none-eabi
 	cargo build --release --features use_semihosting
 
-dfu: build
+dfu:
 	./scripts/generate_dfu.sh
 	ls -l anne-key.dfu
 
