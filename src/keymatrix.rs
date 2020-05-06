@@ -1,5 +1,5 @@
 use bit_field::BitArray;
-use embedded_hal::digital::{InputPin, OutputPin};
+use embedded_hal::digital::v2::{InputPin, OutputPin};
 use hal::gpio::gpioa::*;
 use hal::gpio::gpiob::*;
 use hal::gpio::{Input, Output};
@@ -64,15 +64,16 @@ impl KeyMatrix {
             let wait_until_tick = current_tick - 100;
             while syst.cvr.read() > wait_until_tick {}
 
-            self.state.set_bit(column, self.row_pins.0.is_high());
             self.state
-                .set_bit(column + COLUMNS, self.row_pins.1.is_high());
+                .set_bit(column, self.row_pins.0.is_high().unwrap());
             self.state
-                .set_bit(column + 2 * COLUMNS, self.row_pins.2.is_high());
+                .set_bit(column + COLUMNS, self.row_pins.1.is_high().unwrap());
             self.state
-                .set_bit(column + 3 * COLUMNS, self.row_pins.3.is_high());
+                .set_bit(column + 2 * COLUMNS, self.row_pins.2.is_high().unwrap());
             self.state
-                .set_bit(column + 4 * COLUMNS, self.row_pins.4.is_high());
+                .set_bit(column + 3 * COLUMNS, self.row_pins.3.is_high().unwrap());
+            self.state
+                .set_bit(column + 4 * COLUMNS, self.row_pins.4.is_high().unwrap());
 
             self.disable_column(column);
         }
@@ -94,8 +95,9 @@ impl KeyMatrix {
             11 => self.column_pins.11.set_high(),
             12 => self.column_pins.12.set_high(),
             13 => self.column_pins.13.set_high(),
-            _ => {}
+            _ => Ok(()),
         }
+        .unwrap()
     }
 
     fn disable_column(&mut self, column: usize) {
@@ -114,7 +116,8 @@ impl KeyMatrix {
             11 => self.column_pins.11.set_low(),
             12 => self.column_pins.12.set_low(),
             13 => self.column_pins.13.set_low(),
-            _ => {}
+            _ => Ok(()),
         }
+        .unwrap()
     }
 }
