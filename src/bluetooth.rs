@@ -6,6 +6,7 @@ use crate::protocol::{BleOp, KeyboardOp, LedOp, MacroOp, Message, MsgType, Syste
 use crate::serial::bluetooth_usart::BluetoothUsart;
 use crate::serial::{DmaUsart, Serial, Transfer};
 
+use core::convert::Infallible;
 use core::marker::Unsize;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -45,51 +46,51 @@ where
         }
     }
 
-    pub fn on(&mut self) -> nb::Result<(), !> {
+    pub fn on(&mut self) -> nb::Result<(), Infallible> {
         self.serial.send(MsgType::Ble, BleOp::On as u8, &[])
     }
 
-    pub fn off(&mut self) -> nb::Result<(), !> {
+    pub fn off(&mut self) -> nb::Result<(), Infallible> {
         self.serial.send(MsgType::Ble, BleOp::Off as u8, &[])
     }
 
-    pub fn save_host(&mut self, host: u8) -> nb::Result<(), !> {
+    pub fn save_host(&mut self, host: u8) -> nb::Result<(), Infallible> {
         // TODO: host < 4?
         self.serial
             .send(MsgType::Ble, BleOp::SaveHost as u8, &[host])
     }
 
-    pub fn connect_host(&mut self, host: u8) -> nb::Result<(), !> {
+    pub fn connect_host(&mut self, host: u8) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Ble, BleOp::ConnectHost as u8, &[host])
     }
 
-    pub fn delete_host(&mut self, host: u8) -> nb::Result<(), !> {
+    pub fn delete_host(&mut self, host: u8) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Ble, BleOp::DeleteHost as u8, &[host])
     }
 
-    pub fn broadcast(&mut self) -> nb::Result<(), !> {
+    pub fn broadcast(&mut self) -> nb::Result<(), Infallible> {
         self.serial.send(MsgType::Ble, BleOp::Broadcast as u8, &[])
     }
 
-    pub fn enable_legacy_mode(&mut self, enabled: bool) -> nb::Result<(), !> {
+    pub fn enable_legacy_mode(&mut self, enabled: bool) -> nb::Result<(), Infallible> {
         let on = if enabled { 1 } else { 0 };
         self.serial
             .send(MsgType::Ble, BleOp::LegacyMode as u8, &[on])
     }
 
-    pub fn toggle_legacy_mode(&mut self) -> nb::Result<(), !> {
+    pub fn toggle_legacy_mode(&mut self) -> nb::Result<(), Infallible> {
         let enabled: bool = self.mode == BluetoothMode::Ble;
         self.enable_legacy_mode(enabled)
     }
 
-    pub fn host_list_query(&mut self) -> nb::Result<(), !> {
+    pub fn host_list_query(&mut self) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Ble, BleOp::HostListQuery as u8, &[])
     }
 
-    pub fn send_report(&mut self, report: &HidReport) -> nb::Result<(), !> {
+    pub fn send_report(&mut self, report: &HidReport) -> nb::Result<(), Infallible> {
         self.serial.send(
             MsgType::Keyboard,
             KeyboardOp::KeyReport as u8,
@@ -101,7 +102,7 @@ where
         &self,
         led: &mut Led<BUFFER>,
         keyboard_send_usb_report: bool,
-    ) -> nb::Result<(), !> {
+    ) -> nb::Result<(), Infallible> {
         led.bluetooth_mode(
             self.saved_hosts,
             self.connected_host,

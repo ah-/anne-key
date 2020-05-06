@@ -2,6 +2,7 @@ pub mod bluetooth_usart;
 pub mod led_usart;
 
 use crate::protocol::MsgType;
+use core::convert::Infallible;
 use core::marker::Unsize;
 
 pub struct Serial<USART, T: 'static>
@@ -40,7 +41,7 @@ impl<T> Transfer<T>
 where
     T: Unsize<[u8]>,
 {
-    pub fn poll<USART>(&mut self, usart: &mut USART) -> nb::Result<(), !>
+    pub fn poll<USART>(&mut self, usart: &mut USART) -> nb::Result<(), Infallible>
     where
         USART: DmaUsart,
     {
@@ -98,7 +99,7 @@ where
         message_type: MsgType,
         operation: u8, // TODO: make this typed?
         data: &[u8],
-    ) -> nb::Result<(), !> {
+    ) -> nb::Result<(), Infallible> {
         let tx_len = 3 + data.len() as u16;
         let send_buffer: &mut [u8] = self.send_buffer;
         if self.usart.is_send_ready() && self.send_buffer_pos + tx_len < send_buffer.len() as u16 {
