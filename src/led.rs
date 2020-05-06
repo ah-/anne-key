@@ -7,7 +7,7 @@ use crate::serial::{Serial, Transfer};
 
 use core::convert::Infallible;
 use core::marker::Unsize;
-use embedded_hal::digital::OutputPin;
+use embedded_hal::digital::v2::OutputPin;
 use hal::gpio::gpioc::PC15;
 use hal::gpio::{Input, Output};
 use stm32l1::stm32l151::SYST;
@@ -44,12 +44,12 @@ where
     }
 
     pub fn on(&mut self) -> nb::Result<(), Infallible> {
-        self.pc15.set_high();
+        self.pc15.set_high().unwrap();
         Ok(())
     }
 
     pub fn off(&mut self) -> nb::Result<(), Infallible> {
-        self.pc15.set_low();
+        self.pc15.set_low().unwrap();
         self.state = false;
         Ok(())
     }

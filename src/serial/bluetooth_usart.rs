@@ -1,4 +1,4 @@
-use embedded_hal::digital::OutputPin;
+use embedded_hal::digital::v2::OutputPin;
 use hal::dma::dma1::{C6, C7};
 use hal::gpio::gpioa::{PA1, PA2, PA3};
 use hal::gpio::{Alternate, Input, Output};
@@ -23,7 +23,7 @@ impl DmaUsart for BluetoothUsart {
 
     fn receive(&mut self, length: u16, buffer: u32) {
         // wakeup complete, reset pa1
-        self.pa1.set_low();
+        self.pa1.set_low().unwrap();
 
         self.dma_rx.cgif();
         self.dma_rx.ccr().modify(|_, w| w.en().clear_bit());
@@ -51,8 +51,8 @@ impl DmaUsart for BluetoothUsart {
                 .modify(|_, w| unsafe { w.ndt().bits(2) });
             self.dma_rx.ccr().modify(|_, w| w.en().set_bit());
 
-            self.pa1.set_low();
-            self.pa1.set_high();
+            self.pa1.set_low().unwrap();
+            self.pa1.set_high().unwrap();
         }
 
         self.pending_tx = len;
@@ -87,7 +87,7 @@ impl BluetoothUsart {
         let mut pa1 = pa1.into_output().pull_up();
         let pa2 = pa2.into_alternate(7).pull_up();
         let pa3 = pa3.into_alternate(7).pull_up();
-        pa1.set_low();
+        pa1.set_low().unwrap();
 
         rcc.apb1enr.modify(|_, w| w.usart2en().set_bit());
         rcc.ahbenr.modify(|_, w| w.dma1en().set_bit());
