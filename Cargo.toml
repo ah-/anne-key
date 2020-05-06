@@ -34,7 +34,7 @@ branch = "stm32l1-0.5"
 
 [dependencies.embedded-hal]
 features = ["unproven"]
-version = "0.2.2"
+version = "=0.2.2"
 
 [dependencies.stm32l1]
 features = ["stm32l151", "rt"]

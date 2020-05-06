@@ -145,9 +145,9 @@ dependencies = [
 
 [[package]]
 name = "embedded-hal"
-version = "0.2.3"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee4908a155094da7723c2d60d617b820061e3b4efcc3d9e293d206a5a76c170b"
+checksum = "9880e55238830314d41d88f1ac7a819d495799c3cc3bc392cc172bab26428c33"
 dependencies = [
  "nb",
  "void",
