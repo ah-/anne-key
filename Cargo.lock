@@ -21,7 +21,7 @@ version = "0.0.2"
 dependencies = [
  "bare-metal",
  "bit_field",
- "cortex-m 0.5.10",
+ "cortex-m 0.6.2",
  "cortex-m-rt",
  "cortex-m-rtfm",
  "cortex-m-semihosting",
@@ -69,7 +69,8 @@ checksum = "08c48aae112d48ed9f069b33538ea9e3e90aa263cfa3d1c24309612b1f7472de"
 [[package]]
 name = "cortex-m"
 version = "0.5.10"
-source = "git+https://github.com/hdhoang/cortex-m?branch=static-system_reset2#a6c31633881b4cf0d45848799393d3ddc0ec8c3d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c0b159a1e8306949579de3698c841dba58058197b65c60807194e4fa1e7a554"
 dependencies = [
  "aligned 0.2.0",
  "bare-metal",
@@ -342,22 +343,22 @@ checksum = "dba1a27d3efae4351c8051072d619e3ade2820635c3958d826bfea39d59b54c8"
 
 [[package]]
 name = "stm32l1"
-version = "0.5.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edda4346740d0f01082c353dca33b320e84f9fb51765fdcac7a624017c5a8ff4"
+checksum = "6f78540197924c3e20bd3c9d96f4803678b422cd1531313e30180ad174ae9cb1"
 dependencies = [
  "bare-metal",
- "cortex-m 0.5.10",
+ "cortex-m 0.6.2",
  "cortex-m-rt",
  "vcell",
 ]
 
 [[package]]
 name = "stm32l151-hal"
-version = "0.6.0"
-source = "git+https://github.com/hdhoang/stm32l151-hal?branch=stm32l1-0.5#bf69676077d64c89d6f26c9af88765ad8a4023ae"
+version = "0.7.0"
+source = "git+https://github.com/hdhoang/stm32l151-hal?branch=stm32l1-0.7#72c1391b7483d85da8a651e77c0ade0a48d7cc6b"
 dependencies = [
- "cortex-m 0.5.10",
+ "cortex-m 0.6.2",
  "embedded-hal",
  "nb",
  "stm32l1",
