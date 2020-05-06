@@ -5,6 +5,7 @@ use crate::protocol::{LedOp, Message, MsgType};
 use crate::serial::led_usart::LedUsart;
 use crate::serial::{Serial, Transfer};
 
+use core::convert::Infallible;
 use core::marker::Unsize;
 use embedded_hal::digital::OutputPin;
 use hal::gpio::gpioc::PC15;
@@ -42,18 +43,18 @@ where
         }
     }
 
-    pub fn on(&mut self) -> nb::Result<(), !> {
+    pub fn on(&mut self) -> nb::Result<(), Infallible> {
         self.pc15.set_high();
         Ok(())
     }
 
-    pub fn off(&mut self) -> nb::Result<(), !> {
+    pub fn off(&mut self) -> nb::Result<(), Infallible> {
         self.pc15.set_low();
         self.state = false;
         Ok(())
     }
 
-    pub fn poke(&mut self, syst: &SYST) -> nb::Result<(), !> {
+    pub fn poke(&mut self, syst: &SYST) -> nb::Result<(), Infallible> {
         self.off()?;
 
         // TODO: introduce proper delay()
@@ -67,7 +68,7 @@ where
         Ok(())
     }
 
-    pub fn toggle(&mut self) -> nb::Result<(), !> {
+    pub fn toggle(&mut self) -> nb::Result<(), Infallible> {
         self.state = !self.state;
         if self.state {
             self.theme_mode()
@@ -77,45 +78,45 @@ where
     }
 
     // next_* cycles through themes/brightness/speed
-    pub fn next_theme(&mut self) -> nb::Result<(), !> {
+    pub fn next_theme(&mut self) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Led, LedOp::ConfigCmd as u8, &[1, 0, 0])
     }
 
-    pub fn next_brightness(&mut self) -> nb::Result<(), !> {
+    pub fn next_brightness(&mut self) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 0, 1])
     }
 
-    pub fn next_animation_speed(&mut self) -> nb::Result<(), !> {
+    pub fn next_animation_speed(&mut self) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Led, LedOp::ConfigCmd as u8, &[0, 1, 0])
     }
 
-    pub fn set_theme(&mut self, theme: u8) -> nb::Result<(), !> {
+    pub fn set_theme(&mut self, theme: u8) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Led, LedOp::ThemeMode as u8, &[theme])
     }
 
-    pub fn send_keys(&mut self, state: &KeyState) -> nb::Result<(), !> {
+    pub fn send_keys(&mut self, state: &KeyState) -> nb::Result<(), Infallible> {
         self.serial.send(MsgType::Led, LedOp::Key as u8, state)
     }
 
-    pub fn send_music(&mut self, keys: &[u8]) -> nb::Result<(), !> {
+    pub fn send_music(&mut self, keys: &[u8]) -> nb::Result<(), Infallible> {
         self.serial.send(MsgType::Led, LedOp::Music as u8, keys)
     }
 
-    pub fn get_theme_id(&mut self) -> nb::Result<(), !> {
+    pub fn get_theme_id(&mut self) -> nb::Result<(), Infallible> {
         // responds with with [ThemeId]
         self.serial.send(MsgType::Led, LedOp::GetThemeId as u8, &[])
     }
 
-    pub fn set_keys(&mut self, payload: &[u8]) -> nb::Result<(), !> {
+    pub fn set_keys(&mut self, payload: &[u8]) -> nb::Result<(), Infallible> {
         self.serial
             .send(MsgType::Led, LedOp::SetIndividualKeys as u8, payload)
     }
 
-    pub fn theme_mode(&mut self) -> nb::Result<(), !> {
+    pub fn theme_mode(&mut self) -> nb::Result<(), Infallible> {
         self.state = true;
         self.serial.send(MsgType::Led, LedOp::ThemeMode as u8, &[])
     }
@@ -126,7 +127,7 @@ where
         connected_host: u8,
         mode: BluetoothMode,
         keyboard_send_usb_report: bool,
-    ) -> nb::Result<(), !> {
+    ) -> nb::Result<(), Infallible> {
         let mode_color = match mode {
             BluetoothMode::Unknown => (0xff, 0, 0),
             BluetoothMode::Ble => (0, 0xff, 0),
@@ -190,7 +191,7 @@ where
         self.set_keys(payload)
     }
 
-    pub fn bluetooth_pin_mode(&mut self) -> nb::Result<(), !> {
+    pub fn bluetooth_pin_mode(&mut self) -> nb::Result<(), Infallible> {
         #[rustfmt::skip]
         let payload = &[0xca,
                         11, // the number of keys in this request
