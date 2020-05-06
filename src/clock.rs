@@ -1,7 +1,7 @@
 use stm32l1::stm32l151;
 
 pub fn init_clock(p: &stm32l151::Peripherals) {
-    p.USB.usb_cntr.modify(|_, w| w.pdwn().clear_bit());
+    p.USB.cntr.modify(|_, w| w.pdwn().clear_bit());
 
     p.FLASH.acr.modify(|_, w| w.acc64().set_bit());
     p.FLASH.acr.modify(|_, w| w.prften().set_bit());

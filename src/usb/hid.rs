@@ -19,7 +19,7 @@ impl UsbHid {
         if !usb.istr.read().dir().bit_is_set() {
             pma.write_buffer_u8(0x100, &self.report);
             pma.pma_area.set_u16(10, self.report.len() as u16);
-            usb.usb_ep1r.toggle_tx_out();
+            usb.ep1r.toggle_tx_out();
         //TODO: stall?
         } else {
             panic!()
