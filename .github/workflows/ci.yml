@@ -62,7 +62,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: bloat
-          args: -n 50 --target thumbv7m-none-eabi
+          args: --release -n 50
 
       - name: Run cargo objcopy
         uses: actions-rs/cargo@v1
