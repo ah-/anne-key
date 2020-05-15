@@ -69,4 +69,6 @@ jobs:
         with:
           command: objcopy
           args: --target thumbv7m-none-eabi --release --bin anne-key -- -O binary anne-key.bin
-      # TODO dfu-convert
+
+      - name: Convert to DFU
+        run: ./scripts/dfu-convert.py -b 0x08004000:anne-key.bin anne-key.dfu
