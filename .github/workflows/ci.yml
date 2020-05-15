@@ -26,11 +26,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --release --features use_semihosting
-      - name: Run cargo build with semihosting
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --features use_semihosting
 
   build:
     name: build DFU
