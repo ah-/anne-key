@@ -8,7 +8,7 @@ Firmware for Anne Pro Keyboard written in Rust
 
 This is an alternative firmware for the [Anne Pro Keyboard](http://en.obins.net/anne-pro), with the goal of being more stable than the original firmware and adding extra features.
 
-For the [Anee Pro 2](http://en.obins.net/anne-pro2) (with USB-C connector), please follow and help with the [OpenAnnePro](https://github.com/OpenAnnePro) project (including flashing, bootloader, and more in the future). The developers also hang out in the [Anne Pro Dev discord](https://discord.gg/ygssH9x).
+For the [Anne Pro 2](http://en.obins.net/anne-pro2) (with USB-C connector), please follow and help with the [OpenAnnePro](https://github.com/OpenAnnePro) project (including flashing, bootloader, and more in the future). The developers also hang out in the [Anne Pro Dev discord](https://discord.gg/ygssH9x).
 
 Status
 ------
