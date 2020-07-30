@@ -73,6 +73,7 @@ jobs:
       - name: Convert to DFU
         run: ./scripts/dfu-convert.py -b 0x08004000:anne-key.bin anne-key.dfu
 
-  build-macos: *build
+  build-macos:
+    <<: *build
     name: build DFU on macOS
     runs-on: macos-latest
