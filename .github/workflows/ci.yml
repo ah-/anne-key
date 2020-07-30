@@ -27,9 +27,56 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --release --features use_semihosting
 
-  build:
+  build-ubuntu: # &build not supported
     name: build DFU
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install compiler
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly-2020-03-19
+            target: "thumbv7m-none-eabi"
+            default: true
+            components: llvm-tools-preview
+
+      - name: Install cargo-bloat
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-bloat
+          version: latest
+          use-tool-cache: true
+      - name: Install cargo-binutils
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-binutils
+          version: latest
+          use-tool-cache: true
+
+      - name: Run cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+      - name: Run cargo bloat
+        uses: actions-rs/cargo@v1
+        with:
+          command: bloat
+          args: --release -n 50
+
+      - name: Run cargo objcopy
+        uses: actions-rs/cargo@v1
+        with:
+          command: objcopy
+          args: --release --bin anne-key -- -O binary anne-key.bin
+
+      - name: Convert to DFU
+        run: ./scripts/dfu-convert.py -b 0x08004000:anne-key.bin anne-key.dfu
+
+  build-macos:
+    # <<: *build # anchor not supported
+    name: build DFU on macOS
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install compiler
